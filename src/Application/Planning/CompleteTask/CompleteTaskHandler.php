@@ -11,6 +11,7 @@ use App\Application\Gamification\GatherTaskDew;
 use App\Application\Gamification\ShowPlayer\ShowPlayerHandler;
 use App\Application\Gamification\SpeciesView;
 use App\Application\Identity\CurrentUser;
+use App\Application\Planning\Injust\InjustJournal;
 use App\Application\Planning\TaskView;
 use App\Application\Planning\Today;
 use App\Application\Transaction;
@@ -18,6 +19,7 @@ use App\Domain\Gamification\Greenhouse\DewGain;
 use App\Domain\Gamification\Herbarium\Species;
 use App\Domain\Gamification\PlayerRepository;
 use App\Domain\Gamification\RewardPolicy;
+use App\Domain\Planning\Injust\InjustEventType;
 use App\Domain\Planning\TaskRepository;
 use Symfony\Component\Uid\Ulid;
 
@@ -36,6 +38,7 @@ final readonly class CompleteTaskHandler
         private CollectSpecies $collectSpecies,
         private GatherTaskDew $gatherTaskDew,
         private AtomicChange $atomicChange,
+        private InjustJournal $injust,
     ) {
     }
 
@@ -52,6 +55,7 @@ final readonly class CompleteTaskHandler
         $player = $this->players->of($this->currentUser->get());
         foreach ($completed as $done) {
             ($this->continueSeries)($done);
+            $this->injust->record($done, InjustEventType::Done);
             if (!$done->claimReward($this->today->now())) {
                 continue;
             }

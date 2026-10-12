@@ -91,6 +91,9 @@ class Task
     #[ORM\Column(length: 120, nullable: true)]
     private ?string $externalId = null;
 
+    #[ORM\Column(length: 16, nullable: true)]
+    private ?string $externalRevision = null;
+
     private function __construct(User $owner, string $title, \DateTimeImmutable $now)
     {
         $this->id = new Ulid();
@@ -143,9 +146,10 @@ class Task
         $this->parent = null;
     }
 
-    public function linkTo(string $externalId): void
+    public function linkTo(string $externalId, ?string $revision = null): void
     {
         $this->externalId = $externalId;
+        $this->externalRevision = $revision;
     }
 
     public function rename(string $title): void
@@ -423,5 +427,10 @@ class Task
     public function externalId(): ?string
     {
         return $this->externalId;
+    }
+
+    public function externalRevision(): ?string
+    {
+        return $this->externalRevision;
     }
 }

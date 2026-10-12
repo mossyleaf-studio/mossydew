@@ -13,6 +13,22 @@
         "done": "Imported: {imported} · New projects: {projects} · Already there: {skipped}",
         "notJson": "This file is not a Super Productivity backup."
     },
+    "injust": {
+        "title": "Injust Release",
+        "intro": "Injust Release can send its steps, studio stages and posts to an Injust project here, and gets back what you tick, skip or reopen. Create a token, then paste this address and the token in Injust Release › Settings › Tasks › MossyDew.",
+        "off": "Not connected.",
+        "waitingFirst": "Token ready: waiting for Injust Release to send its tasks.",
+        "lastFeed": "Injust Release last sent its tasks on {moment}. Changes waiting for it: {count}.",
+        "create": "Create a token",
+        "replace": "Replace the token",
+        "revoke": "Disconnect",
+        "revoked": "Injust Release is disconnected.",
+        "address": "Address",
+        "token": "Token",
+        "copy": "Copy",
+        "copied": "Copied.",
+        "once": "The token is shown only now. Replacing it disconnects the old one."
+    },
     "app": {
         "title": "Desktop app",
         "install": "Install MossyDew",

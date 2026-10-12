@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router';
 import { SwitchRoot, SwitchThumb } from 'reka-ui';
 import { useI18n } from 'vue-i18n';
 import AppearanceSettings from '../components/settings/AppearanceSettings.vue';
+import InjustSettings from '../components/settings/InjustSettings.vue';
 import BaseButton from '../components/ui/BaseButton.vue';
 import BaseSelect from '../components/ui/BaseSelect.vue';
 import FormField from '../components/ui/FormField.vue';
@@ -96,6 +97,9 @@ function toggleSound(value) {
                 <input ref="backupInput" type="file" accept="application/json,.json" hidden @change="importBackup">
                 <BaseButton variant="secondary" @click="backupInput.click()">{{ t('settings.import.choose') }}</BaseButton>
             </div>
+        </PageSection>
+        <PageSection :title="t('settings.injust.title')">
+            <InjustSettings />
         </PageSection>
         <PageSection :title="t('settings.app.title')">
             <p class="settings__intro">{{ t(`settings.app.${installState}`) }}</p>

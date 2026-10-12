@@ -13,3 +13,5 @@
 | Achievements | `Domain\Gamification\Achievement\*` | [gamification.md](gamification.md) |
 | Done, statistics | `Application\Planning\{ListDoneTasks, ShowStatistics}\*` | [history.md](history.md) |
 | Account, sign-in, theme | `Domain\Identity\*` | [accounts.md](accounts.md) |
+| Import from Super Productivity | `Application\Planning\ImportSuperProductivity\*` | [tasks.md](tasks.md) |
+| Injust Release link, token, journal | `Domain\Planning\Injust\*`, `Domain\Identity\AccessToken` | [integrations.md](integrations.md) |

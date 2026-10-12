@@ -13,6 +13,22 @@
         "done": "Importées : {imported} · Nouveaux projets : {projects} · Déjà présentes : {skipped}",
         "notJson": "Ce fichier n’est pas une sauvegarde Super Productivity."
     },
+    "injust": {
+        "title": "Injust Release",
+        "intro": "Injust Release peut envoyer ses étapes, étapes de studio et posts dans un projet Injust ici, et récupère ce que vous cochez, sautez ou rouvrez. Créez un jeton, puis collez cette adresse et le jeton dans Injust Release › Réglages › Tâches › MossyDew.",
+        "off": "Non connecté.",
+        "waitingFirst": "Jeton prêt : en attente des tâches d’Injust Release.",
+        "lastFeed": "Injust Release a envoyé ses tâches le {moment}. Changements en attente : {count}.",
+        "create": "Créer un jeton",
+        "replace": "Remplacer le jeton",
+        "revoke": "Déconnecter",
+        "revoked": "Injust Release est déconnecté.",
+        "address": "Adresse",
+        "token": "Jeton",
+        "copy": "Copier",
+        "copied": "Copié.",
+        "once": "Le jeton n’est affiché que maintenant. Le remplacer déconnecte l’ancien."
+    },
     "app": {
         "title": "Application de bureau",
         "install": "Installer MossyDew",

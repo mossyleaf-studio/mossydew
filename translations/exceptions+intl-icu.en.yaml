@@ -12,6 +12,7 @@ project:
 task:
     empty_title: 'Give the task a title.'
     unreadable_backup: 'This file is not a Super Productivity backup. Export one from Super Productivity’s settings.'
+    unreadable_feed: 'Injust Release sent tasks MossyDew cannot read. Update both apps.'
     already_done: '“{title}” is already done.'
     not_done: '“{title}” is not done yet.'
     not_open: '“{title}” is done: reopen it before moving it in the matrix.'

@@ -1,0 +1,17 @@
+# Injust Release link
+
+Injust Release (Louis's local app for releases, `~/Sites/injust-releases`) can share its tasks with MossyDew instead of Super Productivity. MossyDew speaks the exact contract Injust Release already writes for its Super Productivity plugin (its `docs/business/tasks.md`, T2–T8): the **task feed** comes in, a **journal** of what was ticked here goes back. Injust Release only swaps its file transport for HTTP.
+
+```
+Injust Release ─ PUT /integrations/injust/feed (TaskFeed v1) ─► MossyDew
+Injust Release ◄ GET /integrations/injust/journal (TaskJournal v1) ─ MossyDew
+```
+
+- **I1** Settings › Injust Release › **Create a token** gives one personal token (`mdw_` + 48 hex), shown once; MossyDew keeps only its SHA-256. One token per user: creating another replaces it, **Disconnect** deletes it. — `AccessToken`, `CreateAccessTokenHandler`, `RevokeAccessTokenHandler`
+- **I2** `/integrations/*` is a stateless firewall that accepts only `Authorization: Bearer <token>` (401 otherwise); the token opens nothing else (the JSON API stays session-only, A3). The token's owner is the current user, so every rule below is owner-scoped like the rest of the app. — `IntegrationTokenHandler`, `security.yaml`
+- **I3** A feed is refused (`task.unreadable_feed`, 422) unless it is a `injust-releases/task-feed` version 1 with valid items. Receiving it stores the instance, seq and time (shown in Settings) and drops the journal events Injust Release acknowledged (`journal.appliedThrough`, counted only when `journal.epoch` is this user's epoch). A paused feed changes no task. — `InjustFeed`, `ReceiveInjustFeedHandler`, `InjustLink`
+- **I4** Each **open** item is a task of the project **Injust** (created when missing, berry), linked by `Task.externalId = injust:<item id>`: title, notes = release tags then the item's text, deadline = `due`. **The planned day is never set**: Injust Release dates are deadlines (its T10), so a task shows in Today once it is due (T3). An item is rewritten only when its `rev` changed, so edits made here survive until Injust Release changes the item. A linked task done here whose done event was acknowledged but that Injust Release still lists open (it refused or reopened it) is reopened.
+- **I5** An open linked task whose item is **closed done** is completed through the normal completion (`CompleteTaskHandler`), so it earns XP, dew and streak like any task (G1); **closed skipped** or **missing from both lists**: the open task is deleted. Done tasks are never deleted.
+- **I6** Ticking (`done`), reopening (`reopened`) or deleting an open linked task (`skipped`) here appends an event to the journal (seq per user, never reused). While an item has an event not yet acknowledged, feeds leave its task alone: the change made here wins until Injust Release has applied it. A completion caused by a feed also writes its `done` event; Injust Release ignores it (already in that state, its T7). — `InjustJournal`, `InjustEvent`
+- **I7** `GET /integrations/injust/journal` answers `format: injust-releases/sp-journal`, version 1, `plugin: mossydew`, the user's fixed **epoch** (first 8 hex of a SHA-256 of their id), `feedSeen` (instance, seq, time of the last feed) and the unacknowledged events, all tagged with the last feed's instance. — `ShowInjustJournalHandler`
+- **I8** Settings shows whether a token exists, when Injust Release last sent its tasks and how many changes wait for it. — `ShowInjustLinkHandler`, `InjustSettings.vue`

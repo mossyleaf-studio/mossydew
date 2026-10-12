@@ -7,6 +7,12 @@ security:
         dev:
             pattern: ^/(_profiler|_wdt|assets|build|build-e2e)/
             security: false
+        integrations:
+            pattern: ^/integrations/
+            stateless: true
+            provider: app_users
+            access_token:
+                token_handler: App\Infrastructure\Security\IntegrationTokenHandler
         main:
             lazy: true
             provider: app_users
