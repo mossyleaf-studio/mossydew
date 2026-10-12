@@ -1,6 +1,6 @@
 *, *::before, *::after { box-sizing: border-box; }
 
-html { color-scheme: light; background: var(--color-bg); }
+html { color-scheme: light; background: var(--color-bg); scrollbar-width: thin; scrollbar-color: var(--color-border-strong) transparent; }
 
 body {
     margin: 0;
