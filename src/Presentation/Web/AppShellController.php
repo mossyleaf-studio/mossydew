@@ -45,6 +45,7 @@ final class AppShellController extends AbstractController
             'greenhouse' => ['/api/greenhouse'],
             'achievements' => ['/api/achievements'],
             'settings' => ['/api/integrations/injust'],
+            'friends' => ['/api/friends'],
             default => [],
         };
     }

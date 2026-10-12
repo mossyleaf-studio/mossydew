@@ -1,0 +1,28 @@
+{
+    "title": "Amis",
+    "subtitle": "Les autres jardiniers MossyDew qui avancent avec vous.",
+    "list": "Vos amis",
+    "empty": "Pas encore d’amis",
+    "emptyHint": "Envoyez un lien d’invitation à quelqu’un qui utilise MossyDew.",
+    "level": "Niveau {level}",
+    "xp": "{xp} XP",
+    "streak": "Série de {days} jours",
+    "species": "{count} espèces",
+    "remove": "Retirer {name} de vos amis",
+    "removeMessage": "Vous ne verrez plus la progression l’un de l’autre. Une nouvelle invitation peut vous réunir.",
+    "removeConfirm": "Retirer",
+    "removed": "{name} ne fait plus partie de vos amis.",
+    "copied": "Lien copié.",
+    "invite": {
+        "title": "Inviter quelqu’un",
+        "intro": "Créez un lien et envoyez-le à quelqu’un qui a un compte mossyleaf. Il sert une fois, pendant 7 jours. Les amis voient le niveau, l’XP, la série et la taille de l’herbier de l’autre, jamais ses tâches.",
+        "create": "Créer un lien d’invitation",
+        "copy": "Copier le lien"
+    },
+    "join": {
+        "title": "Invitation",
+        "intro": "{name} vous invite à devenir amis sur MossyDew. Vous verrez le niveau, l’XP, la série et la taille de l’herbier de l’autre, jamais vos tâches.",
+        "accept": "Accepter",
+        "accepted": "{name} fait maintenant partie de vos amis."
+    }
+}

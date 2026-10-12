@@ -1,0 +1,28 @@
+{
+    "title": "Friends",
+    "subtitle": "Other MossyDew gardeners you grow alongside.",
+    "list": "Your friends",
+    "empty": "No friends yet",
+    "emptyHint": "Send an invitation link to someone who uses MossyDew.",
+    "level": "Level {level}",
+    "xp": "{xp} XP",
+    "streak": "{days}-day streak",
+    "species": "{count} species",
+    "remove": "Remove {name} from your friends",
+    "removeMessage": "You will no longer see each other’s progress. A new invitation can bring you back together.",
+    "removeConfirm": "Remove",
+    "removed": "{name} is no longer in your friends.",
+    "copied": "Link copied.",
+    "invite": {
+        "title": "Invite a friend",
+        "intro": "Create a link and send it to someone with a mossyleaf account. It works once, for 7 days. Friends see each other’s level, XP, streak and herbarium size, never their tasks.",
+        "create": "Create an invitation link",
+        "copy": "Copy the link"
+    },
+    "join": {
+        "title": "Friend invitation",
+        "intro": "{name} invites you to be friends on MossyDew. You will see each other’s level, XP, streak and herbarium size, never your tasks.",
+        "accept": "Accept",
+        "accepted": "You and {name} are now friends."
+    }
+}

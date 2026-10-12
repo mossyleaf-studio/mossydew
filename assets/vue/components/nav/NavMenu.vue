@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router';
-import { CalendarDays, ChartColumn, CircleCheckBig, Grid2x2, Inbox, Leaf, Plus, Settings, Sun, Trophy, Warehouse } from '@lucide/vue';
+import { CalendarDays, ChartColumn, CircleCheckBig, Grid2x2, Inbox, Leaf, Plus, Settings, Sun, Trophy, Users, Warehouse } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import IconButton from '../ui/IconButton.vue';
 import { useProjects } from '../../composables/useProjects.js';
@@ -22,6 +22,7 @@ const SECONDARY = [
     { to: '/herbarium', icon: Leaf, label: 'nav.herbarium' },
     { to: '/greenhouse', icon: Warehouse, label: 'nav.greenhouse' },
     { to: '/achievements', icon: Trophy, label: 'nav.achievements' },
+    { to: '/friends', icon: Users, label: 'nav.friends' },
     { to: '/stats', icon: ChartColumn, label: 'nav.stats' },
     { to: '/settings', icon: Settings, label: 'nav.settings' },
 ];

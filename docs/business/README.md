@@ -15,3 +15,4 @@
 | Account, sign-in, theme | `Domain\Identity\*` | [accounts.md](accounts.md) |
 | Import from Super Productivity | `Application\Planning\ImportSuperProductivity\*` | [tasks.md](tasks.md) |
 | Injust Release link, token, journal | `Domain\Planning\Injust\*`, `Domain\Identity\AccessToken` | [integrations.md](integrations.md) |
+| Friends, invitation link | `Domain\Social\{FriendInvite, Friendship}` | [social.md](social.md) |

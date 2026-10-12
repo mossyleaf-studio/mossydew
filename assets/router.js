@@ -2,9 +2,11 @@ import { createRouter, createWebHistory } from 'vue-router';
 import AchievementsPage from './vue/pages/AchievementsPage.vue';
 import CreditsPage from './vue/pages/CreditsPage.vue';
 import DonePage from './vue/pages/DonePage.vue';
+import FriendsPage from './vue/pages/FriendsPage.vue';
 import GreenhousePage from './vue/pages/GreenhousePage.vue';
 import HerbariumPage from './vue/pages/HerbariumPage.vue';
 import InboxPage from './vue/pages/InboxPage.vue';
+import JoinFriendPage from './vue/pages/JoinFriendPage.vue';
 import MatrixPage from './vue/pages/MatrixPage.vue';
 import NotFoundPage from './vue/pages/NotFoundPage.vue';
 import ProjectPage from './vue/pages/ProjectPage.vue';
@@ -28,6 +30,8 @@ export const router = createRouter({
         { path: '/herbarium', name: 'herbarium', component: HerbariumPage },
         { path: '/greenhouse', name: 'greenhouse', component: GreenhousePage },
         { path: '/achievements', name: 'achievements', component: AchievementsPage },
+        { path: '/friends', name: 'friends', component: FriendsPage },
+        { path: '/friends/join/:token', name: 'join-friend', component: JoinFriendPage, props: true },
         { path: '/stats', name: 'stats', component: StatsPage },
         { path: '/settings', name: 'settings', component: SettingsPage },
         { path: '/credits', name: 'credits', component: CreditsPage },
