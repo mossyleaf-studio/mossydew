@@ -29,7 +29,9 @@
         "open": "More for “{title}”",
         "edit": "Edit",
         "addSubtask": "Add a subtask",
-        "promote": "Make it a task"
+        "promote": "Make it a task",
+        "select": "Select",
+        "deselect": "Deselect"
     },
     "editor": {
         "title": "Edit task",
@@ -71,5 +73,17 @@
         "close": "Close",
         "nested": "“{title}” is now a subtask of “{parent}”.",
         "promoted": "“{title}” is a task again."
+    },
+    "bulk": {
+        "label": "Selected tasks",
+        "selected": "{count} selected | {count} selected",
+        "complete": "Complete",
+        "move": "Move",
+        "delete": "Delete the selected tasks",
+        "deleteMessage": "This task will be deleted. XP already earned is kept. | These {count} tasks will be deleted. XP already earned is kept.",
+        "clear": "Clear the selection",
+        "done": "Done for 1 task. | Done for {count} tasks.",
+        "partial": "Done for {done}, refused for {failed}: {error}",
+        "refused": "Not completed."
     }
 }

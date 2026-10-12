@@ -9,6 +9,7 @@ import QuadrantTag from './QuadrantTag.vue';
 import TaskMenu from './TaskMenu.vue';
 import { useDates } from '../../composables/useDates.js';
 import { useProjects } from '../../composables/useProjects.js';
+import { useSelection } from '../../composables/useSelection.js';
 import { useSubtaskComposer } from '../../composables/useSubtaskComposer.js';
 import { useTaskActions } from '../../composables/useTaskActions.js';
 import { useTaskDrag } from '../../composables/useTaskDrag.js';
@@ -35,6 +36,7 @@ const editor = useTaskEditor();
 const composer = useSubtaskComposer();
 const drag = useTaskDrag();
 const toast = useToast();
+const selection = useSelection();
 const planOpen = ref(false);
 const dropping = ref(false);
 
@@ -55,6 +57,16 @@ const plannedLabel = computed(() => {
 });
 
 const locked = computed(() => hasOpenSubtasks(props.task));
+const selected = computed(() => selection.has(props.task));
+
+function select() {
+    if (!props.task.done) selection.toggle(props.task);
+}
+
+function openOrSelect(event) {
+    if ((event.metaKey || event.ctrlKey || event.shiftKey || selection.count.value) && !props.task.done) select();
+    else editor.edit(props.task);
+}
 const parentLabel = computed(() => (props.nested ? null : props.task.parentTitle));
 const checkLabel = computed(() => {
     if (locked.value) return t('tasks.subtasks.locked', { title: props.task.title });
@@ -125,6 +137,7 @@ function onKeydown(event) {
         d: () => { planOpen.value = true; },
         e: () => editor.edit(props.task),
         s: () => addSubtask(),
+        x: () => select(),
         Enter: () => editor.edit(props.task),
         ' ': () => toggle(),
     };
@@ -137,7 +150,7 @@ function onKeydown(event) {
 
 <template>
     <li
-        :class="['task-row', `task-row--${task.quadrant ?? 'unsorted'}`, { 'task-row--done': task.done, 'task-row--compact': compact, 'task-row--nested': nested, 'task-row--drop': dropping, 'task-row--dragged': dragged }]"
+        :class="['task-row', `task-row--${task.quadrant ?? 'unsorted'}`, { 'task-row--done': task.done, 'task-row--compact': compact, 'task-row--nested': nested, 'task-row--drop': dropping, 'task-row--dragged': dragged, 'task-row--selected': selected }]"
         tabindex="0"
         :draggable="draggable ? 'true' : undefined"
         @dragstart="onDragStart"
@@ -150,7 +163,7 @@ function onKeydown(event) {
     >
         <DropCheck :done="task.done" :disabled="locked" :label="checkLabel" @toggle="toggle" />
         <div class="task-row__main">
-            <button type="button" class="task-row__title" @click="editor.edit(task)">{{ task.title }}</button>
+            <button type="button" class="task-row__title" @click="openOrSelect">{{ task.title }}</button>
             <p v-if="showQuadrant || parentLabel || (showProject && project) || task.subtaskCount || plannedLabel || dueLabel || repeatLabel || task.notes" class="task-row__meta">
                 <QuadrantTag v-if="showQuadrant" :quadrant="task.quadrant" />
                 <span v-if="parentLabel" class="task-row__parent"><CornerDownRight size="0.875rem" aria-hidden="true" />{{ t('tasks.subtasks.of', { title: parentLabel }) }}</span>
@@ -173,7 +186,7 @@ function onKeydown(event) {
                 @click="plan(inToday ? 'none' : 'today')"
             />
             <PlanMenu v-model:open="planOpen" :task="task" @plan="plan" />
-            <TaskMenu :task="task" @edit="editor.edit(task)" @classify="(quadrant) => actions.classify(task, quadrant)" @add-subtask="addSubtask" @promote="promote" />
+            <TaskMenu :task="task" :selected="selected" @edit="editor.edit(task)" @classify="(quadrant) => actions.classify(task, quadrant)" @add-subtask="addSubtask" @promote="promote" @select="select" />
         </div>
     </li>
 </template>
@@ -226,6 +239,7 @@ function onKeydown(event) {
 .task-row--nested { min-height: 2.75rem; }
 .task-row[draggable="true"] { cursor: grab; }
 .task-row--dragged { opacity: 0.45; }
+.task-row--selected { border-color: var(--color-accent); background: var(--color-accent-soft); }
 .task-row--drop { border-color: var(--color-accent); background: var(--color-accent-soft); box-shadow: var(--focus-ring); }
 
 .task-row--compact { min-height: 3rem; gap: var(--space-2); padding-left: var(--space-3); cursor: grab; }

@@ -29,7 +29,9 @@
         "open": "Plus d’options pour « {title} »",
         "edit": "Modifier",
         "addSubtask": "Ajouter une sous-tâche",
-        "promote": "En faire une tâche"
+        "promote": "En faire une tâche",
+        "select": "Sélectionner",
+        "deselect": "Désélectionner"
     },
     "editor": {
         "title": "Modifier la tâche",
@@ -71,5 +73,17 @@
         "close": "Fermer",
         "nested": "« {title} » est maintenant une sous-tâche de « {parent} ».",
         "promoted": "« {title} » est de nouveau une tâche."
+    },
+    "bulk": {
+        "label": "Tâches sélectionnées",
+        "selected": "{count} sélectionnée | {count} sélectionnées",
+        "complete": "Terminer",
+        "move": "Déplacer",
+        "delete": "Supprimer les tâches sélectionnées",
+        "deleteMessage": "Cette tâche sera supprimée. L’XP déjà gagnée est conservée. | Ces {count} tâches seront supprimées. L’XP déjà gagnée est conservée.",
+        "clear": "Vider la sélection",
+        "done": "Fait pour 1 tâche. | Fait pour {count} tâches.",
+        "partial": "Fait pour {done}, refusé pour {failed} : {error}",
+        "refused": "Non terminée."
     }
 }

@@ -8,6 +8,7 @@
 - **T6** **Inbox** = open tasks without a project. — `ListInboxTasksHandler`
 - **T7** Deleting a project keeps its tasks, which move to the inbox. — `Task.project` `onDelete: SET NULL`
 - **T8** Project names are unique per user (case-insensitive), ≤ 60 chars, with one of 8 colours (berry, honey, moss, fjord, heather, blossom, lichen, rust). — `CreateProjectHandler`, `EditProjectHandler`, `ProjectColor`
+- **T13** **Bulk selection**: in every list (Today, Upcoming, Inbox, projects, matrix), an open task is selected with Ctrl/⌘- or Shift-click on its title, `x` on the focused row, or Select in its menu (phones); once something is selected, a plain click selects too. The bar at the bottom then completes (subtasks before their parents, each earning its reward, G1), plans (today, tomorrow, next week, not planned), sorts into a quadrant, moves to a project or the inbox (subtasks stay with their parent, S5) or deletes the selection, one task at a time through the usual rules; refused tasks are counted and the first reason shown. Escape, the ✕ or changing page clears the selection. — `useSelection`, `BulkBar.vue`, `tasks/bulk.js`
 
 ## Subtasks
 

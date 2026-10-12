@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { RouterLink, RouterView, useRoute } from 'vue-router';
 import { CalendarDays, Grid2x2, Inbox, Menu, Sun } from '@lucide/vue';
 import { ConfigProvider, TooltipProvider } from 'reka-ui';
@@ -9,10 +9,12 @@ import PlayerProgress from '../components/herbarium/PlayerProgress.vue';
 import NavDrawer from '../components/nav/NavDrawer.vue';
 import NavMenu from '../components/nav/NavMenu.vue';
 import ProjectEditor from '../components/projects/ProjectEditor.vue';
+import BulkBar from '../components/tasks/BulkBar.vue';
 import TaskEditor from '../components/tasks/TaskEditor.vue';
 import ToastHost from '../components/ui/ToastHost.vue';
 import { usePlayer } from '../composables/usePlayer.js';
 import { useProjects } from '../composables/useProjects.js';
+import { useSelection } from '../composables/useSelection.js';
 import { useSync } from '../composables/useSync.js';
 import { useTaskEditor } from '../composables/useTaskEditor.js';
 import { intlLocale } from '../i18n/locale.js';
@@ -24,6 +26,9 @@ const { load: loadPlayer } = usePlayer();
 const editor = useTaskEditor();
 const creatingProject = ref(false);
 const menuOpen = ref(false);
+const selection = useSelection();
+
+watch(() => route.path, () => selection.clear());
 
 loadProjects();
 loadPlayer();
@@ -41,6 +46,10 @@ const elsewhere = computed(() => !TABS.some(tabActive));
 
 function focusComposer(event) {
     const typing = event.target.closest?.('input, textarea, [contenteditable], [role="dialog"], [role="menu"]');
+    if (!typing && event.key === 'Escape' && selection.count.value) {
+        selection.clear();
+        return;
+    }
     if (typing || event.metaKey || event.ctrlKey || event.altKey || event.key !== 'n') return;
     const composer = document.getElementById('task-composer-input');
     if (composer) {
@@ -82,6 +91,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', focusComposer));
             <NavDrawer v-model:open="menuOpen" @new-project="creatingProject = true" />
 
             <TaskEditor v-model:open="editor.state.open" :task="editor.state.task" />
+            <BulkBar />
             <ProjectEditor v-model:open="creatingProject" @saved="(project) => project && $router.push(`/projects/${project.id}`)" />
             <CelebrationLayer />
             <ToastHost />
