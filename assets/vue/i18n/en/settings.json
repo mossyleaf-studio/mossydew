@@ -6,6 +6,13 @@
     "timezoneSaved": "Time zone saved.",
     "language": "Language",
     "sound": "Dewdrop sound when a task is done",
+    "app": {
+        "title": "Desktop app",
+        "install": "Install MossyDew",
+        "prompt": "Install MossyDew to open it from your Dock or Start menu in its own window. You stay signed in and everything syncs.",
+        "manual": "To get MossyDew in its own window: in Safari, choose File › Add to Dock; in Chrome or Edge, use the install icon in the address bar.",
+        "installed": "MossyDew is installed on this device."
+    },
     "account": "Account",
     "manageAccount": "Manage my mossyleaf account",
     "logout": "Sign out",

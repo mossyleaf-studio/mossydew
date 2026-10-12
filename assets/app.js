@@ -6,6 +6,7 @@ import './styles/calendar.css';
 import AppShell from './vue/layouts/AppShell.vue';
 import { i18n } from './vue/i18n/index.js';
 import { router } from './router.js';
+import './vue/composables/useInstall.js';
 
 createApp(AppShell).use(i18n).use(router).mount('#app');
 

@@ -6,6 +6,13 @@
     "timezoneSaved": "Fuseau horaire enregistré.",
     "language": "Langue",
     "sound": "Son de goutte quand une tâche est faite",
+    "app": {
+        "title": "Application de bureau",
+        "install": "Installer MossyDew",
+        "prompt": "Installez MossyDew pour l’ouvrir depuis le Dock ou le menu Démarrer, dans sa propre fenêtre. Vous restez connecté et tout se synchronise.",
+        "manual": "Pour avoir MossyDew dans sa propre fenêtre : dans Safari, choisissez Fichier › Ajouter au Dock ; dans Chrome ou Edge, utilisez l’icône d’installation de la barre d’adresse.",
+        "installed": "MossyDew est installé sur cet appareil."
+    },
     "account": "Compte",
     "manageAccount": "Gérer mon compte mossyleaf",
     "logout": "Se déconnecter",

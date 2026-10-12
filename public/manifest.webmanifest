@@ -1,7 +1,7 @@
 {
     "name": "MossyDew",
     "short_name": "MossyDew",
-    "description": "A mossy task manager: plan your day, sort tasks in the Eisenhower matrix and keep your moss piglet lively.",
+    "description": "A mossy task manager: plan your day, sort tasks in the Eisenhower matrix and grow a moss herbarium as you get things done.",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",
@@ -11,6 +11,6 @@
         { "src": "/icons/mossydew.svg", "sizes": "any", "type": "image/svg+xml" },
         { "src": "/icons/mossydew-192.png", "sizes": "192x192", "type": "image/png" },
         { "src": "/icons/mossydew-512.png", "sizes": "512x512", "type": "image/png" },
-        { "src": "/icons/mossydew-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+        { "src": "/icons/mossydew-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
     ]
 }

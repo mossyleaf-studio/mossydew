@@ -10,6 +10,7 @@ import FormField from '../components/ui/FormField.vue';
 import PageHeader from '../components/ui/PageHeader.vue';
 import PageSection from '../components/ui/PageSection.vue';
 import { useApi } from '../composables/useApi.js';
+import { useInstall } from '../composables/useInstall.js';
 import { useSession } from '../composables/useSession.js';
 import { useSound } from '../composables/useSound.js';
 import { useToast } from '../composables/useToast.js';
@@ -20,6 +21,7 @@ const api = useApi();
 const toast = useToast();
 const session = useSession();
 const { enabled: sound, drip } = useSound();
+const { state: installState, install } = useInstall();
 
 const timezones = Intl.supportedValuesOf('timeZone').map((zone) => ({ value: zone, label: zone.replaceAll('_', ' ') }));
 const browserZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -72,6 +74,10 @@ function toggleSound(value) {
         <PageSection :title="t('settings.appearance.title')">
             <p class="settings__intro">{{ t('settings.appearance.intro') }}</p>
             <AppearanceSettings />
+        </PageSection>
+        <PageSection :title="t('settings.app.title')">
+            <p class="settings__intro">{{ t(`settings.app.${installState}`) }}</p>
+            <div v-if="installState === 'prompt'"><BaseButton @click="install">{{ t('settings.app.install') }}</BaseButton></div>
         </PageSection>
         <PageSection :title="t('settings.account')">
             <div class="settings__account">
