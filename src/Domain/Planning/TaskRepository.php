@@ -32,4 +32,9 @@ interface TaskRepository
      * @return list<Task>
      */
     public function openPlannedBefore(\DateTimeImmutable $day): array;
+
+    /**
+     * @return array<string, Task>
+     */
+    public function linked(string $prefix): array;
 }

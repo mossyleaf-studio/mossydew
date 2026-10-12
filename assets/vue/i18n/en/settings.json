@@ -6,6 +6,13 @@
     "timezoneSaved": "Time zone saved.",
     "language": "Language",
     "sound": "Dewdrop sound when a task is done",
+    "import": {
+        "title": "Import from Super Productivity",
+        "intro": "Export a backup from Super Productivity’s settings, then choose the file here. Open tasks come over with their project, their urgent and important tags (as matrix quadrants), their planned day, deadline, notes and subtasks. Done tasks stay behind, and importing the same file again adds nothing new.",
+        "choose": "Choose a backup file…",
+        "done": "Imported: {imported} · New projects: {projects} · Already there: {skipped}",
+        "notJson": "This file is not a Super Productivity backup."
+    },
     "app": {
         "title": "Desktop app",
         "install": "Install MossyDew",

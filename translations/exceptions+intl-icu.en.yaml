@@ -11,6 +11,7 @@ project:
     duplicate_name: 'You already have a project called “{name}”.'
 task:
     empty_title: 'Give the task a title.'
+    unreadable_backup: 'This file is not a Super Productivity backup. Export one from Super Productivity’s settings.'
     already_done: '“{title}” is already done.'
     not_done: '“{title}” is not done yet.'
     not_open: '“{title}” is done: reopen it before moving it in the matrix.'

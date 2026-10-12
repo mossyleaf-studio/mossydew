@@ -22,6 +22,21 @@ const toast = useToast();
 const session = useSession();
 const { enabled: sound, drip } = useSound();
 const { state: installState, install } = useInstall();
+const backupInput = ref(null);
+
+async function importBackup(event) {
+    const [file] = event.target.files;
+    event.target.value = '';
+    if (!file) return;
+    try {
+        const parsed = JSON.parse(await file.text());
+        const { task, project, boards } = parsed.data ?? parsed;
+        const report = await api.post('/api/imports/super-productivity', { task, project, boards });
+        toast.success(t('settings.import.done', report));
+    } catch (error) {
+        toast.error(error instanceof SyntaxError ? t('settings.import.notJson') : error.message);
+    }
+}
 
 const timezones = Intl.supportedValuesOf('timeZone').map((zone) => ({ value: zone, label: zone.replaceAll('_', ' ') }));
 const browserZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -74,6 +89,13 @@ function toggleSound(value) {
         <PageSection :title="t('settings.appearance.title')">
             <p class="settings__intro">{{ t('settings.appearance.intro') }}</p>
             <AppearanceSettings />
+        </PageSection>
+        <PageSection :title="t('settings.import.title')">
+            <p class="settings__intro">{{ t('settings.import.intro') }}</p>
+            <div>
+                <input ref="backupInput" type="file" accept="application/json,.json" hidden @change="importBackup">
+                <BaseButton variant="secondary" @click="backupInput.click()">{{ t('settings.import.choose') }}</BaseButton>
+            </div>
         </PageSection>
         <PageSection :title="t('settings.app.title')">
             <p class="settings__intro">{{ t(`settings.app.${installState}`) }}</p>

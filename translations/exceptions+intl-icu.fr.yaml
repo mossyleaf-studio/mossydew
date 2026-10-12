@@ -11,6 +11,7 @@ project:
     duplicate_name: 'Vous avez déjà un projet « {name} ».'
 task:
     empty_title: 'Donnez un titre à la tâche.'
+    unreadable_backup: 'Ce fichier n’est pas une sauvegarde Super Productivity. Exportez-en une depuis les réglages de Super Productivity.'
     already_done: '« {title} » est déjà faite.'
     not_done: '« {title} » n’est pas encore faite.'
     not_open: '« {title} » est faite : rouvrez-la avant de la déplacer dans la matrice.'

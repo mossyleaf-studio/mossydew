@@ -29,6 +29,7 @@ use Symfony\Component\Uid\Ulid;
 #[ORM\Index(name: 'task_owner_planned', columns: ['owner_id', 'planned_on'])]
 #[ORM\Index(name: 'task_owner_quadrant', columns: ['owner_id', 'quadrant', 'rank'])]
 #[ORM\Index(name: 'task_owner_completed', columns: ['owner_id', 'completed_at'])]
+#[ORM\UniqueConstraint(name: 'task_owner_external', columns: ['owner_id', 'external_id'])]
 class Task
 {
     public const int MAX_TITLE_LENGTH = 200;
@@ -87,6 +88,9 @@ class Task
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $externalId = null;
+
     private function __construct(User $owner, string $title, \DateTimeImmutable $now)
     {
         $this->id = new Ulid();
@@ -137,6 +141,11 @@ class Task
     {
         $this->parent?->subtasks->removeElement($this);
         $this->parent = null;
+    }
+
+    public function linkTo(string $externalId): void
+    {
+        $this->externalId = $externalId;
     }
 
     public function rename(string $title): void
@@ -409,5 +418,10 @@ class Task
         }
 
         return mb_substr($title, 0, self::MAX_TITLE_LENGTH);
+    }
+
+    public function externalId(): ?string
+    {
+        return $this->externalId;
     }
 }

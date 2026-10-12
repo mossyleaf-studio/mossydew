@@ -73,4 +73,21 @@ final readonly class DoctrineTaskRepository implements TaskRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function linked(string $prefix): array
+    {
+        /** @var list<Task> $tasks */
+        $tasks = $this->scope->restrict($this->entityManager->createQueryBuilder()->select('t')->from(Task::class, 't'), 't')
+            ->andWhere('t.externalId LIKE :prefix')
+            ->setParameter('prefix', addcslashes($prefix, '%_').'%')
+            ->getQuery()
+            ->getResult();
+
+        $linked = [];
+        foreach ($tasks as $task) {
+            $linked[(string) $task->externalId()] = $task;
+        }
+
+        return $linked;
+    }
 }
