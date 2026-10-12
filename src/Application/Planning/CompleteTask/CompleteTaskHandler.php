@@ -14,6 +14,7 @@ use App\Application\Identity\CurrentUser;
 use App\Application\Planning\Injust\InjustJournal;
 use App\Application\Planning\TaskView;
 use App\Application\Planning\Today;
+use App\Application\Social\AdvanceGoals;
 use App\Application\Transaction;
 use App\Domain\Gamification\Greenhouse\DewGain;
 use App\Domain\Gamification\Herbarium\Species;
@@ -39,6 +40,7 @@ final readonly class CompleteTaskHandler
         private GatherTaskDew $gatherTaskDew,
         private AtomicChange $atomicChange,
         private InjustJournal $injust,
+        private AdvanceGoals $advanceGoals,
     ) {
     }
 
@@ -71,12 +73,16 @@ final readonly class CompleteTaskHandler
                 $newSpecies = ($this->collectSpecies)($player->owner(), $leveledUpTo - $levelBefore);
             }
         }
-        $dew = $this->atomicChange->apply(function () use ($player, $rewarded): ?DewGain {
-            $dew = ($this->gatherTaskDew)($player->owner(), $rewarded);
-            $this->transaction->commit();
+        [$dew, $goalsReached] = $this->atomicChange->apply(
+            /** @return array{?DewGain, list<string>} */
+            function () use ($player, $rewarded): array {
+                $goalsReached = ($this->advanceGoals)($player->owner(), \count($rewarded));
+                $dew = ($this->gatherTaskDew)($player->owner(), $rewarded);
+                $this->transaction->commit();
 
-            return $dew;
-        });
+                return [$dew, $goalsReached];
+            },
+        );
         ($this->achievements)();
 
         $parent = $task->parent();
@@ -89,6 +95,7 @@ final readonly class CompleteTaskHandler
             array_map(static fn (Species $species): SpeciesView => SpeciesView::of($species), $newSpecies),
             ($this->showPlayer)(),
             null === $parent ? null : TaskView::of($parent),
+            $goalsReached,
         );
     }
 }

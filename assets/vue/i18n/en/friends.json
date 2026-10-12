@@ -24,5 +24,28 @@
         "intro": "{name} invites you to be friends on MossyDew. You will see each other’s level, XP, streak and herbarium size, never your tasks.",
         "accept": "Accept",
         "accepted": "You and {name} are now friends."
+    },
+    "goals": {
+        "title": "Shared goals",
+        "new": "New goal",
+        "name": "Goal",
+        "target": "Tasks to complete together",
+        "endsOn": "Ends on",
+        "with": "With",
+        "create": "Start the goal",
+        "created": "“{title}” has started.",
+        "empty": "Set a number of tasks to complete together before a date. Every task any member completes counts, and when you get there, everyone gets a new moss and dew.",
+        "needFriends": "Invite a friend first to share a goal.",
+        "progress": "{total} of {target} tasks",
+        "member": "{name}: {count}",
+        "you": "You",
+        "until": "Until {date}",
+        "ended": "Ended {date} without reaching it",
+        "reached": "Reached {date}",
+        "leave": "Leave “{title}”",
+        "leaveMessage": "Your tasks stop counting for this goal. The others keep going without you.",
+        "leaveConfirm": "Leave",
+        "left": "You left “{title}”.",
+        "reachedToast": "Shared goal reached: “{title}”! Everyone gets a new moss and dew."
     }
 }

@@ -36,6 +36,7 @@ export function useTaskActions() {
                 return null;
             }
             celebration.reward(completion);
+            (completion.goalsReached ?? []).forEach((title) => toast.success(t('friends.goals.reachedToast', { title })));
             return completion;
         },
         async reopen(task) {

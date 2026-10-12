@@ -1,6 +1,6 @@
 # Greenhouse
 
-Mosses collected in the herbarium grow in the pots of a greenhouse. The greenhouse never produces anything by itself, over time or otherwise: **dew comes only from completed tasks**, and the bigger and richer the greenhouse, the more dew each task brings (XP is unchanged). Dew pays for facilities (more pots, misters, a rain barrel) and for expeditions that bring back new mosses. Important work done before it is urgent (Plant) feeds the greenhouse most.
+Mosses collected in the herbarium grow in the pots of a greenhouse. The greenhouse never produces anything by itself, over time or otherwise: **dew comes only from completed tasks** (including the bonus of a shared goal they reach, SG4), and the bigger and richer the greenhouse, the more dew each task brings (XP is unchanged). Dew pays for facilities (more pots, misters, a rain barrel) and for expeditions that bring back new mosses. Important work done before it is urgent (Plant) feeds the greenhouse most.
 
 - **GH1** Every player has one greenhouse, opened small: glasshouse level 1 (2 pots), misters and rain barrel level 0, no dew. — `Greenhouse::open()`, `SignInHandler`
 - **GH2** Completing a task brings dew once per task (G1), straight to the dew balance: a base by quadrant (Plant 12, Water 6, Trim 3, Compost 1, unsorted 1) plus the greenhouse bonus of GH4. Streak and deadline do not change dew (they stay XP only). A subtask and the parent it completes each bring their own dew (S3). — `DewPolicy`, `GatherTaskDew`, `CompleteTaskHandler`

@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Domain\Gamification\Achievement;
 
 use App\Domain\Gamification\Achievement\AchievementRule;
 use App\Domain\Gamification\Achievement\PlayerStats;
+use App\Domain\Gamification\Achievement\Rule\CommonGround;
 use App\Domain\Gamification\Achievement\Rule\FieldTrip;
 use App\Domain\Gamification\Achievement\Rule\FirstDrop;
 use App\Domain\Gamification\Achievement\Rule\FiveHundredTasks;
@@ -51,6 +52,7 @@ final class AchievementRuleTest extends TestCase
         yield 'patient gardener' => [new PatientGardener(), 'plant_25', static fn (int $count): PlayerStats => new PlayerStats(scheduleCompleted: $count), 25];
         yield 'matrix sorter' => [new MatrixSorter(), 'matrix_sorter', static fn (int $count): PlayerStats => new PlayerStats(tasksClassified: $count), 20];
         yield 'three day streak' => [new ThreeDayStreak(), 'streak_3', static fn (int $days): PlayerStats => new PlayerStats(bestStreak: $days), 3];
+        yield 'common ground' => [new CommonGround(), 'common_ground', static fn (int $count): PlayerStats => new PlayerStats(goalsReached: $count), 1];
         yield 'week streak' => [new WeekStreak(), 'streak_7', static fn (int $days): PlayerStats => new PlayerStats(bestStreak: $days), 7];
         yield 'month streak' => [new MonthStreak(), 'streak_30', static fn (int $days): PlayerStats => new PlayerStats(bestStreak: $days), 30];
         yield 'level five' => [new LevelFive(), 'level_5', static fn (int $level): PlayerStats => new PlayerStats(level: $level), 5];

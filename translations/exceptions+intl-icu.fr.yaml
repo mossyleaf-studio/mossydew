@@ -42,3 +42,8 @@ friend:
     invite_used: 'Cette invitation a déjà servi. Demandez un nouveau lien.'
     invite_expired: 'Cette invitation a expiré. Demandez un nouveau lien.'
     already_friends: '{name} fait déjà partie de vos amis.'
+goal:
+    empty_title: 'Donnez un titre à l’objectif.'
+    invalid_target: 'Un objectif commun compte de 1 à 1000 tâches.'
+    needs_friends: 'Choisissez au moins une personne parmi vos amis pour le partager.'
+    ends_in_the_past: 'Choisissez une date de fin à partir d’aujourd’hui.'

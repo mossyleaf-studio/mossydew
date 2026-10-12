@@ -24,5 +24,28 @@
         "intro": "{name} vous invite à devenir amis sur MossyDew. Vous verrez le niveau, l’XP, la série et la taille de l’herbier de l’autre, jamais vos tâches.",
         "accept": "Accepter",
         "accepted": "{name} fait maintenant partie de vos amis."
+    },
+    "goals": {
+        "title": "Objectifs communs",
+        "new": "Nouvel objectif",
+        "name": "Objectif",
+        "target": "Tâches à faire ensemble",
+        "endsOn": "Jusqu’au",
+        "with": "Avec",
+        "create": "Lancer l’objectif",
+        "created": "« {title} » est lancé.",
+        "empty": "Fixez un nombre de tâches à faire ensemble avant une date. Chaque tâche faite par un membre compte, et à l’arrivée, tout le monde reçoit une nouvelle mousse et de la rosée.",
+        "needFriends": "Invitez d’abord quelqu’un pour partager un objectif.",
+        "progress": "{total} tâches sur {target}",
+        "member": "{name} : {count}",
+        "you": "Vous",
+        "until": "Jusqu’au {date}",
+        "ended": "Terminé le {date} sans être atteint",
+        "reached": "Atteint le {date}",
+        "leave": "Quitter « {title} »",
+        "leaveMessage": "Vos tâches ne comptent plus pour cet objectif. Les autres continuent sans vous.",
+        "leaveConfirm": "Quitter",
+        "left": "Vous avez quitté « {title} ».",
+        "reachedToast": "Objectif commun atteint : « {title} » ! Tout le monde reçoit une nouvelle mousse et de la rosée."
     }
 }

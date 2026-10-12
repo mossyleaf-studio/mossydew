@@ -42,3 +42,8 @@ friend:
     invite_used: 'This invitation has already been used. Ask for a new link.'
     invite_expired: 'This invitation has expired. Ask for a new link.'
     already_friends: '{name} is already your friend.'
+goal:
+    empty_title: 'Give the goal a title.'
+    invalid_target: 'A shared goal counts 1 to 1000 tasks.'
+    needs_friends: 'Choose at least one friend to share the goal with.'
+    ends_in_the_past: 'Pick an end date from today on.'

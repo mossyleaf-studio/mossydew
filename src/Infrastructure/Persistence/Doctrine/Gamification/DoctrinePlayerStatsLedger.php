@@ -33,6 +33,11 @@ final readonly class DoctrinePlayerStatsLedger implements PlayerStatsLedger
             ['owner' => $owner],
         );
 
+        $goals = $this->connection->fetchOne(
+            'SELECT COUNT(*) FROM shared_goal g JOIN goal_member m ON m.goal_id = g.id WHERE m.user_id = :owner AND g.reached_at IS NOT NULL',
+            ['owner' => $owner],
+        );
+
         return new PlayerStats(
             tasksCompleted: self::int($tasks['completed'] ?? 0),
             doFirstCompleted: self::int($tasks['do_first'] ?? 0),
@@ -43,6 +48,7 @@ final readonly class DoctrinePlayerStatsLedger implements PlayerStatsLedger
             dewGathered: self::int($greenhouse['dew_gathered'] ?? 0),
             expeditions: self::int($greenhouse['expeditions'] ?? 0),
             glasshouseLevel: self::int($greenhouse['glasshouse'] ?? 1),
+            goalsReached: self::int($goals),
         );
     }
 

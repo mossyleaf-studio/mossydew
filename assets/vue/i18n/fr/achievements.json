@@ -62,5 +62,9 @@
     "level_10": {
         "title": "Forêt ancienne",
         "description": "Atteignez le niveau 10."
+    },
+    "common_ground": {
+        "title": "Terrain commun",
+        "description": "Atteindre un objectif commun avec des amis."
     }
 }

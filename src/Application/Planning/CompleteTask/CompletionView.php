@@ -14,6 +14,7 @@ final readonly class CompletionView
 {
     /**
      * @param list<SpeciesView> $newSpecies
+     * @param list<string>      $goalsReached
      */
     public function __construct(
         public TaskView $task,
@@ -23,6 +24,7 @@ final readonly class CompletionView
         public array $newSpecies,
         public PlayerView $player,
         public ?TaskView $parent = null,
+        public array $goalsReached = [],
     ) {
     }
 }

@@ -62,5 +62,9 @@
     "level_10": {
         "title": "Old growth",
         "description": "Reach level 10."
+    },
+    "common_ground": {
+        "title": "Common ground",
+        "description": "Reach a shared goal with friends."
     }
 }
