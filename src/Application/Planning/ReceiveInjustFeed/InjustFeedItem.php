@@ -19,8 +19,10 @@ final readonly class InjustFeedItem
     ) {
     }
 
-    public function notes(): string
+    public function group(): ?string
     {
-        return trim(implode(', ', $this->tags)."\n".$this->block);
+        $tag = trim($this->tags[0] ?? '');
+
+        return '' === $tag ? null : $tag;
     }
 }

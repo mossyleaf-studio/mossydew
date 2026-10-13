@@ -56,6 +56,13 @@ final readonly class ReceiveInjustFeedHandler
 
         $waiting = array_flip(array_map(static fn (InjustEvent $event): string => $event->item(), $this->links->pending($owner)));
         $linked = $this->tasks->linked(InjustLink::PREFIX);
+        $groups = $this->tasks->linked(InjustLink::GROUP);
+        foreach ($groups as $externalId => $group) {
+            if (!$group->isDone() && 0 === $group->subtaskCount()) {
+                $this->tasks->remove($group);
+                unset($groups[$externalId]);
+            }
+        }
         $project = null;
         $seen = [];
         foreach ($feed->open as $item) {
@@ -76,6 +83,22 @@ final readonly class ReceiveInjustFeedHandler
             }
             if ($task->isDone()) {
                 $task->reopen();
+            }
+            $tag = $item->group();
+            if (null === $tag || 0 !== $task->subtaskCount() || null !== $task->recurrence()) {
+                continue;
+            }
+            $group = $groups[InjustLink::groupOf($tag)] ?? null;
+            if (null === $group) {
+                $project ??= $this->projects->named(self::PROJECT) ?? $this->createProject($owner, $now);
+                $group = Task::create($owner, $tag, $now);
+                $group->linkTo(InjustLink::groupOf($tag));
+                $group->fileUnder($project);
+                $this->tasks->add($group);
+                $groups[InjustLink::groupOf($tag)] = $group;
+            }
+            if ($task->parent() !== $group) {
+                $task->nestUnder($group);
             }
         }
 
@@ -106,7 +129,7 @@ final readonly class ReceiveInjustFeedHandler
     private function update(Task $task, InjustFeedItem $item): void
     {
         $task->linkTo(InjustFeed::externalId($item->id), $item->revision);
-        $task->describe($item->notes());
+        $task->describe($item->block);
         if (null === $item->due) {
             $task->clearDeadline();
         } else {

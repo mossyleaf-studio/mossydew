@@ -15,6 +15,7 @@ use Symfony\Component\Uid\Ulid;
 class InjustLink
 {
     public const string PREFIX = 'injust:';
+    public const string GROUP = 'injust-group:';
 
     #[ORM\Id]
     #[ORM\Column(type: UlidType::NAME, unique: true)]
@@ -45,6 +46,11 @@ class InjustLink
     public static function open(User $owner): self
     {
         return new self($owner);
+    }
+
+    public static function groupOf(string $tag): string
+    {
+        return self::GROUP.substr(hash('sha256', $tag), 0, 32);
     }
 
     public static function epochOf(User $owner): string

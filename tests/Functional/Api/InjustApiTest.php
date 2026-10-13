@@ -74,7 +74,9 @@ final class InjustApiTest extends WebTestCase
 
         $tasks = self::injustTasks($client);
         self::assertSame(['Cover revealed', 'Guitar playthrough', 'Mixing: She Needs Help'], array_keys($tasks));
-        self::assertSame(['2026-10-09', null, null, "Untitled EP\nUntitled EP, due Fri 9 Oct."], [Json::at($tasks['Cover revealed'], 'dueOn'), Json::at($tasks['Cover revealed'], 'plannedOn'), Json::at($tasks['Cover revealed'], 'quadrant'), Json::at($tasks['Cover revealed'], 'notes')]);
+        self::assertSame(['2026-10-09', null, null, 'Untitled EP, due Fri 9 Oct.'], [Json::at($tasks['Cover revealed'], 'dueOn'), Json::at($tasks['Cover revealed'], 'plannedOn'), Json::at($tasks['Cover revealed'], 'quadrant'), Json::at($tasks['Cover revealed'], 'notes')]);
+        self::assertSame(['Untitled EP', 'Posts', 'Studio'], [Json::at($tasks['Cover revealed'], 'parentTitle'), Json::at($tasks['Guitar playthrough'], 'parentTitle'), Json::at($tasks['Mixing: She Needs Help'], 'parentTitle')], 'each item sits under its first tag');
+        self::assertSame(['Posts', 'Studio', 'Untitled EP'], array_keys(self::injustTasks($client, groups: true)));
 
         $client->jsonRequest('PATCH', '/api/tasks/'.Json::string($tasks['Mixing: She Needs Help'], 'id'), ['title' => 'Mix it my way', 'projectId' => Json::at($tasks['Mixing: She Needs Help'], 'projectId')]);
         self::assertResponseIsSuccessful();
@@ -106,6 +108,7 @@ final class InjustApiTest extends WebTestCase
         $open = self::injustTasks($client, open: true);
         self::assertSame(['Mixing: She Needs Help', 'Pitch playlists'], array_keys($open));
         self::assertSame('2026-10-12', Json::at($open['Mixing: She Needs Help'], 'dueOn'));
+        self::assertSame(['Studio', 'Untitled EP'], array_keys(self::injustTasks($client, open: true, groups: true)), 'an emptied group goes, a new item reopens its done group');
 
         $client->jsonRequest('GET', '/api/player');
         $xp = Json::int(self::body($client), 'xp');
@@ -193,7 +196,7 @@ final class InjustApiTest extends WebTestCase
     /**
      * @return array<string, array<mixed>>
      */
-    private static function injustTasks(KernelBrowser $client, bool $open = false): array
+    private static function injustTasks(KernelBrowser $client, bool $open = false, bool $groups = false): array
     {
         $client->jsonRequest('GET', '/api/projects');
         $project = array_values(array_filter(self::body($client), static fn (mixed $project): bool => 'Injust' === Json::at($project, 'name')))[0] ?? null;
@@ -203,7 +206,7 @@ final class InjustApiTest extends WebTestCase
         $client->jsonRequest('GET', '/api/projects/'.Json::string($project, 'id').'/tasks');
         $tasks = [];
         foreach (self::body($client) as $task) {
-            if (!$open || false === Json::at($task, 'done')) {
+            if ((!$open || false === Json::at($task, 'done')) && $groups === Json::int($task, 'subtaskCount') > 0) {
                 $tasks[Json::string($task, 'title')] = Json::array($task);
             }
         }
