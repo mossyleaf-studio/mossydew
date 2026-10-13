@@ -94,7 +94,7 @@ async function promote() {
     if (await actions.promote(props.task)) toast.success(t('tasks.subtasks.promoted', { title: props.task.title }));
 }
 
-const draggable = computed(() => props.nestable && !props.task.done);
+const draggable = computed(() => props.nestable && !props.task.done && !selection.count.value);
 const dragged = computed(() => drag.state.task?.id === props.task.id);
 
 function onDragStart(event) {

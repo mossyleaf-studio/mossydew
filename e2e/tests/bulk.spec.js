@@ -23,6 +23,7 @@ test('selected tasks are sorted, planned and completed together', async ({ page 
     await page.keyboard.press('x');
     const bar = page.getByRole('toolbar', { name: 'Selected tasks' });
     await expect(bar).toContainText('3 selected');
+    await expect(row(page, tasks[0])).not.toHaveAttribute('draggable', 'true');
     await expect(page.getByRole('dialog')).toHaveCount(0);
 
     await bar.getByRole('button', { name: 'Matrix' }).click();

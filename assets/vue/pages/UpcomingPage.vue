@@ -10,6 +10,7 @@ import PageHeader from '../components/ui/PageHeader.vue';
 import TaskRow from '../components/tasks/TaskRow.vue';
 import { useApi } from '../composables/useApi.js';
 import { useDates } from '../composables/useDates.js';
+import { useSelection } from '../composables/useSelection.js';
 import { useTaskActions } from '../composables/useTaskActions.js';
 import { sortTasks } from '../tasks/compareTasks.js';
 import { addDays } from '../tasks/days.js';
@@ -49,6 +50,7 @@ function heading(day) {
     const relative = dates.relative(day);
     return relative === 'today' || relative === 'tomorrow' ? t(`tasks.days.${relative}`) : dates.weekday(day);
 }
+const selection = useSelection();
 </script>
 
 <template>
@@ -73,6 +75,7 @@ function heading(day) {
                     :animation="160"
                     :delay="180"
                     :delay-on-touch-only="true"
+                    :disabled="selection.count.value > 0"
                     ghost-class="upcoming__ghost"
                     @add="(event) => dropped(event, column.day)"
                 >

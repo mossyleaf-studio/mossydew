@@ -7,6 +7,7 @@ import ProjectFilter from '../components/matrix/ProjectFilter.vue';
 import PageHeader from '../components/ui/PageHeader.vue';
 import TaskRow from '../components/tasks/TaskRow.vue';
 import { useApi } from '../composables/useApi.js';
+import { useSelection } from '../composables/useSelection.js';
 import { useTaskActions } from '../composables/useTaskActions.js';
 import { sortTasks } from '../tasks/compareTasks.js';
 import { formatSelection, matchesSelection, mergeOrder, parseSelection } from '../tasks/projectFilter.js';
@@ -46,7 +47,8 @@ function unclassified(event) {
     if (task) actions.classify(task, null);
 }
 
-const draggable = { group: 'matrix', animation: 160, delay: 180, delayOnTouchOnly: true, ghostClass: 'matrix__ghost' };
+const bulk = useSelection();
+const draggable = computed(() => ({ group: 'matrix', animation: 160, delay: 180, delayOnTouchOnly: true, ghostClass: 'matrix__ghost', disabled: bulk.count.value > 0 }));
 </script>
 
 <template>
