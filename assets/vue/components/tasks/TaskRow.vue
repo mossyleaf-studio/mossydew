@@ -1,12 +1,13 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { AlignLeft, CornerDownRight, ListChecks, Repeat, Sun } from '@lucide/vue';
+import { AlignLeft, ChevronRight, CornerDownRight, ListChecks, Repeat, Sun } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import IconButton from '../ui/IconButton.vue';
 import DropCheck from './DropCheck.vue';
 import PlanMenu from './PlanMenu.vue';
 import QuadrantTag from './QuadrantTag.vue';
 import TaskMenu from './TaskMenu.vue';
+import { useCollapsed } from '../../composables/useCollapsed.js';
 import { useDates } from '../../composables/useDates.js';
 import { useProjects } from '../../composables/useProjects.js';
 import { useSelection } from '../../composables/useSelection.js';
@@ -26,6 +27,7 @@ const props = defineProps({
     compact: { type: Boolean, default: false },
     nested: { type: Boolean, default: false },
     nestable: { type: Boolean, default: false },
+    collapsible: { type: Boolean, default: false },
 });
 
 const { t } = useI18n();
@@ -37,6 +39,8 @@ const composer = useSubtaskComposer();
 const drag = useTaskDrag();
 const toast = useToast();
 const selection = useSelection();
+const collapse = useCollapsed();
+const expanded = computed(() => !collapse.isCollapsed(props.task));
 const planOpen = ref(false);
 const dropping = ref(false);
 
@@ -138,6 +142,7 @@ function onKeydown(event) {
         e: () => editor.edit(props.task),
         s: () => addSubtask(),
         x: () => select(),
+        ...(props.collapsible ? { ArrowLeft: () => collapse.toggle(props.task, true), ArrowRight: () => collapse.toggle(props.task, false) } : {}),
         Enter: () => editor.edit(props.task),
         ' ': () => toggle(),
     };
@@ -161,6 +166,9 @@ function onKeydown(event) {
         :data-task="task.id"
         @keydown="onKeydown"
     >
+        <button v-if="collapsible" type="button" :class="['task-row__fold', { 'task-row__fold--open': expanded }]" :aria-expanded="expanded" :aria-label="t(expanded ? 'tasks.subtasks.hide' : 'tasks.subtasks.show', { title: task.title })" @click="collapse.toggle(task)">
+            <ChevronRight size="1rem" aria-hidden="true" />
+        </button>
         <DropCheck :done="task.done" :disabled="locked" :label="checkLabel" @toggle="toggle" />
         <div class="task-row__main">
             <button type="button" class="task-row__title" @click="openOrSelect">{{ task.title }}</button>
@@ -230,6 +238,10 @@ function onKeydown(event) {
 .task-row__subtasks { font-variant-numeric: tabular-nums; }
 .task-row__notes { color: var(--color-subtle); }
 .task-row__actions { display: flex; align-items: center; flex-shrink: 0; }
+.task-row__fold { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; margin-left: calc(-1 * var(--space-2)); margin-right: calc(-1 * var(--space-2)); padding: 0; border: none; border-radius: var(--radius-pill); background: none; color: var(--color-muted); cursor: pointer; transition: transform var(--transition); }
+.task-row__fold:hover { background: var(--color-hover); color: var(--color-text); }
+.task-row__fold:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.task-row__fold--open { transform: rotate(90deg); }
 .task-row__sun[aria-pressed="true"] { color: var(--color-warning); }
 
 .task-row--done { border-color: transparent; background: transparent; }

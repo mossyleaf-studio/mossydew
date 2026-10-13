@@ -72,7 +72,9 @@
         "more": "Ajouter une sous-tâche",
         "close": "Fermer",
         "nested": "« {title} » est maintenant une sous-tâche de « {parent} ».",
-        "promoted": "« {title} » est de nouveau une tâche."
+        "promoted": "« {title} » est de nouveau une tâche.",
+        "hide": "Masquer les sous-tâches de « {title} »",
+        "show": "Afficher les sous-tâches de « {title} »"
     },
     "bulk": {
         "label": "Tâches sélectionnées",

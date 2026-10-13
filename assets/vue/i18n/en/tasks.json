@@ -72,7 +72,9 @@
         "more": "Add a subtask",
         "close": "Close",
         "nested": "“{title}” is now a subtask of “{parent}”.",
-        "promoted": "“{title}” is a task again."
+        "promoted": "“{title}” is a task again.",
+        "hide": "Hide the subtasks of “{title}”",
+        "show": "Show the subtasks of “{title}”"
     },
     "bulk": {
         "label": "Selected tasks",
