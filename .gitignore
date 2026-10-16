@@ -42,3 +42,19 @@ phpstan.neon
 /ci-build.tgz
 
 /.claude/worktrees/
+
+###> android ###
+/android/.gradle/
+/android/.kotlin/
+/android/build/
+/android/app/build/
+/android/local.properties
+/android/keystore.jks
+/android/keystore.properties
+###< android ###
+
+###> ios ###
+/ios/MossyDew.xcodeproj/
+/ios/Generated/
+/ios/Team.xcconfig
+###< ios ###

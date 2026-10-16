@@ -13,6 +13,12 @@ security:
             provider: app_users
             access_token:
                 token_handler: App\Infrastructure\Security\IntegrationTokenHandler
+        widget:
+            pattern: ^/widget/
+            stateless: true
+            provider: app_users
+            access_token:
+                token_handler: App\Infrastructure\Security\DeviceTokenHandler
         main:
             lazy: true
             provider: app_users

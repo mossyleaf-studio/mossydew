@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue';
 
 const offer = ref(null);
-const installed = ref(window.matchMedia('(display-mode: standalone)').matches);
+const installed = ref(window.matchMedia('(display-mode: standalone)').matches || navigator.userAgent.includes('MossyDewApp'));
 
 window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();

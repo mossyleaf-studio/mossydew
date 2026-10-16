@@ -17,8 +17,17 @@ CI_BUNDLE ?= ci-build.tgz
 export E2E_ASSETS_DIR
 OUTPUT_SYNC = $(if $(filter output-sync,$(.FEATURES)),--output-sync=target)
 BUILD = docker buildx build --platform $(PLATFORM) --target prod -t $(IMAGE):$(TAG) -t $(IMAGE):latest
+ANDROID_HOME ?= $(HOME)/Library/Android/sdk
+ANDROID_TOOLS_ZIP = commandlinetools-mac_arm64-15859902_latest.zip
+ANDROID_TOOLS_SHA256 = 835b62a26162b229b441d1f6d4680383815a270809eb33522c0d480fa5002c4e
+SDKMANAGER = $(ANDROID_HOME)/cmdline-tools/latest/bin/sdkmanager
+ANDROID_ENV = JAVA_HOME=$(shell java -XshowSettings:properties -version 2>&1 | sed -n 's/^ *java.home = //p') ANDROID_HOME=$(ANDROID_HOME)
+GRADLEW = cd android && $(ANDROID_ENV) ./gradlew
+APK = android/app/build/outputs/apk/release/app-release.apk
+IOS_SDK = $(shell xcrun --show-sdk-path)
+IOS_TYPECHECK = swiftc -typecheck -swift-version 6 -parse-as-library -target arm64-apple-ios17.0-macabi -sdk $(IOS_SDK) -F $(IOS_SDK)/System/iOSSupport/System/Library/Frameworks -I $(IOS_SDK)/System/iOSSupport/usr/lib/swift
 
-.PHONY: up down build install assets assets-e2e db db-test fixtures migration test test-unit test-functional test-js deptrac phpstan cs cs-fix e2e e2e-run qa ci ci-up ci-build ci-bundle ci-unbundle ci-warmup ci-checks ci-e2e image push deploy deploy-files
+.PHONY: up down build install assets assets-e2e db db-test fixtures migration test test-unit test-functional test-js deptrac phpstan cs cs-fix e2e e2e-run qa ci ci-up ci-build ci-bundle ci-unbundle ci-warmup ci-checks ci-e2e image push deploy deploy-files android-sdk android-test apk apk-install ios ios-typecheck
 
 up: ## Start the stack (app on http://localhost:8090, Vite on :5174, mock mossyleaf accounts on :8091)
 	$(DC) up -d --wait php database node oidc
@@ -134,3 +143,33 @@ deploy: ## Run IMAGE:TAG (published by CI) on DEPLOY_HOST: set TAG in its .env, 
 		sed -i "s|^IMAGE=.*|IMAGE=$(IMAGE)|; s|^TAG=.*|TAG=$(TAG)|" .env; \
 		$(REMOTE_DOCKER) compose pull app; \
 		$(REMOTE_DOCKER) compose up -d --remove-orphans'
+
+android-sdk: ## Install the Android SDK on the Mac (command-line tools 22.0 for arm64, then platform and build tools, in ANDROID_HOME)
+	@test -x $(SDKMANAGER) || ( tmp=$$(mktemp -d) && cd $$tmp && \
+		curl -fsSLO -C - --retry 5 --retry-all-errors --speed-limit 10000 --speed-time 30 https://dl.google.com/android/repository/$(ANDROID_TOOLS_ZIP) && \
+		echo "$(ANDROID_TOOLS_SHA256)  $(ANDROID_TOOLS_ZIP)" | shasum -a 256 -c - && \
+		unzip -q $(ANDROID_TOOLS_ZIP) && mkdir -p $(ANDROID_HOME)/cmdline-tools && \
+		mv cmdline-tools $(ANDROID_HOME)/cmdline-tools/latest && rm -rf $$tmp )
+	yes | $(ANDROID_ENV) $(SDKMANAGER) --licenses
+	$(ANDROID_ENV) $(SDKMANAGER) "platforms;android-36" "build-tools;36.0.0" platform-tools
+
+android-test: ## Android app JVM unit tests and lint
+	$(GRADLEW) test lintRelease
+
+apk: ## Build the signed Android release APK (creates android/keystore.jks and keystore.properties once: back them up, updates need the same key)
+	@[ -f android/keystore.jks ] || [ -f android/keystore.properties ] || ( password=$$(openssl rand -hex 24) && umask 077 && \
+		KEYSTORE_PASSWORD=$$password keytool -genkeypair -keystore android/keystore.jks -storetype PKCS12 \
+			-alias mossydew -keyalg RSA -keysize 4096 -validity 10000 -dname CN=MossyDew \
+			-storepass:env KEYSTORE_PASSWORD -keypass:env KEYSTORE_PASSWORD && \
+		printf 'storeFile=keystore.jks\nstorePassword=%s\nkeyAlias=mossydew\n' $$password > android/keystore.properties )
+	@[ -f android/keystore.jks ] && [ -f android/keystore.properties ] || { echo 'android/keystore.jks and android/keystore.properties go together: restore the missing one from your backup' >&2; exit 1; }
+	$(GRADLEW) assembleRelease -PversionCode=$$(git rev-list --count HEAD)
+
+apk-install: ## Install the release APK on the phone adb sees (USB or Wi-Fi pairing), over the installed version
+	$(ANDROID_HOME)/platform-tools/adb install -r $(APK)
+
+ios: ## Generate and open the iPad/iPhone Xcode project (needs Xcode and brew install xcodegen; signing team in ios/Team.xcconfig)
+	cd ios && xcodegen generate && open MossyDew.xcodeproj
+
+ios-typecheck: ## Typecheck the iOS app and its widget against the Mac Catalyst SDK (the Command Line Tools are enough)
+	cd ios && $(IOS_TYPECHECK) -module-name MossyDew MossyDew/*.swift Shared/*.swift && $(IOS_TYPECHECK) -module-name TodayWidget -application-extension TodayWidget/*.swift Shared/*.swift

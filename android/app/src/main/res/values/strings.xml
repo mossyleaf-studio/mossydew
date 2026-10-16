@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">MossyDew</string>
+    <string name="widget_title">Today</string>
+    <string name="widget_description">Today’s tasks, to tick off from the home screen</string>
+    <string name="widget_signed_out">Open MossyDew to sign in</string>
+    <string name="widget_nothing_left">Nothing left today</string>
+    <string name="widget_offline">Offline</string>
+    <string name="widget_locked">Subtasks still open</string>
+    <string name="quadrant_do_first">Water</string>
+    <string name="quadrant_schedule">Plant</string>
+    <string name="quadrant_delegate">Trim</string>
+    <string name="quadrant_eliminate">Compost</string>
+    <plurals name="widget_left">
+        <item quantity="one">%d task left</item>
+        <item quantity="other">%d tasks left</item>
+    </plurals>
+</resources>

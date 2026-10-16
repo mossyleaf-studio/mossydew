@@ -30,7 +30,7 @@
         "once": "The token is shown only now. Replacing it disconnects the old one."
     },
     "app": {
-        "title": "Desktop app",
+        "title": "App",
         "install": "Install MossyDew",
         "prompt": "Install MossyDew to open it from your Dock or Start menu in its own window. You stay signed in and everything syncs.",
         "manual": "To get MossyDew in its own window: in Safari, choose File › Add to Dock; in Chrome or Edge, use the install icon in the address bar.",

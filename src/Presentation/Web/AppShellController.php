@@ -9,7 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/{path}', name: 'app', requirements: ['path' => '(?!api/|build|_|login|logout|sw\.js|manifest).*'], defaults: ['path' => ''], methods: ['GET'], priority: -100)]
+#[Route('/{path}', name: 'app', requirements: ['path' => '(?!api/|widget/|integrations/|build|_|login|logout|sw\.js|manifest).*'], defaults: ['path' => ''], methods: ['GET'], priority: -100)]
 final class AppShellController extends AbstractController
 {
     private const array ALWAYS = ['/api/projects', '/api/player'];

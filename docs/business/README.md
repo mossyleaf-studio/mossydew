@@ -16,3 +16,4 @@
 | Import from Super Productivity | `Application\Planning\ImportSuperProductivity\*` | [tasks.md](tasks.md) |
 | Injust Release link, token, journal | `Domain\Planning\Injust\*`, `Domain\Identity\AccessToken` | [integrations.md](integrations.md) |
 | Friends, invitation link, shared goal | `Domain\Social\{FriendInvite, Friendship, SharedGoal}` | [social.md](social.md) |
+| Android and iPad apps, home-screen widget, device token | `Domain\Identity\DeviceToken`, `Application\Planning\ListWidgetTasks\*` | [apps.md](apps.md) |

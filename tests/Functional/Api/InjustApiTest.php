@@ -58,6 +58,8 @@ final class InjustApiTest extends WebTestCase
         $client->getCookieJar()->clear();
         $client->request('GET', '/api/tasks/inbox', server: ['HTTP_AUTHORIZATION' => "Bearer $token", 'HTTP_ACCEPT' => 'application/json']);
         self::assertResponseStatusCodeSame(401);
+        $client->request('GET', '/integrations/anything', server: ['HTTP_AUTHORIZATION' => "Bearer $token"]);
+        self::assertResponseStatusCodeSame(404);
     }
 
     public function testFeedItemsBecomeTasksAndTicksGoBackThroughTheJournal(): void

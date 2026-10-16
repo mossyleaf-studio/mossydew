@@ -69,6 +69,12 @@ Contexts: `Identity`, `Planning`, `Gamification`.
 - Motion: one bold moment — the level-up reveal (`LevelUpReveal.vue`: level rolls over, the card flips and develops amid a spore burst). `prefers-reduced-motion` disables it.
 - Assets: hand-built SVG for drawings, CC0/CC BY iNaturalist photos for the herbarium (`bin/console app:herbarium:import` after changing `SpeciesCatalog`, self-hosted in `public/herbarium/`), no AI-generated images; every third-party asset is listed with its licence in `docs/assets.md` and on `/credits`.
 
+## Android and iPad apps — `android/`, `ios/`
+
+- WebView shells of the production site plus a home-screen **Today** widget that calls `/widget/*` with a per-device bearer token (rules: `docs/business/apps.md`, build and install: `docs/apps.md`). A change to `GET /widget/today` updates both clients.
+- Built on the Mac, not in Docker. Android: Kotlin + Jetpack Glance; `make android-sdk` once, then `make apk`, `make apk-install`, `make android-test`; strings in `android/app/src/main/res/values{,-fr}/strings.xml`; `android/keystore.*` is never committed (updates need the same key).
+- iOS: XcodeGen, `ios/project.yml` is the source (generated project, plists and entitlements are git-ignored), Swift 6, strings in `ios/Shared/Localizable.xcstrings` (en + fr); `make ios` generates and opens the project (needs Xcode), `make ios-typecheck` checks both targets with the Command Line Tools only.
+
 ## Testing expectations
 
 - PHPStan level 10 on `src`, `tests`, `fixtures`; ignores only in `phpstan.dist.neon`.

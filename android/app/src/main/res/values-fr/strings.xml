@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_title">Aujourd’hui</string>
+    <string name="widget_description">Les tâches du jour, à cocher depuis l’écran d’accueil</string>
+    <string name="widget_signed_out">Ouvrez MossyDew pour vous connecter</string>
+    <string name="widget_nothing_left">Plus rien à faire aujourd’hui</string>
+    <string name="widget_offline">Hors ligne</string>
+    <string name="widget_locked">Sous-tâches en cours</string>
+    <string name="quadrant_do_first">Arroser</string>
+    <string name="quadrant_schedule">Planter</string>
+    <string name="quadrant_delegate">Tailler</string>
+    <string name="quadrant_eliminate">Composter</string>
+    <plurals name="widget_left">
+        <item quantity="one">%d tâche restante</item>
+        <item quantity="many">%d tâches restantes</item>
+        <item quantity="other">%d tâches restantes</item>
+    </plurals>
+</resources>

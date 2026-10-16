@@ -30,7 +30,7 @@ final readonly class RefreshAfterWrite
         $urls = $this->requestedUrls($request);
         $content = Response::HTTP_NO_CONTENT === $response->getStatusCode() ? 'null' : $response->getContent();
 
-        if (!$event->isMainRequest() || $request->isMethodSafe() || !$response->isSuccessful() || [] === $urls || !\is_string($content) || !json_validate($content)) {
+        if (!$event->isMainRequest() || !str_starts_with($request->getPathInfo(), '/api/') || $request->isMethodSafe() || !$response->isSuccessful() || [] === $urls || !\is_string($content) || !json_validate($content)) {
             return;
         }
 
