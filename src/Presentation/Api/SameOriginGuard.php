@@ -24,7 +24,7 @@ final readonly class SameOriginGuard
         $request = $event->getRequest();
 
         if (!$event->isMainRequest()
-            || !str_starts_with($request->getPathInfo(), '/api/')
+            || !str_starts_with(rawurldecode($request->getPathInfo()), '/api/')
             || \in_array($request->getMethod(), self::SAFE_METHODS, true)) {
             return;
         }

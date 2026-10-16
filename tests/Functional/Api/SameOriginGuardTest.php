@@ -34,6 +34,23 @@ final class SameOriginGuardTest extends WebTestCase
         yield 'origin header' => [['HTTP_ORIGIN' => 'https://evil.example']];
     }
 
+    #[DataProvider('encodedApiPaths')]
+    public function testEncodedApiPathsAreGuarded(string $path): void
+    {
+        $client = self::signedInClient();
+
+        $client->jsonRequest('POST', $path, ['title' => 'Phishing'], ['HTTP_SEC_FETCH_SITE' => 'same-site']);
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    /** @return iterable<array{string}> */
+    public static function encodedApiPaths(): iterable
+    {
+        yield 'encoded letter' => ['/%61pi/tasks'];
+        yield 'encoded slash' => ['/api%2Ftasks'];
+    }
+
     /**
      * @param array<string, string> $headers
      */
