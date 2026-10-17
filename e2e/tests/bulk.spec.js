@@ -31,7 +31,9 @@ test('selected tasks are sorted, planned and completed together', async ({ page 
     await expect(page.getByTestId('toast').getByText('Done for 3 tasks.')).toBeVisible();
     await expect(bar).toBeHidden();
 
-    for (const task of tasks.slice(0, 2)) await row(page, task).locator('.task-row__title').click({ modifiers: ['Shift'] });
+    await row(page, tasks[0]).locator('.task-row__meta').click({ modifiers: ['ControlOrMeta'] });
+    await row(page, tasks[1]).locator('.task-row__title').click({ modifiers: ['Shift'] });
+    await expect(page.getByRole('toolbar', { name: 'Selected tasks' })).toContainText('2 selected');
     await page.getByRole('toolbar', { name: 'Selected tasks' }).getByRole('button', { name: 'Complete' }).click();
     await expect(row(page, tasks[0])).toBeHidden();
     await expect(row(page, tasks[1])).toBeHidden();

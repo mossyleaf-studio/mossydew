@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { AlignLeft, ChevronRight, CornerDownRight, ListChecks, Repeat, Sun } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import IconButton from '../ui/IconButton.vue';
@@ -67,10 +67,21 @@ function select() {
     if (!props.task.done) selection.toggle(props.task);
 }
 
-function openOrSelect(event) {
-    if ((event.metaKey || event.ctrlKey || event.shiftKey || selection.count.value) && !props.task.done) select();
-    else editor.edit(props.task);
+function onClick(event) {
+    if (event.target.closest('.task-row') !== event.currentTarget) return;
+    const onTitle = event.target.closest('.task-row__title') !== null;
+    if (!onTitle && event.target.closest('button, a, input')) return;
+    const selecting = event.metaKey || event.ctrlKey || event.shiftKey || selection.count.value > 0;
+    if (selecting && !props.task.done) {
+        if (event.shiftKey) selection.extend(props.task);
+        else select();
+    } else if (onTitle) {
+        editor.edit(props.task);
+    }
 }
+
+onMounted(() => selection.show(props.task.id, () => props.task));
+onBeforeUnmount(() => selection.hide(props.task.id));
 const parentLabel = computed(() => (props.nested ? null : props.task.parentTitle));
 const checkLabel = computed(() => {
     if (locked.value) return t('tasks.subtasks.locked', { title: props.task.title });
@@ -155,7 +166,7 @@ function onKeydown(event) {
 
 <template>
     <li
-        :class="['task-row', `task-row--${task.quadrant ?? 'unsorted'}`, { 'task-row--done': task.done, 'task-row--compact': compact, 'task-row--nested': nested, 'task-row--drop': dropping, 'task-row--dragged': dragged, 'task-row--selected': selected }]"
+        :class="['task-row', `task-row--${task.quadrant ?? 'unsorted'}`, { 'task-row--done': task.done, 'task-row--compact': compact, 'task-row--nested': nested, 'task-row--drop': dropping, 'task-row--dragged': dragged, 'task-row--selected': selected, 'task-row--selectable': selection.count.value > 0 && !task.done }]"
         tabindex="0"
         :draggable="draggable ? 'true' : undefined"
         @dragstart="onDragStart"
@@ -165,13 +176,14 @@ function onKeydown(event) {
         @drop="onDrop"
         :data-task="task.id"
         @keydown="onKeydown"
+        @click="onClick"
     >
         <button v-if="collapsible" type="button" :class="['task-row__fold', { 'task-row__fold--open': expanded }]" :aria-expanded="expanded" :aria-label="t(expanded ? 'tasks.subtasks.hide' : 'tasks.subtasks.show', { title: task.title })" @click="collapse.toggle(task)">
             <ChevronRight size="1rem" aria-hidden="true" />
         </button>
         <DropCheck :done="task.done" :disabled="locked" :label="checkLabel" @toggle="toggle" />
         <div class="task-row__main">
-            <button type="button" class="task-row__title" @click="openOrSelect">{{ task.title }}</button>
+            <button type="button" class="task-row__title">{{ task.title }}</button>
             <p v-if="showQuadrant || parentLabel || (showProject && project) || task.subtaskCount || plannedLabel || dueLabel || repeatLabel || task.notes" class="task-row__meta">
                 <QuadrantTag v-if="showQuadrant" :quadrant="task.quadrant" />
                 <span v-if="parentLabel" class="task-row__parent"><CornerDownRight size="0.875rem" aria-hidden="true" />{{ t('tasks.subtasks.of', { title: parentLabel }) }}</span>
@@ -251,6 +263,7 @@ function onKeydown(event) {
 .task-row--nested { min-height: 2.75rem; }
 .task-row[draggable="true"] { cursor: grab; }
 .task-row--dragged { opacity: 0.45; }
+.task-row--selectable { cursor: pointer; }
 .task-row--selected { border-color: var(--color-accent); background: var(--color-accent-soft); }
 .task-row--drop { border-color: var(--color-accent); background: var(--color-accent-soft); box-shadow: var(--focus-ring); }
 
