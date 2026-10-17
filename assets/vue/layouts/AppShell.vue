@@ -10,6 +10,7 @@ import NavDrawer from '../components/nav/NavDrawer.vue';
 import NavMenu from '../components/nav/NavMenu.vue';
 import ProjectEditor from '../components/projects/ProjectEditor.vue';
 import BulkBar from '../components/tasks/BulkBar.vue';
+import SubtaskMoveDialog from '../components/tasks/SubtaskMoveDialog.vue';
 import TaskEditor from '../components/tasks/TaskEditor.vue';
 import ToastHost from '../components/ui/ToastHost.vue';
 import { usePlayer } from '../composables/usePlayer.js';
@@ -92,6 +93,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', focusComposer));
 
             <TaskEditor v-model:open="editor.state.open" :task="editor.state.task" />
             <BulkBar />
+            <SubtaskMoveDialog />
             <ProjectEditor v-model:open="creatingProject" @saved="(project) => project && $router.push(`/projects/${project.id}`)" />
             <CelebrationLayer />
             <ToastHost />

@@ -74,7 +74,14 @@
         "nested": "“{title}” is now a subtask of “{parent}”.",
         "promoted": "“{title}” is a task again.",
         "hide": "Hide the subtasks of “{title}”",
-        "show": "Show the subtasks of “{title}”"
+        "show": "Show the subtasks of “{title}”",
+        "move": {
+            "title": "Move the subtasks too?",
+            "one": "“{title}” has open subtasks. Move them with it, or leave them where they are?",
+            "many": "{count} of these tasks have open subtasks. Move them along, or leave them where they are?",
+            "all": "Move them too",
+            "only": "Leave them"
+        }
     },
     "bulk": {
         "label": "Selected tasks",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canNest, hasOpenSubtasks, nestSubtasks } from './subtasks.js';
+import { canNest, hasOpenSubtasks, nestSubtasks, parentsMoving } from './subtasks.js';
 
 const task = (overrides) => ({
     id: overrides.id,
@@ -66,5 +66,15 @@ describe('canNest', () => {
         expect(canNest(task({ id: 'drawing', subtaskCount: 2 }), task({ id: 'sketchbook' }))).toBe(false);
         expect(canNest(task({ id: 'ferns', recurrence: { interval: 1, unit: 'week' } }), task({ id: 'garden' }))).toBe(false);
         expect(canNest(null, task({ id: 'garden' }))).toBe(false);
+    });
+
+    it('asks about subtasks only for parents with open subtasks that change quadrant', () => {
+        const parent = task({ id: 'fox', quadrant: 'schedule', subtaskCount: 2, subtasksDone: 1 });
+        const finished = task({ id: 'ink', quadrant: 'schedule', subtaskCount: 1, subtasksDone: 1 });
+        const plain = task({ id: 'rake', quadrant: null });
+
+        expect(parentsMoving([parent, finished, plain], 'do_first')).toEqual([parent]);
+        expect(parentsMoving([parent], 'schedule')).toEqual([]);
+        expect(parentsMoving([parent], null)).toEqual([parent]);
     });
 });

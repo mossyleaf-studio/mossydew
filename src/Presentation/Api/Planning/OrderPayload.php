@@ -13,6 +13,7 @@ final readonly class OrderPayload
         #[Assert\All([new Assert\Ulid(message: 'id.invalid')])]
         #[Assert\Count(max: 500)]
         public array $ids = [],
+        public bool $withSubtasks = false,
     ) {
     }
 }

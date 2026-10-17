@@ -12,6 +12,7 @@ final readonly class ClassifyTask
     public function __construct(
         public Ulid $id,
         public ?Quadrant $quadrant,
+        public bool $withSubtasks = false,
     ) {
     }
 }

@@ -8,6 +8,7 @@ import PageHeader from '../components/ui/PageHeader.vue';
 import TaskRow from '../components/tasks/TaskRow.vue';
 import { useApi } from '../composables/useApi.js';
 import { useSelection } from '../composables/useSelection.js';
+import { useSubtaskQuestion } from '../composables/useSubtaskQuestion.js';
 import { useTaskActions } from '../composables/useTaskActions.js';
 import { sortTasks } from '../tasks/compareTasks.js';
 import { formatSelection, matchesSelection, mergeOrder, parseSelection } from '../tasks/projectFilter.js';
@@ -17,6 +18,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const actions = useTaskActions();
+const question = useSubtaskQuestion();
 const tasks = ref(null);
 useApi().load('/api/matrix', tasks);
 
@@ -30,21 +32,31 @@ const selection = computed({
 
 const inQuadrant = (quadrant) => sortTasks((tasks.value ?? []).filter((task) => task.quadrant === quadrant));
 
-watch([tasks, selection], ([value]) => {
-    if (!value) return;
+function layout() {
+    if (!tasks.value) return;
     const shown = (quadrant) => inQuadrant(quadrant).filter((task) => matchesSelection(task, selection.value));
     zones.value = Object.fromEntries(QUADRANTS.map((quadrant) => [quadrant.value, shown(quadrant.value)]));
     unsorted.value = shown(null);
-}, { immediate: true });
-
-function arranged(quadrant) {
-    const all = inQuadrant(quadrant).map((task) => task.id);
-    actions.reorder(quadrant, mergeOrder(all, zones.value[quadrant].map((task) => task.id)));
 }
 
-function unclassified(event) {
-    const task = tasks.value.find((candidate) => candidate.id === event.item.dataset.task);
-    if (task) actions.classify(task, null);
+watch([tasks, selection], layout, { immediate: true });
+
+const dropped = (event) => tasks.value.find((candidate) => candidate.id === event.item.dataset.task);
+
+async function arranged(quadrant, event = null) {
+    const task = event && dropped(event);
+    const withSubtasks = task ? await question.ask([task], quadrant) : false;
+    if (withSubtasks === null) {
+        layout();
+        return;
+    }
+    const all = inQuadrant(quadrant).map((each) => each.id);
+    actions.reorder(quadrant, mergeOrder(all, zones.value[quadrant].map((each) => each.id)), withSubtasks);
+}
+
+async function unclassified(event) {
+    const task = dropped(event);
+    if (task && await actions.classify(task, null) === null) layout();
 }
 
 const bulk = useSelection();
@@ -64,7 +76,7 @@ const draggable = computed(() => ({ group: 'matrix', animation: 160, delay: 180,
                         <h2 class="matrix__name">{{ t(`matrix.quadrants.${quadrant.value}.name`) }} <span class="matrix__count">{{ zones[quadrant.value].length }}</span></h2>
                         <p class="matrix__plain">{{ t(`matrix.quadrants.${quadrant.value}.plain`) }} · {{ t(`matrix.quadrants.${quadrant.value}.advice`) }}</p>
                     </header>
-                    <VueDraggable v-model="zones[quadrant.value]" v-bind="draggable" tag="ul" class="matrix__tasks" @update="arranged(quadrant.value)" @add="arranged(quadrant.value)">
+                    <VueDraggable v-model="zones[quadrant.value]" v-bind="draggable" tag="ul" class="matrix__tasks" @update="arranged(quadrant.value)" @add="(event) => arranged(quadrant.value, event)">
                         <TaskRow v-for="task in zones[quadrant.value]" :key="task.id" :task="task" compact />
                     </VueDraggable>
                 </section>

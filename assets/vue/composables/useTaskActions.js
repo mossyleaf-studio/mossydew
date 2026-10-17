@@ -1,12 +1,14 @@
 import { useI18n } from 'vue-i18n';
 import { useApi } from './useApi.js';
 import { useCelebration } from './useCelebration.js';
+import { useSubtaskQuestion } from './useSubtaskQuestion.js';
 import { useToast } from './useToast.js';
 
 export function useTaskActions() {
     const api = useApi();
     const toast = useToast();
     const celebration = useCelebration();
+    const question = useSubtaskQuestion();
     const { t } = useI18n();
 
     async function attempt(action) {
@@ -22,8 +24,12 @@ export function useTaskActions() {
         create: (payload) => attempt(() => api.post('/api/tasks', payload)),
         edit: (task, payload) => attempt(() => api.patch(`/api/tasks/${task.id}`, payload)),
         plan: (task, when, date = null) => attempt(() => api.post(`/api/tasks/${task.id}/plan`, { when, date })),
-        classify: (task, quadrant) => attempt(() => api.post(`/api/tasks/${task.id}/classify`, { quadrant })),
-        reorder: (quadrant, ids) => attempt(() => api.put(`/api/matrix/${quadrant}/order`, { ids })),
+        async classify(task, quadrant) {
+            const withSubtasks = await question.ask([task], quadrant);
+            if (withSubtasks === null) return null;
+            return attempt(() => api.post(`/api/tasks/${task.id}/classify`, { quadrant, withSubtasks }));
+        },
+        reorder: (quadrant, ids, withSubtasks = false) => attempt(() => api.put(`/api/matrix/${quadrant}/order`, { ids, withSubtasks })),
         addSubtask: (parent, title) => attempt(() => api.post(`/api/tasks/${parent.id}/subtasks`, { title })),
         nest: (task, parent) => attempt(() => api.post(`/api/tasks/${task.id}/parent`, { parentId: parent.id })),
         promote: (task) => attempt(() => api.post(`/api/tasks/${task.id}/parent`, { parentId: null })),

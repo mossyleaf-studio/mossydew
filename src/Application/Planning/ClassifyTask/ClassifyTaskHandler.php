@@ -22,7 +22,7 @@ final readonly class ClassifyTaskHandler
     {
         $task = $this->tasks->get($command->id);
         $quadrant = $command->quadrant;
-        $moved = $task->quadrant() === $quadrant ? [] : [$task, ...$task->subtasksFollowing($task->quadrant(), $quadrant)];
+        $moved = $task->quadrant() === $quadrant ? [] : [$task, ...($command->withSubtasks ? $task->openSubtasksOutside($quadrant) : [])];
         $rank = null === $quadrant ? 0 : $this->tasks->nextRankIn($quadrant);
         foreach ($moved as $each) {
             if (null === $quadrant) {

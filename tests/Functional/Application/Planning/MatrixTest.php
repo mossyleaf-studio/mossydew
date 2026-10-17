@@ -45,7 +45,7 @@ final class MatrixTest extends KernelTestCase
         self::assertSame([null, 0], [$unsorted->quadrant, $unsorted->rank]);
     }
 
-    public function testClassifyingAParentSortsItsUnsortedSubtasksAfterIt(): void
+    public function testAParentMovesAloneUnlessItsSubtasksAreAsked(): void
     {
         self::createTask('Plant', quadrant: Quadrant::Schedule);
         $parent = self::createTask('Fox drawing');
@@ -53,45 +53,47 @@ final class MatrixTest extends KernelTestCase
         $ink = self::addSubtask($parent, 'Ink');
         $this->classify($ink, Quadrant::Eliminate);
 
-        $this->classify($parent, Quadrant::Schedule);
+        $this->classify($parent, Quadrant::DoFirst);
+        self::assertSame(['Fox drawing' => 'do_first', 'Plant' => 'schedule', 'Ink' => 'eliminate', 'Sketch' => null], $this->quadrants());
 
+        $this->classify($parent, Quadrant::Schedule, withSubtasks: true);
         $matrix = self::getContainer()->get(ShowMatrixHandler::class)();
-        self::assertEqualsCanonicalizing(
-            [['Plant', 'schedule', 0], ['Fox drawing', 'schedule', 1], ['Sketch', 'schedule', 2], ['Ink', 'eliminate', 0]],
+        self::assertSame(
+            [['Plant', 'schedule', 0], ['Fox drawing', 'schedule', 1], ['Sketch', 'schedule', 2], ['Ink', 'schedule', 3]],
             array_map(static fn (TaskView $task): array => [$task->title, $task->quadrant, $task->rank], $matrix),
         );
+
+        $this->classify($parent, null, withSubtasks: true);
+        self::assertSame(['Plant' => 'schedule', 'Fox drawing' => null, 'Sketch' => null, 'Ink' => null], $this->quadrants());
     }
 
-    public function testMovingASortedParentTakesAllItsSubtasksAlong(): void
+    public function testDoneSubtasksStayWhereTheyWere(): void
     {
         $parent = self::createTask('Fox drawing', quadrant: Quadrant::Schedule);
         self::addSubtask($parent, 'Sketch');
-        $ink = self::addSubtask($parent, 'Ink');
-        $this->classify($ink, Quadrant::Eliminate);
+        self::completeTask(self::addSubtask($parent, 'Ink'));
 
-        $this->classify($parent, Quadrant::DoFirst);
-        self::assertSame(['Fox drawing' => 'do_first', 'Sketch' => 'do_first', 'Ink' => 'do_first'], $this->quadrants());
+        $this->classify($parent, Quadrant::DoFirst, withSubtasks: true);
 
-        $this->classify($parent, null);
-        self::assertSame(['Fox drawing' => null, 'Sketch' => null, 'Ink' => null], $this->quadrants());
+        self::assertSame(['Fox drawing' => 'do_first', 'Sketch' => 'do_first'], $this->quadrants());
     }
 
-    public function testDraggingAParentIntoAnotherQuadrantRanksItsSubtasksLast(): void
+    public function testDraggingAParentIntoAnotherQuadrantRanksTheAskedSubtasksLast(): void
     {
         $plant = self::createTask('Plant', quadrant: Quadrant::DoFirst);
         $parent = self::createTask('Fox drawing', quadrant: Quadrant::Schedule);
         self::addSubtask($parent, 'Sketch');
 
         $this->reorder(Quadrant::DoFirst, $parent, $plant);
+        self::assertSame(['Fox drawing' => 'do_first', 'Plant' => 'do_first', 'Sketch' => null], $this->quadrants());
 
+        $this->classify($parent, Quadrant::Schedule);
+        $this->reorderWithSubtasks(Quadrant::DoFirst, $parent, $plant);
         $matrix = self::getContainer()->get(ShowMatrixHandler::class)();
         self::assertSame(
             [['Fox drawing', 'do_first', 0], ['Plant', 'do_first', 1], ['Sketch', 'do_first', 2]],
             array_map(static fn (TaskView $task): array => [$task->title, $task->quadrant, $task->rank], $matrix),
         );
-
-        $this->reorder(Quadrant::DoFirst, $plant, $parent);
-        self::assertSame(['Plant' => 'do_first', 'Fox drawing' => 'do_first', 'Sketch' => 'do_first'], $this->quadrants());
     }
 
     public function testReorderingMovesTasksInAndRanksTheOthersAfter(): void
@@ -122,9 +124,9 @@ final class MatrixTest extends KernelTestCase
         $this->reorder(Quadrant::DoFirst, $done, $open);
     }
 
-    private function classify(TaskView $task, ?Quadrant $quadrant): TaskView
+    private function classify(TaskView $task, ?Quadrant $quadrant, bool $withSubtasks = false): TaskView
     {
-        return self::getContainer()->get(ClassifyTaskHandler::class)(new ClassifyTask(Ulid::fromString($task->id), $quadrant));
+        return self::getContainer()->get(ClassifyTaskHandler::class)(new ClassifyTask(Ulid::fromString($task->id), $quadrant, $withSubtasks));
     }
 
     /**
@@ -139,6 +141,21 @@ final class MatrixTest extends KernelTestCase
 
     private function reorder(Quadrant $quadrant, TaskView ...$tasks): void
     {
-        self::getContainer()->get(ReorderQuadrantHandler::class)(new ReorderQuadrant($quadrant, array_values(array_map(static fn (TaskView $task): Ulid => Ulid::fromString($task->id), $tasks))));
+        self::getContainer()->get(ReorderQuadrantHandler::class)(new ReorderQuadrant($quadrant, self::ids($tasks)));
+    }
+
+    private function reorderWithSubtasks(Quadrant $quadrant, TaskView ...$tasks): void
+    {
+        self::getContainer()->get(ReorderQuadrantHandler::class)(new ReorderQuadrant($quadrant, self::ids($tasks), withSubtasks: true));
+    }
+
+    /**
+     * @param array<TaskView> $tasks
+     *
+     * @return list<Ulid>
+     */
+    private static function ids(array $tasks): array
+    {
+        return array_values(array_map(static fn (TaskView $task): Ulid => Ulid::fromString($task->id), $tasks));
     }
 }

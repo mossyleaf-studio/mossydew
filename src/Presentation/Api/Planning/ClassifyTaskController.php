@@ -18,6 +18,6 @@ final class ClassifyTaskController extends AbstractController
 {
     public function __invoke(Ulid $id, #[MapRequestPayload] ClassifyPayload $payload, ClassifyTaskHandler $classifyTask): JsonResponse
     {
-        return $this->json($classifyTask(new ClassifyTask($id, $payload->quadrant)));
+        return $this->json($classifyTask(new ClassifyTask($id, $payload->quadrant, $payload->withSubtasks)));
     }
 }

@@ -33,8 +33,8 @@ final readonly class ReorderQuadrantHandler
             static fn (Task $task): bool => !\in_array((string) $task->id(), $orderedIds, true),
         );
         $followers = [];
-        foreach ($ordered as $task) {
-            foreach ($task->subtasksFollowing($task->quadrant(), $command->quadrant) as $subtask) {
+        foreach ($command->withSubtasks ? $ordered : [] as $task) {
+            foreach ($task->quadrant() === $command->quadrant ? [] : $task->openSubtasksOutside($command->quadrant) as $subtask) {
                 if (!\in_array((string) $subtask->id(), $orderedIds, true)) {
                     $followers[(string) $subtask->id()] = $subtask;
                 }

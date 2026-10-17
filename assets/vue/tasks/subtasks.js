@@ -22,3 +22,7 @@ export function canNest(dragged, target) {
     if (dragged.parentId === target.id) return false;
     return !target.parentId && !dragged.subtaskCount && !dragged.recurrence;
 }
+
+export function parentsMoving(tasks, quadrant) {
+    return tasks.filter((task) => task.quadrant !== quadrant && hasOpenSubtasks(task));
+}

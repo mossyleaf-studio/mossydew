@@ -15,6 +15,7 @@ final readonly class ReorderQuadrant
     public function __construct(
         public Quadrant $quadrant,
         public array $taskIds,
+        public bool $withSubtasks = false,
     ) {
     }
 }

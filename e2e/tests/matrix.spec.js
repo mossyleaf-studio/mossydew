@@ -54,3 +54,30 @@ test('the matrix filters by project and plans tasks from its rows', async ({ pag
     await expect(page).not.toHaveURL(/projects=/);
     await expect(page.locator('.matrix__zone .task-row').filter({ hasNotText: project }).first()).toBeVisible();
 });
+
+test('sorting a parent asks whether its subtasks move along', async ({ page }) => {
+    await signIn(page);
+    await page.goto('/inbox');
+    const parent = unique('Fox drawing');
+    const sketch = unique('Sketch');
+    await page.getByLabel('New task').fill(parent);
+    await page.getByLabel('New task').press('Enter');
+    await row(page, parent).getByRole('button', { name: `More for “${parent}”` }).click();
+    await page.getByRole('menuitem', { name: 'Add a subtask' }).click();
+    await page.getByLabel('New subtask').fill(sketch);
+    await page.getByLabel('New subtask').press('Enter');
+    await page.getByLabel('New subtask').press('Escape');
+    const question = page.getByRole('dialog', { name: 'Move the subtasks too?' });
+
+    await row(page, parent).getByRole('button', { name: `More for “${parent}”` }).click();
+    await page.getByRole('menuitemradio', { name: /Water/ }).click();
+    await question.getByRole('button', { name: 'Leave them' }).click();
+    await expect(row(page, parent)).toHaveClass(/task-row--do_first/);
+    await expect(row(page, sketch)).toHaveClass(/task-row--unsorted/);
+
+    await row(page, parent).getByRole('button', { name: `More for “${parent}”` }).click();
+    await page.getByRole('menuitemradio', { name: /Plant/ }).click();
+    await question.getByRole('button', { name: 'Move them too' }).click();
+    await expect(row(page, parent)).toHaveClass(/task-row--schedule/);
+    await expect(row(page, sketch)).toHaveClass(/task-row--schedule/);
+});

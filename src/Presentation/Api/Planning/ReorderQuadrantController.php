@@ -18,7 +18,7 @@ final class ReorderQuadrantController extends AbstractController
 {
     public function __invoke(Quadrant $quadrant, #[MapRequestPayload] OrderPayload $payload, ReorderQuadrantHandler $reorder): Response
     {
-        $reorder(new ReorderQuadrant($quadrant, array_map(Ulid::fromString(...), $payload->ids)));
+        $reorder(new ReorderQuadrant($quadrant, array_map(Ulid::fromString(...), $payload->ids), $payload->withSubtasks));
 
         return new Response(null, Response::HTTP_NO_CONTENT);
     }

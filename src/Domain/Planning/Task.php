@@ -216,15 +216,11 @@ class Task
     /**
      * @return list<Task>
      */
-    public function subtasksFollowing(?Quadrant $from, ?Quadrant $to): array
+    public function openSubtasksOutside(?Quadrant $quadrant): array
     {
-        if ($from === $to) {
-            return [];
-        }
-
         return array_values(array_filter(
             $this->subtasks(),
-            static fn (self $subtask): bool => $subtask->quadrant !== $to && (null !== $from || null === $subtask->quadrant),
+            static fn (self $subtask): bool => !$subtask->isDone() && $subtask->quadrant !== $quadrant,
         ));
     }
 

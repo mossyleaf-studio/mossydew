@@ -10,6 +10,7 @@ final readonly class ClassifyPayload
 {
     public function __construct(
         public ?Quadrant $quadrant = null,
+        public bool $withSubtasks = false,
     ) {
     }
 }

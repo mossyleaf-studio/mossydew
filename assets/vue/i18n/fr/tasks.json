@@ -74,7 +74,14 @@
         "nested": "« {title} » est maintenant une sous-tâche de « {parent} ».",
         "promoted": "« {title} » est de nouveau une tâche.",
         "hide": "Masquer les sous-tâches de « {title} »",
-        "show": "Afficher les sous-tâches de « {title} »"
+        "show": "Afficher les sous-tâches de « {title} »",
+        "move": {
+            "title": "Déplacer aussi les sous-tâches ?",
+            "one": "« {title} » a des sous-tâches en cours. Les déplacer avec elle, ou les laisser où elles sont ?",
+            "many": "{count} de ces tâches ont des sous-tâches en cours. Les déplacer aussi, ou les laisser où elles sont ?",
+            "all": "Les déplacer aussi",
+            "only": "Les laisser"
+        }
     },
     "bulk": {
         "label": "Tâches sélectionnées",

@@ -9,6 +9,7 @@ import ConfirmButton from '../ui/ConfirmButton.vue';
 import { useApi } from '../../composables/useApi.js';
 import { useProjects } from '../../composables/useProjects.js';
 import { useSelection } from '../../composables/useSelection.js';
+import { useSubtaskQuestion } from '../../composables/useSubtaskQuestion.js';
 import { useTaskActions } from '../../composables/useTaskActions.js';
 import { useToast } from '../../composables/useToast.js';
 import { movePayload, runEach, subtasksFirst } from '../../tasks/bulk.js';
@@ -19,6 +20,7 @@ const api = useApi();
 const toast = useToast();
 const actions = useTaskActions();
 const selection = useSelection();
+const question = useSubtaskQuestion();
 const { projects } = useProjects();
 
 const PLANS = ['today', 'tomorrow', 'next_week', 'none'];
@@ -34,7 +36,10 @@ const complete = () => run(async (task) => {
     if (await actions.complete(task) === null) throw new Error(t('tasks.bulk.refused'));
 }, subtasksFirst(selection.tasks.value));
 const plan = (when) => run((task) => api.post(`/api/tasks/${task.id}/plan`, { when, date: null }));
-const classify = (quadrant) => run((task) => api.post(`/api/tasks/${task.id}/classify`, { quadrant }));
+async function classify(quadrant) {
+    const withSubtasks = await question.ask(selection.tasks.value, quadrant);
+    if (withSubtasks !== null) run((task) => api.post(`/api/tasks/${task.id}/classify`, { quadrant, withSubtasks }));
+}
 const move = (projectId) => run((task) => api.patch(`/api/tasks/${task.id}`, movePayload(task, projectId)), selection.tasks.value.filter((task) => !task.parentId));
 const remove = () => run((task) => api.del(`/api/tasks/${task.id}`));
 </script>
