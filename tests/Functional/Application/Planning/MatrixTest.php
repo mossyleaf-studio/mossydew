@@ -45,6 +45,23 @@ final class MatrixTest extends KernelTestCase
         self::assertSame([null, 0], [$unsorted->quadrant, $unsorted->rank]);
     }
 
+    public function testClassifyingAParentSortsItsUnsortedSubtasksAfterIt(): void
+    {
+        self::createTask('Plant', quadrant: Quadrant::Schedule);
+        $parent = self::createTask('Fox drawing');
+        self::addSubtask($parent, 'Sketch');
+        $ink = self::addSubtask($parent, 'Ink');
+        $this->classify($ink, Quadrant::Eliminate);
+
+        $this->classify($parent, Quadrant::Schedule);
+
+        $matrix = self::getContainer()->get(ShowMatrixHandler::class)();
+        self::assertEqualsCanonicalizing(
+            [['Plant', 'schedule', 0], ['Fox drawing', 'schedule', 1], ['Sketch', 'schedule', 2], ['Ink', 'eliminate', 0]],
+            array_map(static fn (TaskView $task): array => [$task->title, $task->quadrant, $task->rank], $matrix),
+        );
+    }
+
     public function testReorderingMovesTasksInAndRanksTheOthersAfter(): void
     {
         self::createTask('A', quadrant: Quadrant::DoFirst);

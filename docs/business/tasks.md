@@ -26,6 +26,7 @@ Made to split a piece of work (a drawing) into achievable steps (sketch, colouri
 
 - **M1** Quadrants: Water = urgent & important (`DoFirst`), Plant = important, not urgent (`Schedule`), Trim = urgent, not important (`Delegate`), Compost = neither (`Eliminate`). A task may be unsorted.
 - **M2** Inside a quadrant, tasks have a rank set by drag and drop; a task newly put in a quadrant goes last. Done tasks cannot be reordered. — `ReorderQuadrantHandler`, `ClassifyTaskHandler`
+- **M2b** Sorting a parent into a quadrant also sorts its unsorted subtasks there, ranked after it in the order they were added; subtasks already in a quadrant stay put. Making a parent unsorted leaves its subtasks where they are. — `ClassifyTaskHandler`
 - **M3** **Ordering rule of every list**: open before done → Water, Plant, Trim, Compost, unsorted → rank → deadline (none last) → creation. — `DoctrineTaskQueries::ordered()`, mirrored by `assets/vue/tasks/compareTasks.js`
 - **M4** The matrix can be filtered by project (several at once, **Inbox** standing for tasks without a project); the filter lives in the URL (`?projects=`). Reordering a filtered quadrant moves only the visible tasks, hidden ones keep their place. Each quadrant keeps the same size and scrolls inside. — `assets/vue/tasks/projectFilter.js`, `MatrixPage.vue`
 
