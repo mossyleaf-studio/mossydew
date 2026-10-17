@@ -213,6 +213,21 @@ class Task
         $this->rank = 0;
     }
 
+    /**
+     * @return list<Task>
+     */
+    public function subtasksFollowing(?Quadrant $from, ?Quadrant $to): array
+    {
+        if ($from === $to) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            $this->subtasks(),
+            static fn (self $subtask): bool => $subtask->quadrant !== $to && (null !== $from || null === $subtask->quadrant),
+        ));
+    }
+
     public function repeat(?Recurrence $recurrence): void
     {
         if (null !== $recurrence && $this->isDone()) {

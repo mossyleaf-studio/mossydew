@@ -32,8 +32,16 @@ final readonly class ReorderQuadrantHandler
             $this->tasks->openInQuadrant($command->quadrant),
             static fn (Task $task): bool => !\in_array((string) $task->id(), $orderedIds, true),
         );
+        $followers = [];
+        foreach ($ordered as $task) {
+            foreach ($task->subtasksFollowing($task->quadrant(), $command->quadrant) as $subtask) {
+                if (!\in_array((string) $subtask->id(), $orderedIds, true)) {
+                    $followers[(string) $subtask->id()] = $subtask;
+                }
+            }
+        }
 
-        foreach ([...$ordered, ...$others] as $rank => $task) {
+        foreach ([...$ordered, ...$others, ...array_values($followers)] as $rank => $task) {
             $task->classify($command->quadrant, $rank);
         }
         $this->transaction->commit();

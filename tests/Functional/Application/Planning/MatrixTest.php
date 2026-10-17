@@ -62,6 +62,38 @@ final class MatrixTest extends KernelTestCase
         );
     }
 
+    public function testMovingASortedParentTakesAllItsSubtasksAlong(): void
+    {
+        $parent = self::createTask('Fox drawing', quadrant: Quadrant::Schedule);
+        self::addSubtask($parent, 'Sketch');
+        $ink = self::addSubtask($parent, 'Ink');
+        $this->classify($ink, Quadrant::Eliminate);
+
+        $this->classify($parent, Quadrant::DoFirst);
+        self::assertSame(['Fox drawing' => 'do_first', 'Sketch' => 'do_first', 'Ink' => 'do_first'], $this->quadrants());
+
+        $this->classify($parent, null);
+        self::assertSame(['Fox drawing' => null, 'Sketch' => null, 'Ink' => null], $this->quadrants());
+    }
+
+    public function testDraggingAParentIntoAnotherQuadrantRanksItsSubtasksLast(): void
+    {
+        $plant = self::createTask('Plant', quadrant: Quadrant::DoFirst);
+        $parent = self::createTask('Fox drawing', quadrant: Quadrant::Schedule);
+        self::addSubtask($parent, 'Sketch');
+
+        $this->reorder(Quadrant::DoFirst, $parent, $plant);
+
+        $matrix = self::getContainer()->get(ShowMatrixHandler::class)();
+        self::assertSame(
+            [['Fox drawing', 'do_first', 0], ['Plant', 'do_first', 1], ['Sketch', 'do_first', 2]],
+            array_map(static fn (TaskView $task): array => [$task->title, $task->quadrant, $task->rank], $matrix),
+        );
+
+        $this->reorder(Quadrant::DoFirst, $plant, $parent);
+        self::assertSame(['Plant' => 'do_first', 'Fox drawing' => 'do_first', 'Sketch' => 'do_first'], $this->quadrants());
+    }
+
     public function testReorderingMovesTasksInAndRanksTheOthersAfter(): void
     {
         self::createTask('A', quadrant: Quadrant::DoFirst);
@@ -93,6 +125,16 @@ final class MatrixTest extends KernelTestCase
     private function classify(TaskView $task, ?Quadrant $quadrant): TaskView
     {
         return self::getContainer()->get(ClassifyTaskHandler::class)(new ClassifyTask(Ulid::fromString($task->id), $quadrant));
+    }
+
+    /**
+     * @return array<string, ?string>
+     */
+    private function quadrants(): array
+    {
+        $matrix = self::getContainer()->get(ShowMatrixHandler::class)();
+
+        return array_combine(array_map(static fn (TaskView $task): string => $task->title, $matrix), array_map(static fn (TaskView $task): ?string => $task->quadrant, $matrix));
     }
 
     private function reorder(Quadrant $quadrant, TaskView ...$tasks): void
