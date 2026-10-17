@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\Application\Planning;
 
+use App\Application\Gamification\ShowPlayer\ShowPlayerHandler;
 use App\Application\Planning\ChangeParent\ChangeParent;
 use App\Application\Planning\ChangeParent\ChangeParentHandler;
 use App\Application\Planning\DeleteTask\DeleteTaskHandler;
@@ -89,19 +90,20 @@ final class SubtasksTest extends KernelTestCase
         self::completeTask($drawing);
     }
 
-    public function testReopeningASubtaskReopensTheParentWhichEarnsNothingTheSecondTime(): void
+    public function testReopeningASubtaskReopensTheParentAndTakesBothRewardsBack(): void
     {
         $drawing = self::createTask('Fox drawing');
         $sketch = self::addSubtask($drawing, 'Sketch');
-        self::completeTask($sketch);
+        $first = self::completeTask($sketch);
         self::clear();
 
         self::getContainer()->get(ReopenTaskHandler::class)(Ulid::fromString($sketch->id));
         self::clear();
         self::assertFalse(self::find($drawing)->done);
+        self::assertSame([0, 0], [self::getContainer()->get(ShowPlayerHandler::class)()->xp, self::getContainer()->get(ShowPlayerHandler::class)()->dew]);
 
         $again = self::completeTask($sketch);
-        self::assertNull($again->reward);
+        self::assertEquals($first->reward, $again->reward);
         self::assertTrue(self::find($drawing)->done);
     }
 

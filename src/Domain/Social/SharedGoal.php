@@ -103,6 +103,14 @@ class SharedGoal
         return true;
     }
 
+    public function withdraw(User $user, int $tasks, \DateTimeImmutable $today): void
+    {
+        $member = $this->memberOf($user);
+        if (null !== $member && $this->isActiveOn($today)) {
+            $member->withdraw($tasks);
+        }
+    }
+
     public function leave(User $user): void
     {
         $member = $this->memberOf($user);

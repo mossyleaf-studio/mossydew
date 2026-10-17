@@ -29,7 +29,9 @@ final readonly class GatherTaskDew
         $greenhouse = $this->greenhouses->lockedOf($owner);
         $gain = new DewGain(0);
         foreach ($rewarded as $task) {
-            $gain = $gain->plus($this->policy->dewFor($task, $greenhouse));
+            $dew = $this->policy->dewFor($task, $greenhouse);
+            $task->creditDew($dew->amount);
+            $gain = $gain->plus($dew);
         }
         $greenhouse->receive($gain);
 

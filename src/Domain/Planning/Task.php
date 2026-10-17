@@ -85,6 +85,12 @@ class Task
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $rewardedAt = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $rewardXp = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $rewardDew = null;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
@@ -280,15 +286,23 @@ class Task
         return [$this, $parent];
     }
 
-    public function reopen(): void
+    /**
+     * @return list<Task>
+     */
+    public function reopen(): array
     {
         if (!$this->isDone()) {
             throw new TaskNotDone($this->title);
         }
         $this->completedAt = null;
-        if (null !== $this->parent) {
-            $this->parent->completedAt = null;
+
+        $parent = $this->parent;
+        if (null === $parent || !$parent->isDone()) {
+            return [$this];
         }
+        $parent->completedAt = null;
+
+        return [$this, $parent];
     }
 
     public function claimReward(\DateTimeImmutable $now): bool
@@ -299,6 +313,36 @@ class Task
         $this->rewardedAt = $now;
 
         return true;
+    }
+
+    public function creditXp(int $xp): void
+    {
+        $this->rewardXp = $xp;
+    }
+
+    public function creditDew(int $dew): void
+    {
+        $this->rewardDew = $dew;
+    }
+
+    public function forfeitReward(): void
+    {
+        if (null === $this->rewardXp) {
+            return;
+        }
+        $this->rewardedAt = null;
+        $this->rewardXp = null;
+        $this->rewardDew = null;
+    }
+
+    public function rewardXp(): ?int
+    {
+        return $this->rewardXp;
+    }
+
+    public function rewardDew(): ?int
+    {
+        return $this->rewardDew;
     }
 
     public function isDone(): bool

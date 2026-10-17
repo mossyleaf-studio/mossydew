@@ -83,7 +83,7 @@ final class SubtaskTest extends TestCase
         $sketch = $drawing->addSubtask('Sketch', $this->now());
         $sketch->complete($this->now());
 
-        $sketch->reopen();
+        self::assertSame([$sketch, $drawing], $sketch->reopen());
 
         self::assertFalse($drawing->isDone());
     }

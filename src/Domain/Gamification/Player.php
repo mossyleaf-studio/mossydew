@@ -24,6 +24,9 @@ class Player
     #[ORM\Column]
     private int $xp = 0;
 
+    #[ORM\Column]
+    private int $highestLevel = 1;
+
     #[ORM\Embedded(class: Streak::class, columnPrefix: 'streak_')]
     private Streak $streak;
 
@@ -46,10 +49,23 @@ class Player
 
     public function earn(Reward $reward): ?int
     {
-        $before = $this->level();
         $this->xp += $reward->xp;
+        if ($this->level() <= $this->highestLevel) {
+            return null;
+        }
+        $this->highestLevel = $this->level();
 
-        return $this->level() > $before ? $this->level() : null;
+        return $this->highestLevel;
+    }
+
+    public function forfeit(Reward $reward): void
+    {
+        $this->xp = max(0, $this->xp - $reward->xp);
+    }
+
+    public function highestLevel(): int
+    {
+        return $this->highestLevel;
     }
 
     public function level(): int

@@ -50,16 +50,47 @@ final class CompleteTaskTest extends KernelTestCase
         self::assertSame([26, 1, 1, 0], [$completion->player->xp, $completion->player->level, $completion->player->streak, $completion->player->speciesCollected]);
     }
 
-    public function testRewardIsEarnedOncePerTask(): void
+    public function testReopeningTakesTheRewardBackAndCompletingAgainEarnsItAgain(): void
     {
         $task = self::createTask('Vet', quadrant: Quadrant::DoFirst);
         self::completeTask($task);
+        self::getContainer()->get(ReopenTaskHandler::class)(Ulid::fromString($task->id));
+        self::assertSame([0, 0], [self::getContainer()->get(ShowPlayerHandler::class)()->xp, self::getContainer()->get(ShowPlayerHandler::class)()->dew]);
+
+        $again = self::completeTask($task);
+
+        self::assertEquals(new Reward(21), $again->reward);
+        self::assertSame([21, 6], [$again->player->xp, $again->player->dew]);
+    }
+
+    public function testATaskRewardedBeforeRewardsWereKeptKeepsItsRewardWhenReopened(): void
+    {
+        $task = self::createTask('Vet', quadrant: Quadrant::DoFirst);
+        self::completeTask($task);
+        self::getContainer()->get(EntityManagerInterface::class)->getConnection()->executeStatement('UPDATE task SET reward_xp = NULL, reward_dew = NULL');
+        self::getContainer()->get(EntityManagerInterface::class)->clear();
         self::getContainer()->get(ReopenTaskHandler::class)(Ulid::fromString($task->id));
 
         $again = self::completeTask($task);
 
         self::assertNull($again->reward);
-        self::assertSame(21, $again->player->xp);
+        self::assertSame([21, 6], [$again->player->xp, $again->player->dew]);
+    }
+
+    public function testReopeningBelowALevelAndCrossingItAgainCollectsNothingMore(): void
+    {
+        self::getContainer()->get(PlayerRepository::class)->of($this->user)->earn(new Reward(140));
+        self::getContainer()->get(EntityManagerInterface::class)->flush();
+        $task = self::createTask('Vet', quadrant: Quadrant::Schedule);
+        self::assertSame(2, self::completeTask($task)->leveledUpTo);
+        self::getContainer()->get(ReopenTaskHandler::class)(Ulid::fromString($task->id));
+        self::assertSame(1, self::getContainer()->get(ShowPlayerHandler::class)()->level);
+
+        $again = self::completeTask($task);
+
+        self::assertNull($again->leveledUpTo);
+        self::assertSame([], $again->newSpecies);
+        self::assertSame([2, 1], [$again->player->level, $again->player->speciesCollected]);
     }
 
     public function testConsecutiveDaysBuildAStreakThatMultipliesXp(): void
@@ -155,16 +186,17 @@ final class CompleteTaskTest extends KernelTestCase
         );
     }
 
-    public function testDewIsBroughtOncePerTask(): void
+    public function testDewSpentBeforeReopeningLeavesTheBalanceShort(): void
     {
         $task = self::createTask('Vet', quadrant: Quadrant::DoFirst);
         self::completeTask($task);
+        self::getContainer()->get(GreenhouseRepository::class)->of($this->user)->giveBack(4);
+        self::getContainer()->get(EntityManagerInterface::class)->flush();
+
         self::getContainer()->get(ReopenTaskHandler::class)(Ulid::fromString($task->id));
 
-        $again = self::completeTask($task);
-
-        self::assertNull($again->dew);
-        self::assertSame(6, $again->player->dew);
+        $greenhouse = self::getContainer()->get(GreenhouseRepository::class)->of($this->user);
+        self::assertSame([-4, -4], [$greenhouse->dew(), $greenhouse->dewGathered()]);
     }
 
     public function testASubtaskAndTheParentItCompletesEachBringDew(): void

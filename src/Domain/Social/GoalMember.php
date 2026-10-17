@@ -41,6 +41,11 @@ class GoalMember
         $this->contributed += $tasks;
     }
 
+    public function withdraw(int $tasks): void
+    {
+        $this->contributed = max(0, $this->contributed - $tasks);
+    }
+
     public function is(User $user): bool
     {
         return $this->user->id()->equals($user->id());

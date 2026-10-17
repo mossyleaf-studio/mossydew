@@ -131,6 +131,24 @@ final class TaskTest extends TestCase
         self::assertFalse($task->claimReward($now));
     }
 
+    public function testReopeningForfeitsACreditedRewardSoItCanBeClaimedAgain(): void
+    {
+        $task = $this->task('Vet');
+        $now = new \DateTimeImmutable(self::NOW);
+        $task->complete($now);
+        $task->claimReward($now);
+        $task->creditXp(21);
+        $task->creditDew(6);
+
+        $task->reopen();
+        self::assertSame([21, 6], [$task->rewardXp(), $task->rewardDew()]);
+        $task->forfeitReward();
+        self::assertSame([null, null], [$task->rewardXp(), $task->rewardDew()]);
+
+        $task->complete($now);
+        self::assertTrue($task->claimReward($now));
+    }
+
     public function testIsOnTimeUntilTheDeadlineIncluded(): void
     {
         $task = $this->task('Vet');

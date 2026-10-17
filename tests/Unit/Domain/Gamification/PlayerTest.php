@@ -30,6 +30,19 @@ final class PlayerTest extends TestCase
         self::assertSame([660, 5], [$player->xp(), $player->level()]);
     }
 
+    public function testForfeitingDropsTheLevelButCrossingItAgainIsNoNewLevel(): void
+    {
+        $player = $this->player();
+        self::assertSame(2, $player->earn(new Reward(160)));
+
+        $player->forfeit(new Reward(20));
+        self::assertSame([140, 1, 2], [$player->xp(), $player->level(), $player->highestLevel()]);
+        self::assertNull($player->earn(new Reward(20)));
+        self::assertSame(3, $player->earn(new Reward(150)));
+        $player->forfeit(new Reward(1000));
+        self::assertSame(0, $player->xp());
+    }
+
     public function testRecordsActivityInTheStreak(): void
     {
         $player = $this->player();

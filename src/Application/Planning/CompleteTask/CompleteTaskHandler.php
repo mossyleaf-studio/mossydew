@@ -64,10 +64,11 @@ final readonly class CompleteTaskHandler
             $rewarded[] = $done;
             $player->recordActivity($today);
             $earned = $this->policy->rewardFor($done, $today, $player->streak()->current);
+            $done->creditXp($earned->xp);
             $reward = null === $reward ? $earned : $reward->plus($earned);
         }
         if (null !== $reward) {
-            $levelBefore = $player->level();
+            $levelBefore = $player->highestLevel();
             $leveledUpTo = $player->earn($reward);
             if (null !== $leveledUpTo) {
                 $newSpecies = ($this->collectSpecies)($player->owner(), $leveledUpTo - $levelBefore);

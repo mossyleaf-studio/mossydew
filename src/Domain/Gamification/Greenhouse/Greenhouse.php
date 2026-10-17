@@ -80,6 +80,12 @@ class Greenhouse
         $this->dewGathered += $gain->amount;
     }
 
+    public function giveBack(int $dew): void
+    {
+        $this->dew -= $dew;
+        $this->dewGathered -= $dew;
+    }
+
     public function plant(int $number, Specimen $specimen, \DateTimeImmutable $now): void
     {
         $pot = $this->pot($number);

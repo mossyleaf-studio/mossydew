@@ -31,6 +31,18 @@ final class SharedGoalTest extends TestCase
         self::assertFalse($goal->contribute($mira, 1, Day::of('2026-10-31'), self::now()), 'a reached goal stops counting');
     }
 
+    public function testAMemberWithdrawsTasksFromAnActiveGoalOnly(): void
+    {
+        [$louis, $mira] = [self::user('louis'), self::user('mira')];
+        $goal = SharedGoal::set($louis, 'Sprint', 5, Day::of('2026-10-31'), [$mira], self::now());
+        $goal->contribute($louis, 2, Day::of('2026-10-06'), self::now());
+
+        $goal->withdraw($louis, 1, Day::of('2026-11-01'));
+        self::assertSame(2, $goal->total(), 'an ended goal keeps its count');
+        $goal->withdraw($louis, 3, Day::of('2026-10-06'));
+        self::assertSame(0, $goal->total());
+    }
+
     public function testAGoalPastItsEndStopsCounting(): void
     {
         $louis = self::user('louis');
