@@ -227,8 +227,8 @@ function onKeydown(event) {
     transition: background var(--transition), opacity var(--transition);
 }
 
-.task-row::before { content: ""; position: absolute; top: -0.0625rem; bottom: -0.0625rem; left: -0.0625rem; width: 0.3125rem; border-radius: var(--radius) 0 0 var(--radius); background: var(--notch); }
-.task-row--unsorted::before { top: 0.625rem; bottom: 0.625rem; width: 0.1875rem; border-radius: 0 0.125rem 0.125rem 0; }
+.task-row::before { content: ""; position: absolute; inset: calc(-1 * var(--border-width)); border-radius: var(--radius); background: linear-gradient(to right, var(--notch) 0.3125rem, transparent 0); pointer-events: none; }
+.task-row--unsorted::before { top: 0.625rem; right: auto; bottom: 0.625rem; width: 0.1875rem; border-radius: 0 0.125rem 0.125rem 0; background: var(--notch); }
 .task-row:hover, .task-row:focus-within { border-color: var(--color-border-strong); }
 .task-row:focus-visible { box-shadow: var(--focus-ring); }
 
