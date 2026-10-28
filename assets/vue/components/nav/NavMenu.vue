@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router';
-import { CalendarDays, ChartColumn, CircleCheckBig, Grid2x2, Inbox, Leaf, Plus, Settings, Sun, Trophy, Users, Warehouse } from '@lucide/vue';
+import { CalendarDays, ChartColumn, CircleCheckBig, Grid2x2, Inbox, Leaf, Plus, Settings, Sun, Trophy, Users, Warehouse } from '../../icons.js';
 import { useI18n } from 'vue-i18n';
 import IconButton from '../ui/IconButton.vue';
 import { useProjects } from '../../composables/useProjects.js';
@@ -66,7 +66,7 @@ const SECONDARY = [
 
 <style scoped>
 .nav-menu { display: flex; flex: 1; flex-direction: column; gap: var(--space-6); min-height: 100%; }
-.nav-menu__brand { padding: 0 var(--space-3); color: var(--color-ink); font-family: var(--font-display); font-size: 1.6rem; line-height: 1; text-decoration: none; }
+.nav-menu__brand { padding: 0 var(--space-3); color: var(--color-ink); font-family: var(--font-display); font-weight: var(--font-display-weight); font-size: 1.6rem; line-height: 1; text-decoration: none; }
 .nav-menu__links { display: flex; flex-direction: column; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
 .nav-menu__links--secondary { margin-top: auto; }
 

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { Pencil, Trash2 } from '@lucide/vue';
+import { Pencil, Trash2 } from '../icons.js';
 import { useI18n } from 'vue-i18n';
 import ConfirmButton from '../components/ui/ConfirmButton.vue';
 import EmptyState from '../components/ui/EmptyState.vue';

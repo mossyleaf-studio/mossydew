@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import { CloudRain, Droplet, Sprout, Warehouse } from '@lucide/vue';
+import { CloudRain, Droplet, Sprout, Warehouse } from '../../icons.js';
 import { useI18n } from 'vue-i18n';
 import { useDew } from '../../composables/useDew.js';
 import { yieldBreakdown } from '../../greenhouse/formulas.js';
@@ -58,7 +58,7 @@ const yieldFormula = computed(() => {
 
 <style scoped>
 .resources { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin: 0; }
-.resources__tile { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; padding: var(--space-3) var(--space-4); border: 0.0625rem solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
+.resources__tile { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; padding: var(--space-3) var(--space-4); border: var(--border-width) solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
 .resources__tile dd { margin: 0; }
 .resources__tile--dew { border-color: color-mix(in oklch, var(--color-dew) 40%, var(--color-border)); }
 .resources__label { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--color-muted); font-size: var(--font-size-sm); }

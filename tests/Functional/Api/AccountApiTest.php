@@ -32,4 +32,26 @@ final class AccountApiTest extends WebTestCase
         $client->jsonRequest('PUT', '/api/me/language', ['language' => 'de']);
         self::assertResponseStatusCodeSame(422);
     }
+
+    public function testChooseDesign(): void
+    {
+        $client = self::signedInClient();
+
+        $client->jsonRequest('PUT', '/api/me/design', ['design' => 'cozy']);
+        self::assertResponseStatusCodeSame(204);
+
+        $client->jsonRequest('PUT', '/api/me/design', ['design' => 'brutalist']);
+        self::assertResponseStatusCodeSame(422);
+    }
+
+    public function testChooseIcons(): void
+    {
+        $client = self::signedInClient();
+
+        $client->jsonRequest('PUT', '/api/me/icons', ['icons' => 'phosphor']);
+        self::assertResponseStatusCodeSame(204);
+
+        $client->jsonRequest('PUT', '/api/me/icons', ['icons' => 'emoji']);
+        self::assertResponseStatusCodeSame(422);
+    }
 }

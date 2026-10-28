@@ -76,7 +76,7 @@ async function save() {
 .goal-dialog__pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: var(--space-4); }
 .goal-dialog__target { width: 6rem; font-variant-numeric: tabular-nums; }
 .goal-dialog__friends { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-.goal-dialog__friend { padding: var(--space-1) var(--space-3); border: 0.0625rem solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface); color: var(--color-muted); cursor: pointer; }
+.goal-dialog__friend { padding: var(--space-1) var(--space-3); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface); color: var(--color-muted); cursor: pointer; }
 .goal-dialog__friend[aria-pressed="true"] { border-color: var(--color-accent); background: var(--color-accent-soft); color: var(--color-ink); }
 .goal-dialog__actions { display: flex; justify-content: flex-end; gap: var(--space-2); }
 </style>

@@ -10,6 +10,8 @@ Every visual and sound asset shipped with MossyDew, with its source and licence.
 | Dewdrop sound | Synthesised at runtime with the Web Audio API (`composables/useSound.js`) | Project code |
 | Patua One (display font) | https://fonts.google.com/specimen/Patua+One via `@fontsource/patua-one` | SIL OFL 1.1 |
 | Inter (text font) | https://rsms.me/inter/ via `@fontsource-variable/inter` | SIL OFL 1.1 |
+| Fredoka, Nunito (cozy design fonts) | https://fonts.google.com/specimen/Fredoka, https://fonts.google.com/specimen/Nunito via `@fontsource-variable/fredoka`, `@fontsource-variable/nunito` | SIL OFL 1.1 |
 | Icons | Lucide, `@lucide/vue` | ISC |
+| Icons (Phosphor set) | Phosphor, `@phosphor-icons/vue` | MIT |
 
 Add any new third-party asset here **and** on the `/credits` page (`assets/vue/pages/CreditsPage.vue`).

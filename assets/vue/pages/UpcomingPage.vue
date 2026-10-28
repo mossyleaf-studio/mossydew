@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { ChevronLeft, ChevronRight } from '@lucide/vue';
+import { ChevronLeft, ChevronRight } from '../icons.js';
 import { VueDraggable } from 'vue-draggable-plus';
 import { useI18n } from 'vue-i18n';
 import BaseButton from '../components/ui/BaseButton.vue';
@@ -93,7 +93,7 @@ const selection = useSelection();
 .upcoming__day { display: grid; grid-template-columns: 9rem minmax(0, 1fr); align-items: start; gap: var(--space-4); padding: var(--space-3); border-radius: var(--radius); }
 .upcoming__day--today { background: var(--color-accent-soft); box-shadow: inset 0.125rem 0 0 var(--color-accent); }
 .upcoming__header { display: flex; flex-direction: column; padding-top: var(--space-2); }
-.upcoming__weekday { color: var(--color-ink); font-family: var(--font-display); font-size: 1.25rem; font-weight: 400; text-transform: capitalize; }
+.upcoming__weekday { color: var(--color-ink); font-family: var(--font-display); font-size: 1.25rem; font-weight: var(--font-display-weight); text-transform: capitalize; }
 .upcoming__day--today .upcoming__weekday { color: var(--color-accent-strong); }
 .upcoming__date { color: var(--color-subtle); font-size: var(--font-size-sm); }
 .upcoming__body { position: relative; min-width: 0; }

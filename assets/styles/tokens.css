@@ -65,6 +65,8 @@
 
     --font-body: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --font-display: "Patua One", Rockwell, Georgia, serif;
+    --font-display-weight: 400;
+    --font-button: inherit;
     --font-size: 0.9375rem;
     --font-size-md: 0.875rem;
     --font-size-sm: 0.8125rem;
@@ -72,8 +74,27 @@
     --font-size-2xs: 0.7rem;
     --tracking-caps: 0.05em;
 
+    --border-width: 0.0625rem;
+    --lip: 0rem;
+
     --rail-width: 15.5rem;
     --shadow: 0 0.0625rem 0.125rem rgb(17 17 17 / 6%), 0 0.5rem 1.5rem rgb(17 17 17 / 8%);
     --transition: 180ms ease;
     --focus-ring: 0 0 0 0.1875rem var(--color-accent-soft);
+}
+
+:root[data-design="cozy"] {
+    --radius: 1rem;
+    --radius-sm: 0.5rem;
+    --radius-inner: calc(var(--radius) - 0.25rem);
+
+    --font-body: "Nunito Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-display: "Fredoka Variable", "Nunito Variable", system-ui, sans-serif;
+    --font-display-weight: 600;
+    --font-button: var(--font-display);
+    --font-size: 1rem;
+    --font-size-md: 0.9375rem;
+
+    --border-width: 0.125rem;
+    --lip: 0.25rem;
 }

@@ -44,6 +44,12 @@ class User
     #[ORM\Column(length: 7, nullable: true)]
     private ?string $themeAccent = null;
 
+    #[ORM\Column(length: 10, enumType: Design::class, options: ['default' => 'classic'])]
+    private Design $design = Design::Classic;
+
+    #[ORM\Column(length: 10, enumType: IconSet::class, options: ['default' => 'lucide'])]
+    private IconSet $iconSet = IconSet::Lucide;
+
     private function __construct(string $email, string $displayName, string $timezone, \DateTimeImmutable $now)
     {
         $this->id = new Ulid();
@@ -109,6 +115,26 @@ class User
         }
 
         return Theme::of($this->themeBackground, $this->themeAccent);
+    }
+
+    public function decorate(Design $design): void
+    {
+        $this->design = $design;
+    }
+
+    public function design(): Design
+    {
+        return $this->design;
+    }
+
+    public function drawWith(IconSet $iconSet): void
+    {
+        $this->iconSet = $iconSet;
+    }
+
+    public function iconSet(): IconSet
+    {
+        return $this->iconSet;
     }
 
     public function today(\DateTimeImmutable $now): \DateTimeImmutable

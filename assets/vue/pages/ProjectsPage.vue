@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import { Plus } from '@lucide/vue';
+import { Plus } from '../icons.js';
 import { useI18n } from 'vue-i18n';
 import BaseButton from '../components/ui/BaseButton.vue';
 import EmptyState from '../components/ui/EmptyState.vue';

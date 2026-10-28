@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { Lock, Trophy } from '@lucide/vue';
+import { Lock, Trophy } from '../icons.js';
 import { useI18n } from 'vue-i18n';
 import PageHeader from '../components/ui/PageHeader.vue';
 import { useApi } from '../composables/useApi.js';
@@ -39,7 +39,7 @@ const unlockedCount = computed(() => (achievements.value ?? []).filter((achievem
 <style scoped>
 .badges__best { color: var(--color-muted); }
 .badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
-.badges__item { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4); border: 0.0625rem solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
+.badges__item { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4); border: var(--border-width) solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
 .badges__medal { display: grid; place-items: center; flex-shrink: 0; width: 3rem; height: 3rem; border-radius: 50%; background: var(--color-accent-soft); color: var(--color-accent); }
 .badges__item--locked { border-style: dashed; background: transparent; }
 .badges__item--locked .badges__medal { background: var(--color-hover); color: var(--color-subtle); }

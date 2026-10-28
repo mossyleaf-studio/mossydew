@@ -1,6 +1,6 @@
 <script setup>
 import { nextTick, onMounted, ref } from 'vue';
-import { CornerDownRight } from '@lucide/vue';
+import { CornerDownRight } from '../../icons.js';
 import { useI18n } from 'vue-i18n';
 import { useSubtaskComposer } from '../../composables/useSubtaskComposer.js';
 import { useTaskActions } from '../../composables/useTaskActions.js';
@@ -56,7 +56,7 @@ function closeIfEmpty() {
 </template>
 
 <style scoped>
-.subtask-composer { display: flex; align-items: center; gap: var(--space-3); min-height: 2.75rem; padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3); border: 0.0625rem solid var(--color-accent); border-radius: var(--radius); background: var(--color-surface); box-shadow: var(--focus-ring); }
+.subtask-composer { display: flex; align-items: center; gap: var(--space-3); min-height: 2.75rem; padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3); border: var(--border-width) solid var(--color-accent); border-radius: var(--radius); background: var(--color-surface); box-shadow: var(--focus-ring); }
 .subtask-composer__icon { flex-shrink: 0; color: var(--color-muted); }
 .subtask-composer__input { flex: 1; min-width: 0; padding: var(--space-1) 0; border: none; background: none; outline: none; }
 .subtask-composer__input::placeholder { color: var(--color-subtle); }

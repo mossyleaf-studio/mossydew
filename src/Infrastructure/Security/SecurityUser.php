@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Security;
 
+use App\Domain\Identity\Design;
+use App\Domain\Identity\IconSet;
 use App\Domain\Identity\Language;
 use App\Domain\Identity\Theme;
 use App\Domain\Identity\User;
@@ -18,12 +20,14 @@ final class SecurityUser implements UserInterface
         public readonly string $displayName,
         public readonly ?Language $language,
         public readonly ?Theme $theme,
+        public readonly Design $design,
+        public readonly IconSet $iconSet,
     ) {
     }
 
     public static function fromUser(User $user): self
     {
-        return new self($user->id(), $user->email(), $user->displayName(), $user->language(), $user->theme());
+        return new self($user->id(), $user->email(), $user->displayName(), $user->language(), $user->theme(), $user->design(), $user->iconSet());
     }
 
     public function getUserIdentifier(): string
@@ -44,10 +48,12 @@ final class SecurityUser implements UserInterface
             'displayName' => $this->displayName,
             'language' => $this->language?->value,
             'theme' => null === $this->theme ? null : [$this->theme->background, $this->theme->accent],
+            'design' => $this->design->value,
+            'iconSet' => $this->iconSet->value,
         ];
     }
 
-    /** @param array{id: string, email: string, displayName: string, language?: ?string, theme?: ?array{string, string}} $data */
+    /** @param array{id: string, email: string, displayName: string, language?: ?string, theme?: ?array{string, string}, design?: string, iconSet?: string} $data */
     public function __unserialize(array $data): void
     {
         $this->id = Ulid::fromString($data['id']);
@@ -55,5 +61,7 @@ final class SecurityUser implements UserInterface
         $this->displayName = $data['displayName'];
         $this->language = Language::tryFrom($data['language'] ?? '');
         $this->theme = isset($data['theme']) ? Theme::of(...$data['theme']) : null;
+        $this->design = Design::tryFrom($data['design'] ?? '') ?? Design::Classic;
+        $this->iconSet = IconSet::tryFrom($data['iconSet'] ?? '') ?? IconSet::Lucide;
     }
 }

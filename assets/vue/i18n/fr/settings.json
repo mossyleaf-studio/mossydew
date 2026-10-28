@@ -42,7 +42,7 @@
     "credits": "Crédits et licences",
     "appearance": {
         "title": "Apparence",
-        "intro": "Choisissez les couleurs de l’application, rien que pour vous. MossyDew reprend les thèmes de MossyTrunk.",
+        "intro": "Choisissez les couleurs, le style et les icônes de l’application, rien que pour vous. MossyDew reprend les thèmes de MossyTrunk ; le style douillet et les icônes Phosphor sont ceux de muhmeal.",
         "themesLabel": "Thème",
         "saved": "Apparence enregistrée.",
         "themes": {
@@ -51,6 +51,16 @@
             "fjord": "Fjord",
             "plum": "Prune",
             "night": "Nuit"
+        },
+        "designLabel": "Style",
+        "designs": {
+            "classic": "Classique",
+            "cozy": "Douillet"
+        },
+        "iconsLabel": "Icônes",
+        "icons": {
+            "lucide": "Lucide",
+            "phosphor": "Phosphor"
         }
     }
 }

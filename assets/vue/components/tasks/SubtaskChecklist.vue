@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue';
-import { Plus } from '@lucide/vue';
+import { Plus } from '../../icons.js';
 import { useI18n } from 'vue-i18n';
 import DropCheck from './DropCheck.vue';
 import { useApi } from '../../composables/useApi.js';

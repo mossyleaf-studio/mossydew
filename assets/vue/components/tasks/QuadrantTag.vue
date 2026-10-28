@@ -1,5 +1,5 @@
 <script setup>
-import { Droplets, Recycle, Scissors, Sprout } from '@lucide/vue';
+import { Droplets, Recycle, Scissors, Sprout } from '../../icons.js';
 import { useI18n } from 'vue-i18n';
 
 const ICONS = { do_first: Droplets, schedule: Sprout, delegate: Scissors, eliminate: Recycle };

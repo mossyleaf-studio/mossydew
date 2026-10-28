@@ -42,7 +42,7 @@ const name = computed(() => t(`species.${props.slug}`));
     gap: var(--space-3);
     height: 100%;
     padding: var(--space-3);
-    border: 0.0625rem solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius);
     background: var(--color-surface);
 }
@@ -58,13 +58,13 @@ const name = computed(() => t(`species.${props.slug}`));
     flex-direction: column;
     gap: var(--space-1);
     padding: var(--space-3);
-    border: 0.0625rem solid var(--color-border-strong);
+    border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius-sm);
 }
 
 .species-card__header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-1); }
 .species-card__number { color: var(--color-muted); font-size: var(--font-size-xs); }
-.species-card__name { margin: 0; color: var(--color-ink); font-family: var(--font-display); font-size: 1.2rem; font-weight: 400; line-height: 1.15; }
+.species-card__name { margin: 0; color: var(--color-ink); font-family: var(--font-display); font-size: 1.2rem; font-weight: var(--font-display-weight); line-height: 1.15; }
 .species-card__latin { color: var(--color-muted); font-size: var(--font-size-sm); font-style: italic; }
 .species-card__note { margin-top: var(--space-1); color: var(--color-text); font-size: var(--font-size-sm); line-height: 1.45; }
 .species-card__date { margin-top: auto; padding-top: var(--space-2); color: var(--color-subtle); font-size: var(--font-size-xs); }

@@ -42,7 +42,7 @@
     "credits": "Credits and licences",
     "appearance": {
         "title": "Appearance",
-        "intro": "Choose the app’s colours, just for you. MossyDew uses the same themes as MossyTrunk.",
+        "intro": "Choose the app’s colours, design and icons, just for you. MossyDew uses the same themes as MossyTrunk; the cozy design and Phosphor icons are those of muhmeal.",
         "themesLabel": "Theme",
         "saved": "Appearance saved.",
         "themes": {
@@ -51,6 +51,16 @@
             "fjord": "Fjord",
             "plum": "Plum",
             "night": "Night"
+        },
+        "designLabel": "Design",
+        "designs": {
+            "classic": "Classic",
+            "cozy": "Cozy"
+        },
+        "iconsLabel": "Icons",
+        "icons": {
+            "lucide": "Lucide",
+            "phosphor": "Phosphor"
         }
     }
 }

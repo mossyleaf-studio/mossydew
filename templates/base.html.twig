@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% set theme = app.user.theme ?? null %}
-<html lang="{{ app.request.locale }}"{% if theme %} style="--theme-background: {{ theme.background }}; --theme-accent: {{ theme.accent }}; color-scheme: {{ theme.dark ? 'dark' : 'light' }}"{% endif %}>
+<html lang="{{ app.request.locale }}"{% if (app.user.design.value ?? null) == 'cozy' %} data-design="cozy"{% endif %}{% if theme %} style="--theme-background: {{ theme.background }}; --theme-accent: {{ theme.accent }}; color-scheme: {{ theme.dark ? 'dark' : 'light' }}"{% endif %}>
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">

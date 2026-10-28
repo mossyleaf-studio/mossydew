@@ -35,7 +35,7 @@ const options = computed(() => [
     gap: var(--space-2);
     min-height: 2rem;
     padding: var(--space-1) var(--space-3);
-    border: 0.0625rem solid var(--color-border-strong);
+    border: var(--border-width) solid var(--color-border-strong);
     border-radius: 999rem;
     background: var(--color-surface);
     color: var(--color-ink);

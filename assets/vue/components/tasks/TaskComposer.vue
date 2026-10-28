@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { Plus } from '@lucide/vue';
+import { Plus } from '../../icons.js';
 import { useI18n } from 'vue-i18n';
 import { useTaskActions } from '../../composables/useTaskActions.js';
 

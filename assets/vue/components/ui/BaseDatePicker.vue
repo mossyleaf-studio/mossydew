@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { parseDate } from '@internationalized/date';
-import { CalendarDays, ChevronLeft, ChevronRight, X } from '@lucide/vue';
+import { CalendarDays, ChevronLeft, ChevronRight, X } from '../../icons.js';
 import {
     DatePickerCalendar, DatePickerCell, DatePickerCellTrigger, DatePickerContent, DatePickerField, DatePickerGrid,
     DatePickerGridBody, DatePickerGridHead, DatePickerGridRow, DatePickerHeadCell, DatePickerHeader, DatePickerHeading,

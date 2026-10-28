@@ -58,7 +58,7 @@ const mosses = computed(() => props.plantable.map((moss) => ({ ...moss, photo: s
     gap: var(--space-3);
     width: 100%;
     padding: var(--space-2);
-    border: 0.0625rem solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius);
     background: var(--color-surface);
     text-align: left;

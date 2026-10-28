@@ -1,5 +1,5 @@
 <script setup>
-import { X } from '@lucide/vue';
+import { X } from '../../icons.js';
 import { ToastClose, ToastDescription, ToastProvider, ToastRoot, ToastViewport } from 'reka-ui';
 import { useI18n } from 'vue-i18n';
 import { useToast } from '../../composables/useToast.js';

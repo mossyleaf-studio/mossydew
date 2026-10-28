@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { parseDate } from '@internationalized/date';
-import { CalendarDays, ChevronLeft, ChevronRight } from '@lucide/vue';
+import { CalendarDays, ChevronLeft, ChevronRight } from '../../icons.js';
 import {
     CalendarCell, CalendarCellTrigger, CalendarGrid, CalendarGridBody, CalendarGridHead, CalendarGridRow, CalendarHeadCell,
     CalendarHeader, CalendarHeading, CalendarNext, CalendarPrev, CalendarRoot, PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigger,

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { RouterLink, RouterView, useRoute } from 'vue-router';
-import { CalendarDays, Grid2x2, Inbox, Menu, Sun } from '@lucide/vue';
+import { CalendarDays, Grid2x2, Inbox, Menu, Sun } from '../icons.js';
 import { ConfigProvider, TooltipProvider } from 'reka-ui';
 import { useI18n } from 'vue-i18n';
 import CelebrationLayer from '../components/herbarium/CelebrationLayer.vue';
@@ -120,7 +120,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', focusComposer));
     height: 100vh;
     overflow-y: auto;
     padding: var(--space-6) var(--space-4);
-    border-right: 0.0625rem solid var(--color-border);
+    border-right: var(--border-width) solid var(--color-border);
     background: var(--color-sidebar);
 }
 
@@ -139,7 +139,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', focusComposer));
 @media (max-width: 48rem) {
     .shell { grid-template-columns: minmax(0, 1fr); }
     .shell__rail { display: none; }
-    .shell__strip { display: block; padding-bottom: var(--space-4); border-bottom: 0.0625rem solid var(--color-border); }
+    .shell__strip { display: block; padding-bottom: var(--space-4); border-bottom: var(--border-width) solid var(--color-border); }
     .shell__main { gap: var(--space-4); padding: var(--space-4) var(--space-4) calc(6rem + env(safe-area-inset-bottom)); }
     .shell__main :deep(h1) { font-size: 1.6rem; }
 
@@ -152,7 +152,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', focusComposer));
         display: grid;
         grid-template-columns: repeat(5, 1fr);
         padding: var(--space-1) var(--space-1) calc(var(--space-1) + env(safe-area-inset-bottom));
-        border-top: 0.0625rem solid var(--color-border);
+        border-top: var(--border-width) solid var(--color-border);
         background: color-mix(in oklch, var(--color-surface) 94%, transparent);
         backdrop-filter: blur(0.75rem);
     }

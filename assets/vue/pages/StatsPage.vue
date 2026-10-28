@@ -64,7 +64,7 @@ const tiles = computed(() => {
 
 <style scoped>
 .stats__tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin: 0; }
-.stats__card { padding: var(--space-4) var(--space-5); border: 0.0625rem solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
+.stats__card { padding: var(--space-4) var(--space-5); border: var(--border-width) solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
 .stats__columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: var(--space-5); }
 .stats__projects { grid-column: 1 / -1; }
 .stats__empty { color: var(--color-muted); font-size: var(--font-size-md); }

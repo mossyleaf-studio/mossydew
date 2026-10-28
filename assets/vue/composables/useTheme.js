@@ -1,5 +1,6 @@
 import { useApi } from './useApi.js';
 import { useSession } from './useSession.js';
+import { iconSet } from '../icons.js';
 
 export const THEMES = [
     { name: 'moss', background: '#f5f5f3', accent: '#5b7f3a' },
@@ -8,6 +9,8 @@ export const THEMES = [
     { name: 'plum', background: '#f6f2f6', accent: '#7a4d84' },
     { name: 'night', background: '#1d201b', accent: '#93bb6c' },
 ];
+
+export const DESIGNS = ['classic', 'cozy'];
 
 const DARK_LUMINANCE = 0.24;
 
@@ -30,14 +33,36 @@ export function applyTheme({ background, accent }) {
     root.setProperty('color-scheme', luminance(background) < DARK_LUMINANCE ? 'dark' : 'light');
 }
 
+export function applyDesign(design) {
+    if (design === 'cozy') document.documentElement.dataset.design = design;
+    else delete document.documentElement.dataset.design;
+}
+
 export function useTheme() {
     const api = useApi();
-    const saved = useSession()?.theme ?? THEMES[0];
+    const session = useSession();
+    const saved = session?.theme ?? THEMES[0];
 
     async function choose(theme) {
         applyTheme(theme);
         await api.put('/api/me/theme', { background: theme.background, accent: theme.accent });
     }
 
-    return { saved: { background: saved.background, accent: saved.accent }, choose };
+    async function chooseDesign(design) {
+        applyDesign(design);
+        await api.put('/api/me/design', { design });
+    }
+
+    async function chooseIcons(icons) {
+        iconSet.value = icons;
+        await api.put('/api/me/icons', { icons });
+    }
+
+    return {
+        saved: { background: saved.background, accent: saved.accent },
+        savedDesign: session?.design ?? DESIGNS[0],
+        choose,
+        chooseDesign,
+        chooseIcons,
+    };
 }

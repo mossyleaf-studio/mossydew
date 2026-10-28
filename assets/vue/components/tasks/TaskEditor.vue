@@ -1,6 +1,6 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue';
-import { Trash2 } from '@lucide/vue';
+import { Trash2 } from '../../icons.js';
 import { useI18n } from 'vue-i18n';
 import BaseButton from '../ui/BaseButton.vue';
 import BaseDatePicker from '../ui/BaseDatePicker.vue';

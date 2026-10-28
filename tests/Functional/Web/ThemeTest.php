@@ -23,7 +23,25 @@ final class ThemeTest extends WebTestCase
         $crawler = $client->request('GET', '/today');
 
         self::assertNull($crawler->filter('html')->attr('style'));
-        self::assertNull(Json::at(Json::decode($crawler->filter('#app-session')->text()), 'theme'));
+        $session = Json::decode($crawler->filter('#app-session')->text());
+        self::assertNull(Json::at($session, 'theme'));
+        self::assertNull($crawler->filter('html')->attr('data-design'));
+        self::assertSame('classic', Json::string($session, 'design'));
+        self::assertSame('lucide', Json::string($session, 'icons'));
+    }
+
+    public function testChooseDesignAndIconsStoresThemAndStylesThePages(): void
+    {
+        $client = self::signedInClient();
+
+        $client->jsonRequest('PUT', '/api/me/design', ['design' => 'cozy']);
+        $client->jsonRequest('PUT', '/api/me/icons', ['icons' => 'phosphor']);
+
+        $crawler = $client->request('GET', '/today');
+        self::assertSame('cozy', $crawler->filter('html')->attr('data-design'));
+        $session = Json::decode($crawler->filter('#app-session')->text());
+        self::assertSame('cozy', Json::string($session, 'design'));
+        self::assertSame('phosphor', Json::string($session, 'icons'));
     }
 
     public function testChooseThemeStoresItAndColoursThePages(): void

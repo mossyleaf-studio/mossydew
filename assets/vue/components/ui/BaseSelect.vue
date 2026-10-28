@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import { Check, ChevronDown } from '@lucide/vue';
+import { Check, ChevronDown } from '../../icons.js';
 import { SelectContent, SelectItem, SelectItemIndicator, SelectItemText, SelectPortal, SelectRoot, SelectTrigger, SelectValue, SelectViewport } from 'reka-ui';
 import { useI18n } from 'vue-i18n';
 

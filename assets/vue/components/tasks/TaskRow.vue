@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { AlignLeft, ChevronRight, CornerDownRight, ListChecks, Repeat, Sun } from '@lucide/vue';
+import { AlignLeft, ChevronRight, CornerDownRight, ListChecks, Repeat, Sun } from '../../icons.js';
 import { useI18n } from 'vue-i18n';
 import IconButton from '../ui/IconButton.vue';
 import DropCheck from './DropCheck.vue';
@@ -220,7 +220,7 @@ function onKeydown(event) {
     gap: var(--space-3);
     min-height: 3.25rem;
     padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
-    border: 0.0625rem solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius);
     background: var(--color-surface);
     outline: none;

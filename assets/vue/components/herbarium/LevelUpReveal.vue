@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted } from 'vue';
-import { Sprout } from '@lucide/vue';
+import { Sprout } from '../../icons.js';
 import { DialogDescription, DialogTitle } from 'reka-ui';
 import { useI18n } from 'vue-i18n';
 import BaseButton from '../ui/BaseButton.vue';
@@ -96,6 +96,7 @@ onMounted(() => useSound().levelUp());
     background: var(--color-accent);
     color: var(--color-on-accent);
     font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
     font-size: 2.25rem;
     line-height: 1;
 }
@@ -103,7 +104,7 @@ onMounted(() => useSound().levelUp());
 .level-up__from { animation: level-up-out 450ms 250ms cubic-bezier(0.5, 0, 0.75, 0) both; }
 .level-up__to { animation: level-up-in 600ms 450ms cubic-bezier(0.3, 1.5, 0.5, 1) both; }
 
-.level-up__title { margin: 0; color: var(--color-ink); font-family: var(--font-display); font-size: 2rem; font-weight: 400; line-height: 1; }
+.level-up__title { margin: 0; color: var(--color-ink); font-family: var(--font-display); font-size: 2rem; font-weight: var(--font-display-weight); line-height: 1; }
 
 .level-up__stage { position: relative; isolation: isolate; display: grid; gap: var(--space-4); width: min(19rem, 100%); perspective: 70rem; }
 
@@ -123,7 +124,7 @@ onMounted(() => useSound().levelUp());
 .level-up__back {
     display: grid;
     place-items: center;
-    border: 0.0625rem solid color-mix(in oklch, var(--rarity) 50%, var(--color-border));
+    border: var(--border-width) solid color-mix(in oklch, var(--rarity) 50%, var(--color-border));
     border-radius: var(--radius);
     background:
         radial-gradient(circle at 50% 45%, color-mix(in oklch, var(--rarity) 22%, var(--color-surface)) 0, transparent 60%),

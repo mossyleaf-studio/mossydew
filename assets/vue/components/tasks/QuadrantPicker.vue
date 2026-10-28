@@ -34,7 +34,7 @@ const UNSORTED = 'unsorted';
     align-items: flex-start;
     gap: 0.125rem;
     padding: var(--space-2) var(--space-3);
-    border: 0.0625rem solid var(--color-border-strong);
+    border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius);
     background: var(--color-surface);
     text-align: left;

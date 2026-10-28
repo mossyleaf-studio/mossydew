@@ -1,6 +1,6 @@
 <script setup>
 import { reactive, ref, watch } from 'vue';
-import { Check } from '@lucide/vue';
+import { Check } from '../../icons.js';
 import { RadioGroupItem, RadioGroupRoot } from 'reka-ui';
 import { useI18n } from 'vue-i18n';
 import BaseButton from '../ui/BaseButton.vue';

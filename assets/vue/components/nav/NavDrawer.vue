@@ -1,7 +1,7 @@
 <script setup>
 import { watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { X } from '@lucide/vue';
+import { X } from '../../icons.js';
 import { DialogClose, DialogContent, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from 'reka-ui';
 import { useI18n } from 'vue-i18n';
 import NavMenu from './NavMenu.vue';
@@ -47,7 +47,7 @@ function newProject() {
     width: min(18rem, 85vw);
     overflow-y: auto;
     padding: var(--space-5) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
-    border-right: 0.0625rem solid var(--color-border);
+    border-right: var(--border-width) solid var(--color-border);
     background: var(--color-sidebar);
     box-shadow: var(--shadow);
     animation: drawer-in 220ms ease-out;

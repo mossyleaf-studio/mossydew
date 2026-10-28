@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { ArrowRight, CloudDrizzle, CloudRain, Warehouse } from '@lucide/vue';
+import { ArrowRight, CloudDrizzle, CloudRain, Warehouse } from '../../icons.js';
 import { useI18n } from 'vue-i18n';
 import ConfirmButton from '../ui/ConfirmButton.vue';
 import { useDew } from '../../composables/useDew.js';
@@ -97,8 +97,8 @@ const rows = computed(() => props.facilities.map((facility) => ({
 
 <style scoped>
 .facilities-frame { container-type: inline-size; }
-.facilities { width: 100%; border: 0.0625rem solid var(--color-border); border-radius: var(--radius); border-collapse: separate; border-spacing: 0; background: var(--color-surface); font-size: var(--font-size-md); }
-.facilities th, .facilities td { padding: var(--space-3); border-bottom: 0.0625rem solid var(--color-border); text-align: left; vertical-align: middle; }
+.facilities { width: 100%; border: var(--border-width) solid var(--color-border); border-radius: var(--radius); border-collapse: separate; border-spacing: 0; background: var(--color-surface); font-size: var(--font-size-md); }
+.facilities th, .facilities td { padding: var(--space-3); border-bottom: var(--border-width) solid var(--color-border); text-align: left; vertical-align: middle; }
 .facilities tbody tr:last-child > * { border-bottom: none; }
 .facilities__head th { padding-block: var(--space-2); color: var(--color-subtle); font-size: var(--font-size-xs); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; white-space: nowrap; }
 .facilities__numeric { text-align: right !important; }
@@ -131,7 +131,7 @@ const rows = computed(() => props.facilities.map((facility) => ({
         align-items: center;
         gap: var(--space-2) var(--space-3);
         padding: var(--space-3);
-        border-bottom: 0.0625rem solid var(--color-border);
+        border-bottom: var(--border-width) solid var(--color-border);
     }
     .facilities tbody tr:last-child { border-bottom: none; }
     .facilities th, .facilities td { padding: 0; border: none; }

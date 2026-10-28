@@ -44,6 +44,7 @@ const remaining = computed(() => props.player.nextLevelXp - props.player.xp);
     background: var(--color-accent);
     color: var(--color-on-accent);
     font-family: var(--font-display);
+    font-weight: var(--font-display-weight);
     font-size: 1.25rem;
     line-height: 1;
     overflow: hidden;

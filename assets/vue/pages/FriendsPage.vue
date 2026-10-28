@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { Flame, Leaf, LogOut, Plus, UserMinus } from '@lucide/vue';
+import { Flame, Leaf, LogOut, Plus, UserMinus } from '../icons.js';
 import { useI18n } from 'vue-i18n';
 import GoalDialog from '../components/friends/GoalDialog.vue';
 import BaseButton from '../components/ui/BaseButton.vue';
@@ -114,13 +114,13 @@ async function remove(friend) {
 .friends__invite { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
 .friends__invite code { overflow-wrap: anywhere; font-size: var(--font-size-sm); }
 .friends { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
-.friends__card { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: 0.0625rem solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
-.friends__level { display: grid; place-items: center; flex-shrink: 0; width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--color-accent-soft); color: var(--color-accent); font-family: var(--font-display); font-size: 1.125rem; }
+.friends__card { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: var(--border-width) solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
+.friends__level { display: grid; place-items: center; flex-shrink: 0; width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--color-accent-soft); color: var(--color-accent); font-family: var(--font-display); font-weight: var(--font-display-weight); font-size: 1.125rem; }
 .friends__text { display: flex; flex: 1; flex-direction: column; gap: 0.125rem; min-width: 0; }
 .friends__stats { display: flex; flex-wrap: wrap; gap: var(--space-3); color: var(--color-muted); font-size: var(--font-size-sm); }
 .friends__stats span { display: inline-flex; align-items: center; gap: 0.25rem; }
 .goals { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
-.goals__card { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3) var(--space-4); border: 0.0625rem solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
+.goals__card { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3) var(--space-4); border: var(--border-width) solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
 .goals__card--reached { border-color: var(--color-accent); }
 .goals__header { display: flex; align-items: center; gap: var(--space-3); }
 .goals__header strong { flex: 1; min-width: 0; }

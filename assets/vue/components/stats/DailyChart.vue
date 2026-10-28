@@ -58,7 +58,7 @@ function label(day) {
 .daily-chart { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; }
 .daily-chart__plot { position: relative; height: 10rem; margin-left: 1.75rem; }
 .daily-chart__grid { position: absolute; inset: 0; }
-.daily-chart__tick { position: absolute; right: 0; left: 0; border-top: 0.0625rem solid var(--color-border); }
+.daily-chart__tick { position: absolute; right: 0; left: 0; border-top: var(--border-width) solid var(--color-border); }
 .daily-chart__tick-label { position: absolute; right: calc(100% + var(--space-2)); color: var(--color-subtle); font-size: var(--font-size-xs); line-height: 1; transform: translateY(-50%); }
 .daily-chart__bars { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); gap: 0.125rem; }
 .daily-chart__column { position: relative; display: flex; align-items: flex-end; justify-content: center; }
@@ -67,7 +67,7 @@ function label(day) {
 .daily-chart__column--today .daily-chart__bar { background: var(--color-accent); }
 .daily-chart__column--today { box-shadow: inset 0 -0.125rem 0 var(--color-accent); }
 
-.daily-chart__tip { position: absolute; top: 0; z-index: 2; display: none; padding: var(--space-1) var(--space-2); border: 0.0625rem solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); box-shadow: var(--shadow); color: var(--color-muted); font-size: var(--font-size-xs); white-space: nowrap; pointer-events: none; }
+.daily-chart__tip { position: absolute; top: 0; z-index: 2; display: none; padding: var(--space-1) var(--space-2); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); box-shadow: var(--shadow); color: var(--color-muted); font-size: var(--font-size-xs); white-space: nowrap; pointer-events: none; }
 .daily-chart__tip strong { color: var(--color-ink); }
 .daily-chart__column:hover .daily-chart__tip { display: block; }
 .daily-chart__column:nth-child(-n + 5) .daily-chart__tip { left: 0; }

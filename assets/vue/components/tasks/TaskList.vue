@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import { Plus } from '@lucide/vue';
+import { Plus } from '../../icons.js';
 import { useI18n } from 'vue-i18n';
 import SubtaskComposer from './SubtaskComposer.vue';
 import TaskRow from './TaskRow.vue';

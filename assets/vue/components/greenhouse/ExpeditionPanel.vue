@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { Compass } from '@lucide/vue';
+import { Compass } from '../../icons.js';
 import { useI18n } from 'vue-i18n';
 import BaseButton from '../ui/BaseButton.vue';
 import BaseModal from '../ui/BaseModal.vue';
@@ -61,7 +61,7 @@ const revealOpen = computed({ get: () => found.value !== null, set: (open) => { 
 </template>
 
 <style scoped>
-.expedition { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-4); padding: var(--space-4); border: 0.0625rem solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
+.expedition { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-4); padding: var(--space-4); border: var(--border-width) solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
 .expedition__icon { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; background: var(--color-accent-soft); color: var(--color-accent); }
 .expedition__text { display: flex; flex-direction: column; gap: 0.125rem; min-width: 0; }
 .expedition__title { color: var(--color-ink); font-weight: 600; }

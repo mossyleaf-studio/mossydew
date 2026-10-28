@@ -1,5 +1,5 @@
 <script setup>
-import { CalendarDays, Check, FolderInput, Grid2x2, Trash2, X } from '@lucide/vue';
+import { CalendarDays, Check, FolderInput, Grid2x2, Trash2, X } from '../../icons.js';
 import {
     DropdownMenuContent, DropdownMenuItem, DropdownMenuPortal, DropdownMenuRoot, DropdownMenuTrigger,
 } from 'reka-ui';
@@ -97,7 +97,7 @@ const remove = () => run((task) => api.del(`/api/tasks/${task.id}`));
     width: max-content;
     max-width: calc(100vw - 2rem);
     padding: var(--space-2) var(--space-3);
-    border: 0.0625rem solid var(--color-border-strong);
+    border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius);
     background: var(--color-surface);
     box-shadow: var(--shadow);

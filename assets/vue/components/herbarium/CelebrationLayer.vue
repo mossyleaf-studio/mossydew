@@ -1,6 +1,6 @@
 <script setup>
 import { computed, watch } from 'vue';
-import { Trophy } from '@lucide/vue';
+import { Trophy } from '../../icons.js';
 import { DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from 'reka-ui';
 import { useI18n } from 'vue-i18n';
 import BaseButton from '../ui/BaseButton.vue';
@@ -65,7 +65,7 @@ const achievementsOpen = computed({
 <style>
 .celebration { width: min(26rem, 100%); text-align: left; }
 .celebration--level-up { overflow-x: hidden; padding-block: var(--space-6); }
-.celebration__title { margin: 0; color: var(--color-ink); font-family: var(--font-display); font-size: 1.9rem; font-weight: 400; }
+.celebration__title { margin: 0; color: var(--color-ink); font-family: var(--font-display); font-size: 1.9rem; font-weight: var(--font-display-weight); }
 .celebration__text { display: block; color: var(--color-muted); }
 .celebration__list { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
 .celebration__item { display: flex; align-items: flex-start; gap: var(--space-3); }

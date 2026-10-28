@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import { Ellipsis } from '@lucide/vue';
+import { Ellipsis } from '../../icons.js';
 import {
     DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuRadioGroup, DropdownMenuRadioItem,
     DropdownMenuRoot, DropdownMenuSeparator, DropdownMenuTrigger,

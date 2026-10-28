@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router';
-import { Droplet, Droplets, Leaf } from '@lucide/vue';
+import { Droplet, Droplets, Leaf } from '../../icons.js';
 import { useI18n } from 'vue-i18n';
 import XpBar from './XpBar.vue';
 import { useCelebration } from '../../composables/useCelebration.js';
@@ -70,7 +70,7 @@ const { number } = useDew();
 .player-progress__streak--cold svg { color: var(--color-subtle); }
 
 .player-progress__bursts { position: absolute; inset: 0; pointer-events: none; }
-.player-progress__burst { position: absolute; right: 0; bottom: 100%; display: flex; flex-direction: column; align-items: flex-end; color: var(--color-accent-strong); font-family: var(--font-display); font-size: 1.25rem; line-height: 1; animation: burst-rise 1500ms ease-out forwards; }
+.player-progress__burst { position: absolute; right: 0; bottom: 100%; display: flex; flex-direction: column; align-items: flex-end; color: var(--color-accent-strong); font-family: var(--font-display); font-weight: var(--font-display-weight); font-size: 1.25rem; line-height: 1; animation: burst-rise 1500ms ease-out forwards; }
 .player-progress__burst-dew { margin-top: 0.125rem; color: color-mix(in oklch, var(--color-dew) 65%, var(--color-ink)); font-family: var(--font-body); font-size: var(--font-size-sm); font-weight: 600; white-space: nowrap; }
 
 @keyframes burst-rise {

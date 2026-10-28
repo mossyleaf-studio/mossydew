@@ -78,8 +78,8 @@ const rows = computed(() => props.sources.map((source) => {
 
 <style scoped>
 .sources { display: flex; flex-direction: column; gap: var(--space-2); }
-.sources__table { width: 100%; border: 0.0625rem solid var(--color-border); border-radius: var(--radius); border-collapse: separate; border-spacing: 0; background: var(--color-surface); font-size: var(--font-size-md); }
-.sources__table th, .sources__table td { padding: var(--space-2) var(--space-3); border-bottom: 0.0625rem solid var(--color-border); text-align: left; }
+.sources__table { width: 100%; border: var(--border-width) solid var(--color-border); border-radius: var(--radius); border-collapse: separate; border-spacing: 0; background: var(--color-surface); font-size: var(--font-size-md); }
+.sources__table th, .sources__table td { padding: var(--space-2) var(--space-3); border-bottom: var(--border-width) solid var(--color-border); text-align: left; }
 .sources__table tbody tr:last-child > * { border-bottom: none; }
 .sources__table thead th { color: var(--color-subtle); font-size: var(--font-size-xs); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; white-space: nowrap; }
 .sources__numeric { text-align: right !important; }

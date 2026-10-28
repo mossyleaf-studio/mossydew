@@ -102,12 +102,12 @@ const draggable = computed(() => ({ group: 'matrix', animation: 160, delay: 180,
 .matrix__axis--side { grid-area: side; flex-direction: row-reverse; writing-mode: vertical-rl; transform: rotate(180deg); }
 .matrix__axis--side span { display: flex; align-items: center; justify-content: center; }
 .matrix__board { grid-area: board; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: var(--space-3); height: max(30rem, calc(100dvh - 16rem)); }
-.matrix__zone { --tone: var(--quadrant-unsorted); display: flex; flex-direction: column; gap: var(--space-3); min-height: 0; overflow: hidden; padding: var(--space-4) var(--space-3) var(--space-3) var(--space-4); border: 0.0625rem solid var(--color-border); border-top: 0.1875rem solid var(--tone); border-radius: var(--radius); background: color-mix(in oklch, var(--tone) 5%, var(--color-surface)); }
+.matrix__zone { --tone: var(--quadrant-unsorted); display: flex; flex-direction: column; gap: var(--space-3); min-height: 0; overflow: hidden; padding: var(--space-4) var(--space-3) var(--space-3) var(--space-4); border: var(--border-width) solid var(--color-border); border-top: 0.1875rem solid var(--tone); border-radius: var(--radius); background: color-mix(in oklch, var(--tone) 5%, var(--color-surface)); }
 .matrix__zone--do_first { --tone: var(--quadrant-do-first); }
 .matrix__zone--schedule { --tone: var(--quadrant-schedule); }
 .matrix__zone--delegate { --tone: var(--quadrant-delegate); }
 .matrix__zone--eliminate { --tone: var(--quadrant-eliminate); }
-.matrix__name { color: var(--color-ink); font-family: var(--font-display); font-size: 1.375rem; font-weight: 400; }
+.matrix__name { color: var(--color-ink); font-family: var(--font-display); font-size: 1.375rem; font-weight: var(--font-display-weight); }
 .matrix__count { color: var(--color-subtle); font-family: var(--font-body); font-size: var(--font-size-sm); font-variant-numeric: tabular-nums; }
 .matrix__plain { color: var(--color-muted); font-size: var(--font-size-sm); }
 .matrix__header { flex-shrink: 0; padding-right: var(--space-1); }

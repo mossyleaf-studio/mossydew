@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { Lock, Shovel, Sprout } from '@lucide/vue';
+import { Lock, Shovel, Sprout } from '../../icons.js';
 import { useI18n } from 'vue-i18n';
 import BaseButton from '../ui/BaseButton.vue';
 import IconButton from '../ui/IconButton.vue';
@@ -84,8 +84,8 @@ const locked = computed(() => (props.pots.length < props.maxPots ? { number: pro
 
 <style scoped>
 .pots-frame { container-type: inline-size; }
-.pots { width: 100%; border: 0.0625rem solid var(--color-border); border-radius: var(--radius); border-collapse: separate; border-spacing: 0; background: var(--color-surface); font-size: var(--font-size-md); }
-.pots th, .pots td { padding: var(--space-2) var(--space-3); border-bottom: 0.0625rem solid var(--color-border); text-align: left; vertical-align: middle; }
+.pots { width: 100%; border: var(--border-width) solid var(--color-border); border-radius: var(--radius); border-collapse: separate; border-spacing: 0; background: var(--color-surface); font-size: var(--font-size-md); }
+.pots th, .pots td { padding: var(--space-2) var(--space-3); border-bottom: var(--border-width) solid var(--color-border); text-align: left; vertical-align: middle; }
 .pots tbody tr:last-child > * { border-bottom: none; }
 .pots__head th { color: var(--color-subtle); font-size: var(--font-size-xs); font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; white-space: nowrap; }
 .pots__number { width: 2.5rem; color: var(--color-muted); font-weight: 600; }
@@ -117,7 +117,7 @@ const locked = computed(() => (props.pots.length < props.maxPots ? { number: pro
         align-items: center;
         gap: var(--space-2) var(--space-3);
         padding: var(--space-3);
-        border-bottom: 0.0625rem solid var(--color-border);
+        border-bottom: var(--border-width) solid var(--color-border);
     }
     .pots tbody tr:last-child { border-bottom: none; }
     .pots th, .pots td { padding: 0; border: none; }

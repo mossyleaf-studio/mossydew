@@ -34,7 +34,7 @@ defineProps({
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    border: 0.0625rem solid transparent;
+    border: var(--border-width) solid transparent;
     border-radius: var(--radius);
     background: none;
     color: var(--color-muted);
