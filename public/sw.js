@@ -1,4 +1,4 @@
-const STATIC_CACHE = 'mossydew-static-v1';
+const STATIC_CACHE = 'mossydew-static-v2';
 const SHELL_CACHE = 'mossydew-shell-v1';
 
 self.addEventListener('install', () => self.skipWaiting());
