@@ -24,7 +24,7 @@ const quadrant = computed({
 </script>
 
 <template>
-    <DropdownMenuRoot>
+    <DropdownMenuRoot :modal="false">
         <DropdownMenuTrigger class="task-menu__trigger" :aria-label="t('tasks.menu.open', { title: task.title })">
             <Ellipsis size="1.125rem" aria-hidden="true" />
         </DropdownMenuTrigger>

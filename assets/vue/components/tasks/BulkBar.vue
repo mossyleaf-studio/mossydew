@@ -49,7 +49,7 @@ const remove = () => run((task) => api.del(`/api/tasks/${task.id}`));
         <div v-if="selection.count.value" class="bulk-bar" role="toolbar" :aria-label="t('tasks.bulk.label')">
             <span class="bulk-bar__count tabular" aria-live="polite">{{ t('tasks.bulk.selected', { count: selection.count.value }, selection.count.value) }}</span>
             <BaseButton variant="secondary" @click="complete"><Check size="1rem" aria-hidden="true" />{{ t('tasks.bulk.complete') }}</BaseButton>
-            <DropdownMenuRoot>
+            <DropdownMenuRoot :modal="false">
                 <DropdownMenuTrigger as-child><BaseButton variant="secondary"><CalendarDays size="1rem" aria-hidden="true" />{{ t('tasks.plan.open') }}</BaseButton></DropdownMenuTrigger>
                 <DropdownMenuPortal>
                     <DropdownMenuContent class="popover" :side-offset="6" side="top">
@@ -57,7 +57,7 @@ const remove = () => run((task) => api.del(`/api/tasks/${task.id}`));
                     </DropdownMenuContent>
                 </DropdownMenuPortal>
             </DropdownMenuRoot>
-            <DropdownMenuRoot>
+            <DropdownMenuRoot :modal="false">
                 <DropdownMenuTrigger as-child><BaseButton variant="secondary"><Grid2x2 size="1rem" aria-hidden="true" />{{ t('matrix.title') }}</BaseButton></DropdownMenuTrigger>
                 <DropdownMenuPortal>
                     <DropdownMenuContent class="popover task-menu" :side-offset="6" side="top">
@@ -68,7 +68,7 @@ const remove = () => run((task) => api.del(`/api/tasks/${task.id}`));
                     </DropdownMenuContent>
                 </DropdownMenuPortal>
             </DropdownMenuRoot>
-            <DropdownMenuRoot>
+            <DropdownMenuRoot :modal="false">
                 <DropdownMenuTrigger as-child><BaseButton variant="secondary"><FolderInput size="1rem" aria-hidden="true" />{{ t('tasks.bulk.move') }}</BaseButton></DropdownMenuTrigger>
                 <DropdownMenuPortal>
                     <DropdownMenuContent class="popover" :side-offset="6" side="top">
