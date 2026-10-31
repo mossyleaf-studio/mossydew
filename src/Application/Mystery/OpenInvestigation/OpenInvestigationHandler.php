@@ -33,7 +33,7 @@ final readonly class OpenInvestigationHandler
             if (null !== $this->investigations->openLockedOf($user)) {
                 throw new CaseStillOpen();
             }
-            $investigation = Investigation::open($user, $this->generator->generate(), $this->clock->now());
+            $investigation = Investigation::open($user, $this->generator->generate(), $this->clock->now(), gift: !$this->investigations->receivedGift($user));
             $this->investigations->add($investigation);
             $this->transaction->commit();
 

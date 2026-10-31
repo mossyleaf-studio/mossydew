@@ -58,4 +58,9 @@ final readonly class DoctrineInvestigationRepository implements InvestigationRep
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    public function receivedGift(User $owner): bool
+    {
+        return $this->entityManager->getRepository(Investigation::class)->count(['owner' => $owner, 'gift' => true]) > 0;
+    }
 }

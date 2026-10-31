@@ -3,7 +3,7 @@
     "solvedCount": "Aucune affaire résolue | 1 affaire résolue | {count} affaires résolues",
     "progress": "Indices révélés : {revealed} sur {total}",
     "clueRevealed": "Un nouvel indice vous attend dans Mystères moussus. | {count} nouveaux indices vous attendent dans Mystères moussus.",
-    "intro": "Quelqu’un a été retrouvé mort dans une maison pleine d’invités. Chaque tâche terminée révèle un indice sur l’endroit où se trouvait chacun. Reconstituez tout le plan, puis dites qui a commis le meurtre.",
+    "intro": "Quelqu’un a été retrouvé mort dans une maison pleine d’invités. Chaque tâche terminée révèle un indice sur l’endroit où se trouvait chacun. Reconstituez tout le plan, puis dites qui a commis le meurtre. Votre première enquête arrive avec tous ses indices déjà révélés.",
     "open": "Ouvrir une affaire",
     "openNew": "Ouvrir une nouvelle affaire",
     "opening": "Dessin du plan en cours…",

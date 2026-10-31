@@ -59,7 +59,7 @@ final class MysteryUseCasesTest extends KernelTestCase
         self::assertSame(0, $view->solved);
     }
 
-    public function testOpeningACaseHidesEveryClueAndSavesTheBoard(): void
+    public function testTheFirstCaseIsAGiftWithEveryClueRevealedAndSavesTheBoard(): void
     {
         $opened = $this->open();
         self::clear();
@@ -70,11 +70,50 @@ final class MysteryUseCasesTest extends KernelTestCase
         self::assertGreaterThanOrEqual(6, $case->size);
         self::assertLessThanOrEqual(14, $case->size);
         self::assertSame([$case->size * $case->size, $case->size * $case->size, $case->size], [\count($case->rooms), \count($case->furniture), \count($case->people)]);
-        self::assertSame([[], false, null, null], [$case->clues, $case->solved, $case->solution, $case->murderer]);
-        self::assertGreaterThan(0, $case->hiddenClues);
+        self::assertNotSame([], $case->clues);
+        self::assertSame([0, false, null, null], [$case->hiddenClues, $case->solved, $case->solution, $case->murderer]);
         self::assertSame(['placements' => array_fill(0, $case->size, null), 'crosses' => []], $case->notes);
         self::assertContains($case->victim, array_keys($case->people));
         self::assertSame(0, $this->show()->solved);
+    }
+
+    public function testCompletedTasksRevealNothingMoreOnTheGift(): void
+    {
+        $this->playMysteries(true);
+        $this->open();
+        $clues = $this->case()->clues;
+
+        self::assertSame(0, self::completeTask(self::createTask('Water the fern'))->cluesRevealed);
+        self::assertSame([$clues, 0], [$this->case()->clues, $this->case()->hiddenClues]);
+    }
+
+    public function testTheNextCasesHideEveryClueEvenAfterSwitchingMysteriesOffAndOn(): void
+    {
+        $this->playMysteries(true);
+        $this->open();
+        $this->solve();
+        $this->playMysteries(false);
+        $this->playMysteries(true);
+
+        $this->open();
+
+        $case = $this->case();
+        self::assertSame([], $case->clues);
+        self::assertGreaterThan(0, $case->hiddenClues);
+    }
+
+    public function testAPlayerWhoNeverHadTheGiftGetsItWithTheirNextCase(): void
+    {
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $solvedBeforeTheGift = Investigation::open($this->owner(), self::blueprint(), Clock::get()->now());
+        $solvedBeforeTheGift->accuse($solvedBeforeTheGift->solution(), $solvedBeforeTheGift->murderer(), Clock::get()->now());
+        $entityManager->persist($solvedBeforeTheGift);
+        $entityManager->flush();
+
+        $this->open();
+
+        self::assertSame(0, $this->case()->hiddenClues);
+        self::assertNotSame([], $this->case()->clues);
     }
 
     public function testACaseCannotBeOpenedWhileAnotherIsOpen(): void
@@ -89,7 +128,7 @@ final class MysteryUseCasesTest extends KernelTestCase
     public function testACompletedTaskRevealsTheNextClueWhenMysteriesAreOn(): void
     {
         $this->playMysteries(true);
-        $this->open();
+        $this->openAfterTheGift();
         $hidden = $this->case()->hiddenClues;
 
         $first = self::completeTask(self::createTask('Water the fern'));
@@ -108,7 +147,7 @@ final class MysteryUseCasesTest extends KernelTestCase
 
     public function testNothingIsRevealedWhileMysteriesAreOffAndTheCaseIsKept(): void
     {
-        $this->open();
+        $this->openAfterTheGift();
         self::assertSame(0, self::completeTask(self::createTask('Water the fern'))->cluesRevealed);
 
         $this->playMysteries(true);
@@ -129,7 +168,7 @@ final class MysteryUseCasesTest extends KernelTestCase
         self::assertSame(0, self::completeTask(self::createTask('Water the fern'))->cluesRevealed);
         self::assertNull($this->show()->investigation);
 
-        $this->open();
+        $this->openWithClues(2);
         $this->solve();
 
         self::assertSame(0, self::completeTask(self::createTask('Repot the aloe'))->cluesRevealed);
@@ -139,7 +178,7 @@ final class MysteryUseCasesTest extends KernelTestCase
     public function testReopeningATaskHidesNothingAndCompletingItAgainRevealsNothingMore(): void
     {
         $this->playMysteries(true);
-        $this->open();
+        $this->openAfterTheGift();
         $task = self::createTask('Water the fern');
         self::assertSame(1, self::completeTask($task)->cluesRevealed);
 
@@ -154,7 +193,7 @@ final class MysteryUseCasesTest extends KernelTestCase
     public function testASubtaskThatCompletesItsParentRevealsTwoClues(): void
     {
         $this->playMysteries(true);
-        $this->open();
+        $this->openAfterTheGift();
         $cleaning = self::createTask('Spring cleaning');
         $windows = self::addSubtask($cleaning, 'Windows');
         self::clear();
@@ -394,6 +433,13 @@ final class MysteryUseCasesTest extends KernelTestCase
     private function open(): InvestigationView
     {
         return self::getContainer()->get(OpenInvestigationHandler::class)();
+    }
+
+    private function openAfterTheGift(): void
+    {
+        $this->open();
+        $this->solve();
+        $this->open();
     }
 
     private function solve(): void

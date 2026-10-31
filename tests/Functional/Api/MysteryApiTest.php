@@ -35,7 +35,7 @@ final class MysteryApiTest extends WebTestCase
         self::assertSame(['investigation' => null, 'solved' => 0], self::body($client));
     }
 
-    public function testOpeningACaseKeepsTheSolutionAndTheHiddenCluesBack(): void
+    public function testTheFirstCaseShowsEveryClueButKeepsTheSolutionBack(): void
     {
         $client = self::signedInClient();
 
@@ -58,8 +58,8 @@ final class MysteryApiTest extends WebTestCase
         self::assertContainsOnlyString(Json::array($case, 'kinds'));
         self::assertGreaterThanOrEqual(0, Json::int($case, 'victim'));
         self::assertLessThan($size, Json::int($case, 'victim'));
-        self::assertSame([[], false, null, null], [Json::at($case, 'clues'), Json::at($case, 'solved'), Json::at($case, 'solution'), Json::at($case, 'murderer')]);
-        self::assertGreaterThan(0, Json::int($case, 'hiddenClues'));
+        self::assertNotSame([], Json::array($case, 'clues'));
+        self::assertSame([0, false, null, null], [Json::at($case, 'hiddenClues'), Json::at($case, 'solved'), Json::at($case, 'solution'), Json::at($case, 'murderer')]);
         self::assertSame(['placements' => array_fill(0, $size, null), 'crosses' => []], Json::array($case, 'notes'));
     }
 
@@ -218,9 +218,13 @@ final class MysteryApiTest extends WebTestCase
 
     public function testACompletedTaskRevealsAClueOnlyWhileMysteriesAreOn(): void
     {
-        $client = self::signedInClient();
+        [$client, $user] = self::client();
+        $client->jsonRequest('POST', '/api/mystery/investigations');
+        $gift = self::caseOf($user);
+        $client->jsonRequest('POST', self::accusationUrl((string) $gift->id()), ['placements' => $gift->solution(), 'murderer' => $gift->murderer()]);
         $client->jsonRequest('POST', '/api/mystery/investigations');
         $hidden = Json::int(self::body($client), 'investigation', 'hiddenClues');
+        self::assertGreaterThan(0, $hidden);
 
         self::assertSame(0, self::completeATask($client));
 

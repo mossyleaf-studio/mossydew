@@ -51,13 +51,16 @@ class Investigation
     #[ORM\Column(type: 'json')]
     private array $notes;
 
+    #[ORM\Column(options: ['default' => false])]
+    private bool $gift;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $openedAt;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $solvedAt = null;
 
-    private function __construct(User $owner, Blueprint $blueprint, \DateTimeImmutable $now)
+    private function __construct(User $owner, Blueprint $blueprint, \DateTimeImmutable $now, bool $gift)
     {
         $this->id = new Ulid();
         $this->owner = $owner;
@@ -67,12 +70,13 @@ class Investigation
         $this->solution = $blueprint->solution;
         $this->clues = array_map(static fn (Clue $clue): array => $clue->toArray(), $blueprint->clues);
         $this->notes = ['placements' => array_fill(0, $blueprint->floorplan->size, null), 'crosses' => []];
+        $this->gift = $gift;
         $this->openedAt = $now;
     }
 
-    public static function open(User $owner, Blueprint $blueprint, \DateTimeImmutable $now): self
+    public static function open(User $owner, Blueprint $blueprint, \DateTimeImmutable $now, bool $gift = false): self
     {
-        return new self($owner, $blueprint, $now);
+        return new self($owner, $blueprint, $now, $gift);
     }
 
     public function revealFor(Ulid $task): bool
@@ -167,12 +171,12 @@ class Investigation
      */
     public function revealedClues(): array
     {
-        return array_map(Clue::fromArray(...), \array_slice($this->clues, 0, \count($this->revealedBy)));
+        return array_map(Clue::fromArray(...), \array_slice($this->clues, 0, $this->revealedClueCount()));
     }
 
     public function hiddenClueCount(): int
     {
-        return \count($this->clues) - \count($this->revealedBy);
+        return \count($this->clues) - $this->revealedClueCount();
     }
 
     /**
@@ -191,5 +195,10 @@ class Investigation
     public function solvedAt(): ?\DateTimeImmutable
     {
         return $this->solvedAt;
+    }
+
+    private function revealedClueCount(): int
+    {
+        return $this->gift ? \count($this->clues) : \count($this->revealedBy);
     }
 }

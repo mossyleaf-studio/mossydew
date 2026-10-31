@@ -31,7 +31,7 @@ function boardOf(id, size) {
     };
 }
 
-test('Moss Mysteries is opt-in, remembers the marks, and a completed task reveals a clue', async ({ page }) => {
+test('Moss Mysteries is opt-in, its first case shows every clue, and it remembers the marks', async ({ page }) => {
     await signInAsSleuth(page);
 
     const rail = page.locator('.shell__rail');
@@ -51,8 +51,8 @@ test('Moss Mysteries is opt-in, remembers the marks, and a completed task reveal
     await expect(page.getByTestId('board')).toBeVisible({ timeout: 20_000 });
     await expect(page.getByTestId('cell').first()).toBeVisible();
     await expect(page.getByTestId('person').first()).toBeVisible();
-    await expect(page.getByTestId('locked-clue').first()).toBeVisible();
-    await expect(page.getByTestId('clue')).toHaveCount(0);
+    await expect(page.getByTestId('clue').first()).toBeVisible();
+    await expect(page.getByTestId('locked-clue')).toHaveCount(0);
     await expect(page.getByTestId('accuse')).toBeDisabled();
 
     const first = page.getByTestId('person').first();
@@ -68,6 +68,15 @@ test('Moss Mysteries is opt-in, remembers the marks, and a completed task reveal
     }).toBe(1);
     await page.reload();
     await expect(page.getByTestId('person').first()).toHaveAttribute('aria-label', /placed on [A-N]\d+/);
+});
+
+test('a completed task tells when it revealed a clue', async ({ page }) => {
+    await signInAsSleuth(page);
+    await page.route('**/api/tasks/*/complete', async (route) => {
+        const response = await route.fetch();
+        const body = await response.json();
+        await route.fulfill({ response, json: { ...body, data: { ...body.data, cluesRevealed: 1 } } });
+    });
 
     const title = unique('Mulch the beds');
     const created = await page.request.post('/api/tasks', { data: { title, plan: 'today', quadrant: 'schedule' } });
@@ -75,13 +84,6 @@ test('Moss Mysteries is opt-in, remembers the marks, and a completed task reveal
     await page.goto('/');
     await row(page, title).getByRole('checkbox', { name: `Complete “${title}”` }).click();
     await expect(page.getByTestId('toast').filter({ hasText: 'new clue' })).toBeVisible();
-    const celebration = page.getByRole('dialog', { name: 'New achievement' });
-    await celebration.getByRole('button', { name: 'Continue' }).click();
-    await expect(celebration).toBeHidden();
-
-    await rail.getByRole('link', { name: 'Mysteries' }).click();
-    await expect(page.getByTestId('clue')).toHaveCount(1);
-    await expect(page.getByTestId('clue').first()).toContainText('.');
 });
 
 test('a smaller case opened on another device replaces the board on this one', async ({ page }) => {

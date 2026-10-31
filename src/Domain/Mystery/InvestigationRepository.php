@@ -15,4 +15,6 @@ interface InvestigationRepository
     public function openLockedOf(User $owner): ?Investigation;
 
     public function solvedCount(User $owner): int;
+
+    public function receivedGift(User $owner): bool;
 }

@@ -3,7 +3,7 @@
     "solvedCount": "No case solved yet | 1 case solved | {count} cases solved",
     "progress": "{revealed} of {total} clues revealed",
     "clueRevealed": "A new clue is waiting in Moss Mysteries. | {count} new clues are waiting in Moss Mysteries.",
-    "intro": "Someone has been found dead in a house full of guests. Each task you complete reveals one clue about where everyone stood. Work out the whole floor plan, then name the murderer.",
+    "intro": "Someone has been found dead in a house full of guests. Each task you complete reveals one clue about where everyone stood. Work out the whole floor plan, then name the murderer. Your first case comes with every clue already revealed.",
     "open": "Open a case",
     "openNew": "Open a new case",
     "opening": "Drawing up the floor plan…",

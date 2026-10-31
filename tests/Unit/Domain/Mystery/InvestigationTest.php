@@ -36,6 +36,18 @@ final class InvestigationTest extends TestCase
         self::assertNull($investigation->solvedAt());
     }
 
+    public function testAGiftOpensWithEveryClueRevealedAndTasksRevealNothingMore(): void
+    {
+        $blueprint = self::blueprint();
+
+        $investigation = Investigation::open(self::owner(), $blueprint, new \DateTimeImmutable(), gift: true);
+
+        self::assertEquals($blueprint->clues, $investigation->revealedClues());
+        self::assertSame(0, $investigation->hiddenClueCount());
+        self::assertFalse($investigation->revealFor(new Ulid()));
+        self::assertEquals($blueprint->clues, $investigation->revealedClues());
+    }
+
     public function testTheMurdererIsTheOnlySuspectInTheVictimsRoom(): void
     {
         $blueprint = self::blueprint();
