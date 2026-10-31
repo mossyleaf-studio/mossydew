@@ -77,6 +77,18 @@ final class UserTest extends TestCase
         self::assertSame([Language::French, 'Asia/Tokyo', 'Lou'], [$user->language(), $user->timezone(), $user->displayName()]);
     }
 
+    public function testMysteriesAreOffUntilChosen(): void
+    {
+        $user = $this->user();
+        self::assertFalse($user->playsMysteries());
+
+        $user->playMysteries(true);
+        self::assertTrue($user->playsMysteries());
+
+        $user->playMysteries(false);
+        self::assertFalse($user->playsMysteries());
+    }
+
     public function testFollowsItsMossyleafAccount(): void
     {
         $user = $this->user();

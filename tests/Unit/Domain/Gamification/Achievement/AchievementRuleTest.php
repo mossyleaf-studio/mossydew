@@ -8,6 +8,7 @@ use App\Domain\Gamification\Achievement\AchievementRule;
 use App\Domain\Gamification\Achievement\PlayerStats;
 use App\Domain\Gamification\Achievement\Rule\CommonGround;
 use App\Domain\Gamification\Achievement\Rule\FieldTrip;
+use App\Domain\Gamification\Achievement\Rule\FirstCase;
 use App\Domain\Gamification\Achievement\Rule\FirstDrop;
 use App\Domain\Gamification\Achievement\Rule\FiveHundredTasks;
 use App\Domain\Gamification\Achievement\Rule\GrowingGlasshouse;
@@ -18,6 +19,7 @@ use App\Domain\Gamification\Achievement\Rule\MatrixSorter;
 use App\Domain\Gamification\Achievement\Rule\MonthStreak;
 use App\Domain\Gamification\Achievement\Rule\MorningDew;
 use App\Domain\Gamification\Achievement\Rule\PatientGardener;
+use App\Domain\Gamification\Achievement\Rule\TenCases;
 use App\Domain\Gamification\Achievement\Rule\TenTasks;
 use App\Domain\Gamification\Achievement\Rule\TenWaterings;
 use App\Domain\Gamification\Achievement\Rule\ThreeDayStreak;
@@ -60,6 +62,8 @@ final class AchievementRuleTest extends TestCase
         yield 'field trip' => [new FieldTrip(), 'field_trip', static fn (int $count): PlayerStats => new PlayerStats(expeditions: $count), 1];
         yield 'morning dew' => [new MorningDew(), 'dew_1000', static fn (int $dew): PlayerStats => new PlayerStats(dewGathered: $dew), 1_000];
         yield 'growing glasshouse' => [new GrowingGlasshouse(), 'glasshouse_5', static fn (int $level): PlayerStats => new PlayerStats(glasshouseLevel: $level), 5];
+        yield 'first case' => [new FirstCase(), 'first_case', static fn (int $count): PlayerStats => new PlayerStats(casesSolved: $count), 1];
+        yield 'ten cases' => [new TenCases(), 'ten_cases', static fn (int $count): PlayerStats => new PlayerStats(casesSolved: $count), 10];
     }
 
     public function testCompletedTasksDoNotCountForOtherRules(): void
@@ -70,6 +74,8 @@ final class AchievementRuleTest extends TestCase
         self::assertFalse(new WeekStreak()->isMetBy($stats));
         self::assertFalse(new LevelFive()->isMetBy($stats));
         self::assertFalse(new MorningDew()->isMetBy($stats));
+        self::assertFalse(new FirstCase()->isMetBy($stats));
+        self::assertFalse(new TenCases()->isMetBy($stats));
     }
 
     public function testANewGreenhouseUnlocksNothing(): void

@@ -6,6 +6,7 @@ namespace App\Tests\Functional\Application\Identity;
 
 use App\Application\Identity\ChangeTimezone\ChangeTimezoneHandler;
 use App\Application\Identity\ChooseLanguage\ChooseLanguageHandler;
+use App\Application\Identity\ChooseMysteries\ChooseMysteriesHandler;
 use App\Application\Identity\SignIn\SignIn;
 use App\Application\Identity\SignIn\SignInHandler;
 use App\Domain\Gamification\Greenhouse\GreenhouseRepository;
@@ -109,6 +110,20 @@ final class AccountUseCasesTest extends KernelTestCase
         self::getContainer()->get(ChooseLanguageHandler::class)(Language::French);
 
         self::assertSame(['Asia/Tokyo', Language::French], [$user->timezone(), $user->language()]);
+    }
+
+    public function testChooseMysteries(): void
+    {
+        $user = self::actAsNewUser();
+        self::assertFalse($user->playsMysteries());
+
+        self::getContainer()->get(ChooseMysteriesHandler::class)(true);
+        self::getContainer()->get(EntityManagerInterface::class)->clear();
+        self::assertTrue(self::getContainer()->get(UserRepository::class)->get($user->id())->playsMysteries());
+
+        self::getContainer()->get(ChooseMysteriesHandler::class)(false);
+        self::getContainer()->get(EntityManagerInterface::class)->clear();
+        self::assertFalse(self::getContainer()->get(UserRepository::class)->get($user->id())->playsMysteries());
     }
 
     private function signIn(SignIn $command): User

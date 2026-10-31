@@ -1,5 +1,5 @@
 shared:
-    not_found: '{subject, select, task {Cette tâche n’existe} project {Ce projet n’existe} player {Ce profil de joueur n’existe} greenhouse {Cette serre n’existe} critter {Cette bestiole n’existe} invite {Cette invitation n’existe} friend {Cet ami n’existe} goal {Cet objectif commun n’existe} other {Cet élément n’existe}} plus.'
+    not_found: '{subject, select, task {Cette tâche n’existe} project {Ce projet n’existe} player {Ce profil de joueur n’existe} greenhouse {Cette serre n’existe} investigation {Cette enquête n’existe} critter {Cette bestiole n’existe} invite {Cette invitation n’existe} friend {Cet ami n’existe} goal {Cet objectif commun n’existe} other {Cet élément n’existe}} plus.'
     invalid_day: '« {day} » n’est pas une date valide.'
 user:
     invalid_email: '« {email} » n’est pas une adresse e-mail valide.'
@@ -47,3 +47,7 @@ goal:
     invalid_target: 'Un objectif commun compte de 1 à 1000 tâches.'
     needs_friends: 'Choisissez au moins une personne parmi vos amis pour le partager.'
     ends_in_the_past: 'Choisissez une date de fin à partir d’aujourd’hui.'
+mystery:
+    wrong_accusation: 'Quelque chose ne colle pas encore. Regardez de plus près.'
+    case_still_open: 'Terminez l’enquête en cours avant d’en ouvrir une nouvelle.'
+    invalid_notes: 'Ces notes ne correspondent pas au plan.'

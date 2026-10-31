@@ -46,6 +46,7 @@ final class AppShellController extends AbstractController
             'achievements' => ['/api/achievements'],
             'settings' => ['/api/integrations/injust'],
             'friends' => ['/api/friends'],
+            'mysteries' => ['/api/mystery'],
             default => [],
         };
     }

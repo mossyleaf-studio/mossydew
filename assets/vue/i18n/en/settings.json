@@ -6,6 +6,8 @@
     "timezoneSaved": "Time zone saved.",
     "language": "Language",
     "sound": "Dewdrop sound when a task is done",
+    "mysteries": "Moss Mysteries",
+    "mysteriesHint": "A logic puzzle to solve: each task you complete reveals one clue. Turning it off keeps your open case.",
     "import": {
         "title": "Import from Super Productivity",
         "intro": "Export a backup from Super Productivity’s settings, then choose the file here. Open tasks come over with their project, their urgent and important tags (as matrix quadrants), their planned day, deadline, notes and subtasks. Done tasks stay behind, and importing the same file again adds nothing new.",

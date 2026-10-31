@@ -1,5 +1,5 @@
 shared:
-    not_found: 'This {subject, select, task {task} project {project} player {player} greenhouse {greenhouse} critter {critter} invite {invitation} friend {friend} goal {shared goal} other {item}} no longer exists.'
+    not_found: 'This {subject, select, task {task} project {project} player {player} greenhouse {greenhouse} investigation {case} critter {critter} invite {invitation} friend {friend} goal {shared goal} other {item}} no longer exists.'
     invalid_day: '“{day}” is not a valid date.'
 user:
     invalid_email: '“{email}” is not a valid email address.'
@@ -47,3 +47,7 @@ goal:
     invalid_target: 'A shared goal counts 1 to 1000 tasks.'
     needs_friends: 'Choose at least one friend to share the goal with.'
     ends_in_the_past: 'Pick an end date from today on.'
+mystery:
+    wrong_accusation: 'Something doesn’t add up yet. Look again.'
+    case_still_open: 'Finish your current case before opening a new one.'
+    invalid_notes: 'These notes do not fit the board.'

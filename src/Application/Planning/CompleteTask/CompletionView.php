@@ -25,6 +25,7 @@ final readonly class CompletionView
         public PlayerView $player,
         public ?TaskView $parent = null,
         public array $goalsReached = [],
+        public int $cluesRevealed = 0,
     ) {
     }
 }

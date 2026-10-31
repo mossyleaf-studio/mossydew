@@ -11,6 +11,7 @@ use App\Application\Gamification\GatherTaskDew;
 use App\Application\Gamification\ShowPlayer\ShowPlayerHandler;
 use App\Application\Gamification\SpeciesView;
 use App\Application\Identity\CurrentUser;
+use App\Application\Mystery\RevealClues;
 use App\Application\Planning\Injust\InjustJournal;
 use App\Application\Planning\TaskView;
 use App\Application\Planning\Today;
@@ -41,6 +42,7 @@ final readonly class CompleteTaskHandler
         private AtomicChange $atomicChange,
         private InjustJournal $injust,
         private AdvanceGoals $advanceGoals,
+        private RevealClues $revealClues,
     ) {
     }
 
@@ -74,14 +76,15 @@ final readonly class CompleteTaskHandler
                 $newSpecies = ($this->collectSpecies)($player->owner(), $leveledUpTo - $levelBefore);
             }
         }
-        [$dew, $goalsReached] = $this->atomicChange->apply(
-            /** @return array{?DewGain, list<string>} */
+        [$dew, $goalsReached, $cluesRevealed] = $this->atomicChange->apply(
+            /** @return array{?DewGain, list<string>, int} */
             function () use ($player, $rewarded): array {
                 $goalsReached = ($this->advanceGoals)($player->owner(), \count($rewarded));
                 $dew = ($this->gatherTaskDew)($player->owner(), $rewarded);
+                $cluesRevealed = ($this->revealClues)($player->owner(), $rewarded);
                 $this->transaction->commit();
 
-                return [$dew, $goalsReached];
+                return [$dew, $goalsReached, $cluesRevealed];
             },
         );
         ($this->achievements)();
@@ -97,6 +100,7 @@ final readonly class CompleteTaskHandler
             ($this->showPlayer)(),
             null === $parent ? null : TaskView::of($parent),
             $goalsReached,
+            $cluesRevealed,
         );
     }
 }

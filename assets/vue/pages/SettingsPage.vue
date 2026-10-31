@@ -12,6 +12,7 @@ import PageHeader from '../components/ui/PageHeader.vue';
 import PageSection from '../components/ui/PageSection.vue';
 import { useApi } from '../composables/useApi.js';
 import { useInstall } from '../composables/useInstall.js';
+import { chooseMysteries, mysteriesEnabled } from '../composables/useMysteries.js';
 import { useSession } from '../composables/useSession.js';
 import { useSound } from '../composables/useSound.js';
 import { useToast } from '../composables/useToast.js';
@@ -68,6 +69,8 @@ function toggleSound(value) {
     sound.value = value;
     if (value) drip();
 }
+
+const toggleMysteries = (value) => toast.attempt(() => chooseMysteries(value));
 </script>
 
 <template>
@@ -85,6 +88,13 @@ function toggleSound(value) {
                     <SwitchRoot :model-value="sound" class="switch" @update:model-value="toggleSound"><SwitchThumb class="switch__thumb" /></SwitchRoot>
                     <span>{{ t('settings.sound') }}</span>
                 </label>
+                <div class="settings__switch settings__switch--hinted">
+                    <SwitchRoot id="settings-mysteries" :model-value="mysteriesEnabled" class="switch" aria-describedby="settings-mysteries-hint" @update:model-value="toggleMysteries"><SwitchThumb class="switch__thumb" /></SwitchRoot>
+                    <span class="settings__switch-text">
+                        <label for="settings-mysteries" class="settings__switch-label">{{ t('settings.mysteries') }}</label>
+                        <span id="settings-mysteries-hint" class="settings__hint">{{ t('settings.mysteriesHint') }}</span>
+                    </span>
+                </div>
             </div>
         </PageSection>
         <PageSection :title="t('settings.appearance.title')">
@@ -121,6 +131,10 @@ function toggleSound(value) {
 <style scoped>
 .settings { display: flex; flex-direction: column; gap: var(--space-4); max-width: 28rem; }
 .settings__switch { display: flex; align-items: center; gap: var(--space-3); cursor: pointer; }
+.settings__switch--hinted { align-items: flex-start; cursor: default; }
+.settings__switch-text { display: flex; flex-direction: column; gap: var(--space-1); }
+.settings__switch-label { cursor: pointer; }
+.settings__hint { color: var(--color-subtle); font-size: var(--font-size-sm); }
 .switch { position: relative; flex-shrink: 0; width: 2.5rem; height: 1.5rem; padding: 0; border: none; border-radius: var(--radius-pill); background: var(--color-border-strong); cursor: pointer; transition: background var(--transition); }
 .switch[data-state="checked"] { background: var(--color-accent); }
 .switch__thumb { display: block; width: 1.125rem; height: 1.125rem; border-radius: 50%; background: var(--color-surface); box-shadow: var(--shadow); transform: translateX(0.1875rem); transition: transform var(--transition); }

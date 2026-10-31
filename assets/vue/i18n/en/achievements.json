@@ -66,5 +66,13 @@
     "common_ground": {
         "title": "Common ground",
         "description": "Reach a shared goal with friends."
+    },
+    "first_case": {
+        "title": "Case closed",
+        "description": "Solve your first Moss Mystery."
+    },
+    "ten_cases": {
+        "title": "Seasoned sleuth",
+        "description": "Solve 10 Moss Mysteries."
     }
 }

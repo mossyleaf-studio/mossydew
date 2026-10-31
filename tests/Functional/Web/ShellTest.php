@@ -52,6 +52,18 @@ final class ShellTest extends WebTestCase
         self::assertSame(2, Json::int($preloaded, '/api/greenhouse', 'wateringMultiplier'));
     }
 
+    public function testTheMysteriesPagePreloadsTheCase(): void
+    {
+        $client = self::signedInClient();
+
+        $crawler = $client->request('GET', '/mysteries');
+
+        self::assertResponseIsSuccessful();
+        $preloaded = Json::decode($crawler->filter('#app-preload')->text());
+        self::assertSame(['/api/projects', '/api/player', '/api/mystery'], array_keys($preloaded));
+        self::assertSame(['investigation' => null, 'solved' => 0], Json::array($preloaded, '/api/mystery'));
+    }
+
     public function testSignedInUsersGetTheShell(): void
     {
         $client = self::signedInClient('louis@mossydew.test');

@@ -43,7 +43,7 @@ final class GamificationApiTest extends WebTestCase
 
         $client->jsonRequest('GET', '/api/achievements');
         self::assertResponseIsSuccessful();
-        self::assertCount(16, self::body($client));
+        self::assertCount(18, self::body($client));
         self::assertSame('first_drop', Json::string(self::body($client), 0, 'id'));
         self::assertIsString(Json::at(self::body($client), 0, 'unlockedAt'));
 

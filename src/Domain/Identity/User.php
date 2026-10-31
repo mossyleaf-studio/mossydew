@@ -50,6 +50,9 @@ class User
     #[ORM\Column(length: 10, enumType: IconSet::class, options: ['default' => 'lucide'])]
     private IconSet $iconSet = IconSet::Lucide;
 
+    #[ORM\Column(options: ['default' => false])]
+    private bool $playsMysteries = false;
+
     private function __construct(string $email, string $displayName, string $timezone, \DateTimeImmutable $now)
     {
         $this->id = new Ulid();
@@ -135,6 +138,16 @@ class User
     public function iconSet(): IconSet
     {
         return $this->iconSet;
+    }
+
+    public function playMysteries(bool $plays): void
+    {
+        $this->playsMysteries = $plays;
+    }
+
+    public function playsMysteries(): bool
+    {
+        return $this->playsMysteries;
     }
 
     public function today(\DateTimeImmutable $now): \DateTimeImmutable

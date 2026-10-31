@@ -1,0 +1,120 @@
+{
+    "title": "Moss Mysteries",
+    "solvedCount": "No case solved yet | 1 case solved | {count} cases solved",
+    "progress": "{revealed} of {total} clues revealed",
+    "clueRevealed": "A new clue is waiting in Moss Mysteries. | {count} new clues are waiting in Moss Mysteries.",
+    "intro": "Someone has been found dead in a house full of guests. Each task you complete reveals one clue about where everyone stood. Work out the whole floor plan, then name the murderer.",
+    "open": "Open a case",
+    "openNew": "Open a new case",
+    "opening": "Drawing up the floor plan…",
+    "off": "Moss Mysteries is off, so completed tasks reveal no clues.",
+    "offAction": "Turn it on in Settings",
+    "rules": {
+        "title": "How to play",
+        "grid": "Everyone stands on exactly one square, and no two people share a row or a column: each row and each column holds one person.",
+        "murderer": "The victim’s room holds exactly two people: the victim and the murderer. Nobody else is ever alone with the victim.",
+        "furniture": "Armchairs, sofas and beds are seats: someone can stand there. Every other piece of furniture fills its square, so nobody stands on it.",
+        "directions": "North is the top of the plan and west is its left. “Next to” means sharing a side, even through a wall into another room; touching at a corner does not count.",
+        "counts": "A room’s head count includes the victim: “Nobody was in the kitchen” means the victim was not there either, and “Exactly 3 people were in the library” counts the victim among them.",
+        "clues": "Each task you complete reveals the next clue.",
+        "marks": "Pick a person, then tap a square to place them. With nobody picked, tap an empty square to cross it out, or tap a placed person to take them back off. Your marks are saved with the case.",
+        "accusation": "Once everyone is placed, choose the murderer and accuse. A wrong accusation costs nothing and does not say what is wrong.",
+        "seats": "Seats",
+        "blocking": "Blocks the square"
+    },
+    "palette": {
+        "title": "People",
+        "label": "People to place on the plan",
+        "victim": "victim",
+        "hint": "Pick a person, then tap a square to place them.",
+        "picked": "Placing {name}: tap a square, or pick {name} again to cancel.",
+        "progress": "{placed} of {total} placed",
+        "state": {
+            "suspect": {
+                "placed": "{name}, placed on {cell}",
+                "unplaced": "{name}, not placed yet"
+            },
+            "victim": {
+                "placed": "{name}, the victim, placed on {cell}",
+                "unplaced": "{name}, the victim, not placed yet"
+            }
+        }
+    },
+    "board": {
+        "title": "Floor plan",
+        "label": "Floor plan",
+        "north": "North",
+        "hint": "Tap a square to see its room and furniture.",
+        "seat": "{name} (seat)",
+        "blocking": "{name} (blocks the square)",
+        "crossed": "crossed out",
+        "clearCrosses": "Clear crosses",
+        "here": {
+            "suspect": "{name} is here",
+            "victim": "{name}, the victim, is here",
+            "murderer": "{name}, the murderer, is here"
+        }
+    },
+    "clues": {
+        "title": "Clues",
+        "none": "No clue yet. Complete a task to reveal the first one.",
+        "locked": "Complete a task to reveal this clue.",
+        "lockedMany": "{count} more clues are locked. Complete tasks to reveal them."
+    },
+    "accusation": {
+        "title": "Accusation",
+        "intro": "Name the murderer once everyone is placed. A wrong accusation costs nothing.",
+        "suspects": "Suspects",
+        "submit": "Accuse",
+        "needsEveryone": "Place everyone on the plan first.",
+        "needsSuspect": "Choose who you accuse.",
+        "solved": "Case solved: {name} did it."
+    },
+    "verdict": {
+        "title": "Case solved",
+        "culprit": "{name} did it.",
+        "story": "{murderer} was {room} with {victim}, and nobody else."
+    },
+    "rooms": {
+        "kitchen": { "name": "Kitchen", "in": "in the kitchen" },
+        "living_room": { "name": "Living room", "in": "in the living room" },
+        "bedroom": { "name": "Bedroom", "in": "in the bedroom" },
+        "bathroom": { "name": "Bathroom", "in": "in the bathroom" },
+        "library": { "name": "Library", "in": "in the library" },
+        "music_room": { "name": "Music room", "in": "in the music room" },
+        "study": { "name": "Study", "in": "in the study" },
+        "dining_room": { "name": "Dining room", "in": "in the dining room" },
+        "hall": { "name": "Hall", "in": "in the hall" },
+        "conservatory": { "name": "Conservatory", "in": "in the conservatory" },
+        "guest_room": { "name": "Guest room", "in": "in the guest room" },
+        "nursery": { "name": "Nursery", "in": "in the nursery" },
+        "attic": { "name": "Attic", "in": "in the attic" },
+        "laundry": { "name": "Laundry", "in": "in the laundry" }
+    },
+    "furniture": {
+        "armchair": { "name": "Armchair", "on": "in an armchair", "beside": "next to an armchair" },
+        "sofa": { "name": "Sofa", "on": "on a sofa", "beside": "next to a sofa" },
+        "bed": { "name": "Bed", "on": "in a bed", "beside": "next to a bed" },
+        "plant": { "name": "Plant", "beside": "next to a plant" },
+        "books": { "name": "Bookcase", "beside": "next to a bookcase" },
+        "bath": { "name": "Bathtub", "beside": "next to a bathtub" },
+        "toilet": { "name": "Toilet", "beside": "next to a toilet" },
+        "tv": { "name": "Television", "beside": "next to a television" },
+        "piano": { "name": "Piano", "beside": "next to a piano" },
+        "lamp": { "name": "Floor lamp", "beside": "next to a floor lamp" },
+        "stove": { "name": "Stove", "beside": "next to a stove" },
+        "washer": { "name": "Washing machine", "beside": "next to a washing machine" }
+    },
+    "sentence": {
+        "in_room": "{person} was {room}.",
+        "on_furniture": "{person} was {furniture}.",
+        "beside_furniture": "{person} was {furniture}.",
+        "in_row": "{person} was in row {row}.",
+        "in_column": "{person} was in column {column}.",
+        "same_room": "{person} and {other} were in the same room.",
+        "north_of": "{person} was further north than {other}.",
+        "west_of": "{person} was further west than {other}.",
+        "empty_room": "Nobody was {room}.",
+        "room_holds": "Exactly one person was {room}. | Exactly {count} people were {room}."
+    }
+}

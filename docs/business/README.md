@@ -11,6 +11,7 @@
 | Herbarium, species, specimen | `Domain\Gamification\Herbarium\{SpeciesCatalog, SpeciesDraw, Specimen}` | [gamification.md](gamification.md) |
 | Greenhouse, pot, dew, facility, expedition | `Domain\Gamification\Greenhouse\{Greenhouse, Pot, Facility, DewPolicy}` | [greenhouse.md](greenhouse.md) |
 | Achievements | `Domain\Gamification\Achievement\*` | [gamification.md](gamification.md) |
+| Moss Mysteries, case, clue, accusation | `Domain\Mystery\{Investigation, CaseGenerator, Solver}` | [mysteries.md](mysteries.md) |
 | Done, statistics | `Application\Planning\{ListDoneTasks, ShowStatistics}\*` | [history.md](history.md) |
 | Account, sign-in, theme | `Domain\Identity\*` | [accounts.md](accounts.md) |
 | Import from Super Productivity | `Application\Planning\ImportSuperProductivity\*` | [tasks.md](tasks.md) |

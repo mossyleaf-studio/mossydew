@@ -1,8 +1,10 @@
 <script setup>
+import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
-import { CalendarDays, ChartColumn, CircleCheckBig, Grid2x2, Inbox, Leaf, Plus, Settings, Sun, Trophy, Users, Warehouse } from '../../icons.js';
+import { CalendarDays, ChartColumn, CircleCheckBig, Grid2x2, Inbox, Leaf, Plus, Search, Settings, Sun, Trophy, Users, Warehouse } from '../../icons.js';
 import { useI18n } from 'vue-i18n';
 import IconButton from '../ui/IconButton.vue';
+import { mysteriesEnabled } from '../../composables/useMysteries.js';
 import { useProjects } from '../../composables/useProjects.js';
 
 const emit = defineEmits(['new-project']);
@@ -18,14 +20,15 @@ const MAIN = [
     { to: '/done', icon: CircleCheckBig, label: 'nav.done' },
 ];
 
-const SECONDARY = [
+const secondary = computed(() => [
     { to: '/herbarium', icon: Leaf, label: 'nav.herbarium' },
     { to: '/greenhouse', icon: Warehouse, label: 'nav.greenhouse' },
+    ...(mysteriesEnabled.value ? [{ to: '/mysteries', icon: Search, label: 'nav.mysteries' }] : []),
     { to: '/achievements', icon: Trophy, label: 'nav.achievements' },
     { to: '/friends', icon: Users, label: 'nav.friends' },
     { to: '/stats', icon: ChartColumn, label: 'nav.stats' },
     { to: '/settings', icon: Settings, label: 'nav.settings' },
-];
+]);
 </script>
 
 <template>
@@ -55,7 +58,7 @@ const SECONDARY = [
             <p v-if="!projects.length" class="nav-menu__hint">{{ t('nav.noProjects') }}</p>
         </div>
         <ul class="nav-menu__links nav-menu__links--secondary">
-            <li v-for="link in SECONDARY" :key="link.to">
+            <li v-for="link in secondary" :key="link.to">
                 <RouterLink :to="link.to" class="nav-menu__link" active-class="nav-menu__link--active">
                     <component :is="link.icon" class="nav-menu__icon" size="1.125rem" :stroke-width="1.75" aria-hidden="true" />{{ t(link.label) }}
                 </RouterLink>

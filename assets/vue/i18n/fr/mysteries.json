@@ -1,0 +1,120 @@
+{
+    "title": "Mystères moussus",
+    "solvedCount": "Aucune affaire résolue | 1 affaire résolue | {count} affaires résolues",
+    "progress": "Indices révélés : {revealed} sur {total}",
+    "clueRevealed": "Un nouvel indice vous attend dans Mystères moussus. | {count} nouveaux indices vous attendent dans Mystères moussus.",
+    "intro": "Quelqu’un a été retrouvé mort dans une maison pleine d’invités. Chaque tâche terminée révèle un indice sur l’endroit où se trouvait chacun. Reconstituez tout le plan, puis dites qui a commis le meurtre.",
+    "open": "Ouvrir une affaire",
+    "openNew": "Ouvrir une nouvelle affaire",
+    "opening": "Dessin du plan en cours…",
+    "off": "Mystères moussus est désactivé : les tâches terminées ne révèlent aucun indice.",
+    "offAction": "L’activer dans les réglages",
+    "rules": {
+        "title": "Comment jouer",
+        "grid": "Chaque personne occupe une seule case du plan, et aucune ligne ni colonne n’en accueille deux : chaque ligne et chaque colonne contient une personne.",
+        "murderer": "La pièce de la victime contient exactement deux personnes : la victime et l’auteur du meurtre. Aucune autre personne ne se retrouve en tête-à-tête avec la victime.",
+        "furniture": "Fauteuils, canapés et lits sont des sièges : on peut s’y trouver. Tout autre meuble occupe sa case en entier, donc personne ne s’y tient.",
+        "directions": "Le nord est le haut du plan et l’ouest sa gauche. « À côté » signifie partager un côté, même à travers un mur, dans une autre pièce ; toucher un coin ne compte pas.",
+        "counts": "Le nombre de personnes d’une pièce compte la victime : « Personne n’était dans la cuisine » signifie que la victime n’y était pas non plus, et « Exactement 3 personnes étaient dans la bibliothèque » la compte parmi elles.",
+        "clues": "Chaque tâche terminée révèle l’indice suivant.",
+        "marks": "Choisissez une personne, puis touchez une case pour l’y placer. Sans personne choisie, touchez une case vide pour la barrer, ou une personne placée pour la retirer du plan. Vos marques sont enregistrées avec l’affaire.",
+        "accusation": "Quand tout le monde est placé, choisissez qui a commis le meurtre et accusez. Une accusation fausse ne coûte rien et ne dit pas ce qui cloche.",
+        "seats": "Sièges",
+        "blocking": "Bloque la case"
+    },
+    "palette": {
+        "title": "Personnes",
+        "label": "Personnes à placer sur le plan",
+        "victim": "victime",
+        "hint": "Choisissez une personne, puis touchez une case pour la placer.",
+        "picked": "Placement de {name} : touchez une case, ou choisissez {name} à nouveau pour annuler.",
+        "progress": "Placement : {placed} sur {total}",
+        "state": {
+            "suspect": {
+                "placed": "{name}, sur la case {cell}",
+                "unplaced": "{name}, pas encore sur le plan"
+            },
+            "victim": {
+                "placed": "{name}, la victime, sur la case {cell}",
+                "unplaced": "{name}, la victime, pas encore sur le plan"
+            }
+        }
+    },
+    "board": {
+        "title": "Plan de la maison",
+        "label": "Plan de la maison",
+        "north": "Nord",
+        "hint": "Touchez une case pour voir sa pièce et son mobilier.",
+        "seat": "{name} (siège)",
+        "blocking": "{name} (bloque la case)",
+        "crossed": "barrée",
+        "clearCrosses": "Effacer les croix",
+        "here": {
+            "suspect": "{name} est ici",
+            "victim": "{name}, la victime, est ici",
+            "murderer": "{name}, l’auteur du meurtre, est ici"
+        }
+    },
+    "clues": {
+        "title": "Indices",
+        "none": "Aucun indice pour l’instant. Terminez une tâche pour révéler le premier.",
+        "locked": "Terminez une tâche pour révéler cet indice.",
+        "lockedMany": "{count} autres indices sont verrouillés. Terminez des tâches pour les révéler."
+    },
+    "accusation": {
+        "title": "Accusation",
+        "intro": "Désignez qui a commis le meurtre quand tout le monde est placé. Une accusation fausse ne coûte rien.",
+        "suspects": "Suspects",
+        "submit": "Accuser",
+        "needsEveryone": "Placez d’abord tout le monde sur le plan.",
+        "needsSuspect": "Choisissez qui vous accusez.",
+        "solved": "Affaire résolue : le crime est l’œuvre de {name}."
+    },
+    "verdict": {
+        "title": "Affaire résolue",
+        "culprit": "Le crime est l’œuvre de {name}.",
+        "story": "{murderer} se trouvait {room} avec {victim}, sans personne d’autre."
+    },
+    "rooms": {
+        "kitchen": { "name": "Cuisine", "in": "dans la cuisine" },
+        "living_room": { "name": "Salon", "in": "dans le salon" },
+        "bedroom": { "name": "Chambre", "in": "dans la chambre" },
+        "bathroom": { "name": "Salle de bain", "in": "dans la salle de bain" },
+        "library": { "name": "Bibliothèque", "in": "dans la bibliothèque" },
+        "music_room": { "name": "Salle de musique", "in": "dans la salle de musique" },
+        "study": { "name": "Bureau", "in": "dans le bureau" },
+        "dining_room": { "name": "Salle à manger", "in": "dans la salle à manger" },
+        "hall": { "name": "Vestibule", "in": "dans le vestibule" },
+        "conservatory": { "name": "Véranda", "in": "dans la véranda" },
+        "guest_room": { "name": "Chambre d’amis", "in": "dans la chambre d’amis" },
+        "nursery": { "name": "Chambre d’enfant", "in": "dans la chambre d’enfant" },
+        "attic": { "name": "Grenier", "in": "dans le grenier" },
+        "laundry": { "name": "Buanderie", "in": "dans la buanderie" }
+    },
+    "furniture": {
+        "armchair": { "name": "Fauteuil", "on": "dans un fauteuil", "beside": "à côté d’un fauteuil" },
+        "sofa": { "name": "Canapé", "on": "sur un canapé", "beside": "à côté d’un canapé" },
+        "bed": { "name": "Lit", "on": "dans un lit", "beside": "à côté d’un lit" },
+        "plant": { "name": "Plante", "beside": "à côté d’une plante" },
+        "books": { "name": "Étagère à livres", "beside": "à côté d’une étagère à livres" },
+        "bath": { "name": "Baignoire", "beside": "à côté d’une baignoire" },
+        "toilet": { "name": "Toilettes", "beside": "à côté des toilettes" },
+        "tv": { "name": "Télévision", "beside": "à côté d’une télévision" },
+        "piano": { "name": "Piano", "beside": "à côté d’un piano" },
+        "lamp": { "name": "Lampadaire", "beside": "à côté d’un lampadaire" },
+        "stove": { "name": "Cuisinière", "beside": "à côté d’une cuisinière" },
+        "washer": { "name": "Lave-linge", "beside": "à côté d’un lave-linge" }
+    },
+    "sentence": {
+        "in_room": "{person} était {room}.",
+        "on_furniture": "{person} était {furniture}.",
+        "beside_furniture": "{person} était {furniture}.",
+        "in_row": "{person} était sur la ligne {row}.",
+        "in_column": "{person} était sur la colonne {column}.",
+        "same_room": "{person} et {other} étaient dans la même pièce.",
+        "north_of": "{person} était plus au nord que {other}.",
+        "west_of": "{person} était plus à l’ouest que {other}.",
+        "empty_room": "Personne n’était {room}.",
+        "room_holds": "Exactement une personne était {room}. | Exactement {count} personnes étaient {room}."
+    }
+}

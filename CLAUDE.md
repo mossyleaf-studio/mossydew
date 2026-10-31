@@ -1,6 +1,6 @@
 # MossyDew — project guide for Claude
 
-Gamified task manager from the MossyTrunk ecosystem, with a moss herbarium to fill. Tasks (with a planned day and an optional deadline) live in projects or in the inbox; **Today** is a work context that gathers tasks from every project; the **Eisenhower matrix** orders every list; completing tasks earns XP and streaks; every level (flat 150 XP) crossed adds a random moss species (iNaturalist photo, rarity-weighted) to the user's herbarium, alongside achievements; collected mosses grow in an upgradable **greenhouse** that never produces over time: completed tasks bring dew (Plant most), and the bigger the greenhouse, the more dew each task brings; dew is spent on instant facility upgrades and expeditions for new mosses.
+Gamified task manager from the MossyTrunk ecosystem, with a moss herbarium to fill. Tasks (with a planned day and an optional deadline) live in projects or in the inbox; **Today** is a work context that gathers tasks from every project; the **Eisenhower matrix** orders every list; completing tasks earns XP and streaks; every level (flat 150 XP) crossed adds a random moss species (iNaturalist photo, rarity-weighted) to the user's herbarium, alongside achievements; collected mosses grow in an upgradable **greenhouse** that never produces over time: completed tasks bring dew (Plant most), and the bigger the greenhouse, the more dew each task brings; dew is spent on instant facility upgrades and expeditions for new mosses. Optional **Moss Mysteries** (Settings toggle): a generated logic grid (`Domain\Mystery\CaseGenerator`, proven unique by `Solver`) whose clues are revealed one per completed task.
 UI languages: **English and French**. URLs, code, commits: **English**.
 
 **Business rules live in [`docs/business/`](docs/business/README.md)** — read the relevant page before touching a domain concept, and update it in the same commit when a rule changes.
@@ -42,7 +42,7 @@ make e2e             # Playwright against php-e2e (APP_ENV=test)
 | `Infrastructure/` | Doctrine repositories and read ports, security adapters (mossyleaf accounts OIDC client), console | Domain, Application |
 | `Presentation/` | `Api/` JSON controllers + payload DTOs, `Web/` Twig shells and auth pages | Application, Domain |
 
-Contexts: `Identity`, `Planning`, `Gamification`.
+Contexts: `Identity`, `Planning`, `Gamification`, `Social`, `Mystery`.
 
 - Doctrine mapping = attributes on Domain entities. Dates without time (`plannedOn`, `dueOn`, streak days) are `date_immutable` built through `Domain\Shared\Day` — never `new \DateTimeImmutable()` for a day.
 - **"Today" depends on the user's time zone** (`User::today($now)`, `Application\Planning\Today`): never compare days with the server clock directly.

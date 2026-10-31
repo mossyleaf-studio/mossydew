@@ -6,6 +6,8 @@
     "timezoneSaved": "Fuseau horaire enregistré.",
     "language": "Langue",
     "sound": "Son de goutte quand une tâche est faite",
+    "mysteries": "Mystères moussus",
+    "mysteriesHint": "Une énigme de logique : chaque tâche terminée révèle un indice. La désactiver garde votre affaire en cours.",
     "import": {
         "title": "Importer depuis Super Productivity",
         "intro": "Exportez une sauvegarde depuis les réglages de Super Productivity, puis choisissez le fichier ici. Les tâches ouvertes arrivent avec leur projet, leurs étiquettes urgent et important (en quadrants de la matrice), leur jour prévu, leur échéance, leurs notes et leurs sous-tâches. Les tâches faites restent là-bas, et réimporter le même fichier n’ajoute rien de nouveau.",

@@ -44,6 +44,17 @@ final class AccountApiTest extends WebTestCase
         self::assertResponseStatusCodeSame(422);
     }
 
+    public function testChooseMysteries(): void
+    {
+        $client = self::signedInClient();
+
+        $client->jsonRequest('PUT', '/api/me/mysteries', ['enabled' => true]);
+        self::assertResponseStatusCodeSame(204);
+
+        $client->jsonRequest('PUT', '/api/me/mysteries', ['enabled' => 'maybe']);
+        self::assertResponseStatusCodeSame(422);
+    }
+
     public function testChooseIcons(): void
     {
         $client = self::signedInClient();

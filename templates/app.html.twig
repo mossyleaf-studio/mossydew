@@ -11,6 +11,7 @@
         theme: app.user.theme ? {background: app.user.theme.background, accent: app.user.theme.accent} : null,
         design: app.user.design.value,
         icons: app.user.iconSet.value,
+        mysteries: app.user.mysteries,
         logoutToken: csrf_token('logout'),
         accountsUrl: accounts_url,
     }|json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP'))|raw }}</script>

@@ -8,6 +8,7 @@ import HerbariumPage from './vue/pages/HerbariumPage.vue';
 import InboxPage from './vue/pages/InboxPage.vue';
 import JoinFriendPage from './vue/pages/JoinFriendPage.vue';
 import MatrixPage from './vue/pages/MatrixPage.vue';
+import MysteriesPage from './vue/pages/MysteriesPage.vue';
 import NotFoundPage from './vue/pages/NotFoundPage.vue';
 import ProjectPage from './vue/pages/ProjectPage.vue';
 import ProjectsPage from './vue/pages/ProjectsPage.vue';
@@ -29,6 +30,7 @@ export const router = createRouter({
         { path: '/projects/:id', name: 'project', component: ProjectPage, props: true },
         { path: '/herbarium', name: 'herbarium', component: HerbariumPage },
         { path: '/greenhouse', name: 'greenhouse', component: GreenhousePage },
+        { path: '/mysteries', name: 'mysteries', component: MysteriesPage },
         { path: '/achievements', name: 'achievements', component: AchievementsPage },
         { path: '/friends', name: 'friends', component: FriendsPage },
         { path: '/friends/join/:token', name: 'join-friend', component: JoinFriendPage, props: true },

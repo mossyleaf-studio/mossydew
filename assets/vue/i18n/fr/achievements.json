@@ -66,5 +66,13 @@
     "common_ground": {
         "title": "Terrain commun",
         "description": "Atteindre un objectif commun avec des amis."
+    },
+    "first_case": {
+        "title": "Affaire classée",
+        "description": "Résolvez votre premier mystère moussu."
+    },
+    "ten_cases": {
+        "title": "Dix affaires classées",
+        "description": "Résolvez 10 mystères moussus."
     }
 }

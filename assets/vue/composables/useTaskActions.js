@@ -43,6 +43,7 @@ export function useTaskActions() {
             }
             celebration.reward(completion);
             (completion.goalsReached ?? []).forEach((title) => toast.success(t('friends.goals.reachedToast', { title })));
+            if (completion.cluesRevealed > 0) toast.info(t('mysteries.clueRevealed', completion.cluesRevealed));
             return completion;
         },
         async reopen(task) {

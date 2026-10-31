@@ -38,6 +38,11 @@ final readonly class DoctrinePlayerStatsLedger implements PlayerStatsLedger
             ['owner' => $owner],
         );
 
+        $cases = $this->connection->fetchOne(
+            'SELECT COUNT(*) FROM investigation WHERE owner_id = :owner AND solved_at IS NOT NULL',
+            ['owner' => $owner],
+        );
+
         return new PlayerStats(
             tasksCompleted: self::int($tasks['completed'] ?? 0),
             doFirstCompleted: self::int($tasks['do_first'] ?? 0),
@@ -49,6 +54,7 @@ final readonly class DoctrinePlayerStatsLedger implements PlayerStatsLedger
             expeditions: self::int($greenhouse['expeditions'] ?? 0),
             glasshouseLevel: self::int($greenhouse['glasshouse'] ?? 1),
             goalsReached: self::int($goals),
+            casesSolved: self::int($cases),
         );
     }
 

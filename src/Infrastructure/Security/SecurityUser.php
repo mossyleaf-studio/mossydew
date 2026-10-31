@@ -22,12 +22,13 @@ final class SecurityUser implements UserInterface
         public readonly ?Theme $theme,
         public readonly Design $design,
         public readonly IconSet $iconSet,
+        public readonly bool $mysteries,
     ) {
     }
 
     public static function fromUser(User $user): self
     {
-        return new self($user->id(), $user->email(), $user->displayName(), $user->language(), $user->theme(), $user->design(), $user->iconSet());
+        return new self($user->id(), $user->email(), $user->displayName(), $user->language(), $user->theme(), $user->design(), $user->iconSet(), $user->playsMysteries());
     }
 
     public function getUserIdentifier(): string
@@ -50,10 +51,11 @@ final class SecurityUser implements UserInterface
             'theme' => null === $this->theme ? null : [$this->theme->background, $this->theme->accent],
             'design' => $this->design->value,
             'iconSet' => $this->iconSet->value,
+            'mysteries' => $this->mysteries,
         ];
     }
 
-    /** @param array{id: string, email: string, displayName: string, language?: ?string, theme?: ?array{string, string}, design?: string, iconSet?: string} $data */
+    /** @param array{id: string, email: string, displayName: string, language?: ?string, theme?: ?array{string, string}, design?: string, iconSet?: string, mysteries?: bool} $data */
     public function __unserialize(array $data): void
     {
         $this->id = Ulid::fromString($data['id']);
@@ -63,5 +65,6 @@ final class SecurityUser implements UserInterface
         $this->theme = isset($data['theme']) ? Theme::of(...$data['theme']) : null;
         $this->design = Design::tryFrom($data['design'] ?? '') ?? Design::Classic;
         $this->iconSet = IconSet::tryFrom($data['iconSet'] ?? '') ?? IconSet::Lucide;
+        $this->mysteries = $data['mysteries'] ?? false;
     }
 }

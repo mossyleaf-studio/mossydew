@@ -17,6 +17,7 @@ final readonly class PlayerStats
         public int $expeditions = 0,
         public int $glasshouseLevel = 1,
         public int $goalsReached = 0,
+        public int $casesSolved = 0,
     ) {
     }
 }

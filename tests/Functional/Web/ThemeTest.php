@@ -28,6 +28,25 @@ final class ThemeTest extends WebTestCase
         self::assertNull($crawler->filter('html')->attr('data-design'));
         self::assertSame('classic', Json::string($session, 'design'));
         self::assertSame('lucide', Json::string($session, 'icons'));
+        self::assertFalse(Json::at($session, 'mysteries'));
+    }
+
+    public function testChooseMysteriesFlagsEveryPageAfterAFullReload(): void
+    {
+        $client = self::signedInClient();
+
+        $client->jsonRequest('PUT', '/api/me/mysteries', ['enabled' => true]);
+        self::assertResponseStatusCodeSame(204);
+
+        foreach (['/today', '/mysteries', '/today'] as $path) {
+            $crawler = $client->request('GET', $path);
+            self::assertTrue(Json::at(Json::decode($crawler->filter('#app-session')->text()), 'mysteries'));
+        }
+
+        $client->jsonRequest('PUT', '/api/me/mysteries', ['enabled' => false]);
+
+        $crawler = $client->request('GET', '/today');
+        self::assertFalse(Json::at(Json::decode($crawler->filter('#app-session')->text()), 'mysteries'));
     }
 
     public function testChooseDesignAndIconsStoresThemAndStylesThePages(): void

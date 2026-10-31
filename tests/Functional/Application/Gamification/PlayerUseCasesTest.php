@@ -73,7 +73,7 @@ final class PlayerUseCasesTest extends KernelTestCase
         $achievements = self::getContainer()->get(ListAchievementsHandler::class)();
 
         $unlocked = array_values(array_filter($achievements, static fn (AchievementView $achievement): bool => null !== $achievement->unlockedAt));
-        self::assertCount(16, $achievements);
+        self::assertCount(18, $achievements);
         self::assertSame(['first_drop'], array_map(static fn (AchievementView $achievement): string => $achievement->id, $unlocked));
         self::assertEquals(new \DateTimeImmutable('2026-10-06 08:00 UTC'), new \DateTimeImmutable((string) $unlocked[0]->unlockedAt));
     }
