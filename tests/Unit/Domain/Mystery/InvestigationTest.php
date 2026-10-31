@@ -6,19 +6,21 @@ namespace App\Tests\Unit\Domain\Mystery;
 
 use App\Domain\Identity\User;
 use App\Domain\Mystery\Blueprint;
-use App\Domain\Mystery\CaseGenerator;
+use App\Domain\Mystery\Clue;
+use App\Domain\Mystery\ClueKind;
 use App\Domain\Mystery\Exception\InvalidNotes;
 use App\Domain\Mystery\Exception\WrongAccusation;
+use App\Domain\Mystery\Floorplan;
+use App\Domain\Mystery\Gender;
 use App\Domain\Mystery\Investigation;
+use App\Domain\Mystery\RoomKind;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Random\Engine\Mt19937;
-use Random\Randomizer;
 use Symfony\Component\Uid\Ulid;
 
 final class InvestigationTest extends TestCase
 {
-    public function testACaseOpensWithEveryClueHiddenAndEmptyNotes(): void
+    public function testACaseOpensWithOnlyTheGivenClueRevealedAndEmptyNotes(): void
     {
         $blueprint = self::blueprint();
         $now = new \DateTimeImmutable('2026-10-06 09:00 UTC');
@@ -27,13 +29,26 @@ final class InvestigationTest extends TestCase
 
         $size = $blueprint->floorplan->size;
         self::assertEquals($blueprint->floorplan, $investigation->floorplan());
-        self::assertSame([$blueprint->people, $blueprint->victim, $blueprint->solution], [$investigation->people(), $investigation->victim(), $investigation->solution()]);
-        self::assertSame([], $investigation->revealedClues());
-        self::assertSame(\count($blueprint->clues), $investigation->hiddenClueCount());
+        self::assertSame([$blueprint->people, $blueprint->genders, $blueprint->victim, $blueprint->solution], [$investigation->people(), $investigation->genders(), $investigation->victim(), $investigation->solution()]);
+        self::assertEquals($blueprint->rules, $investigation->rules());
+        self::assertEquals([new Clue(ClueKind::AloneWithMurderer, person: $blueprint->victim)], $investigation->revealedClues());
+        self::assertSame(\count($blueprint->clues) - 1, $investigation->hiddenClueCount());
         self::assertSame(['placements' => array_fill(0, $size, null), 'crosses' => []], $investigation->notes());
         self::assertFalse($investigation->isSolved());
         self::assertEquals($now, $investigation->openedAt());
         self::assertNull($investigation->solvedAt());
+    }
+
+    public function testACaseWithoutAGivenClueOpensWithEveryClueHidden(): void
+    {
+        $blueprint = self::blueprint(given: false);
+
+        $investigation = Investigation::open(self::owner(), $blueprint, new \DateTimeImmutable());
+
+        self::assertSame([], $investigation->revealedClues());
+        self::assertSame(\count($blueprint->clues), $investigation->hiddenClueCount());
+        self::assertTrue($investigation->revealFor(new Ulid()));
+        self::assertEquals(\array_slice($blueprint->clues, 0, 1), $investigation->revealedClues());
     }
 
     public function testAGiftOpensWithEveryClueRevealedAndTasksRevealNothingMore(): void
@@ -65,14 +80,14 @@ final class InvestigationTest extends TestCase
         $first = new Ulid();
 
         self::assertTrue($investigation->revealFor($first));
-        self::assertEquals(\array_slice($blueprint->clues, 0, 1), $investigation->revealedClues());
+        self::assertEquals(\array_slice($blueprint->clues, 0, 2), $investigation->revealedClues());
 
         self::assertFalse($investigation->revealFor($first));
-        self::assertEquals(\array_slice($blueprint->clues, 0, 1), $investigation->revealedClues());
+        self::assertEquals(\array_slice($blueprint->clues, 0, 2), $investigation->revealedClues());
 
         self::assertTrue($investigation->revealFor(new Ulid()));
-        self::assertEquals(\array_slice($blueprint->clues, 0, 2), $investigation->revealedClues());
-        self::assertSame(\count($blueprint->clues) - 2, $investigation->hiddenClueCount());
+        self::assertEquals(\array_slice($blueprint->clues, 0, 3), $investigation->revealedClues());
+        self::assertSame(\count($blueprint->clues) - 3, $investigation->hiddenClueCount());
     }
 
     public function testNothingIsRevealedPastTheLastClue(): void
@@ -80,7 +95,7 @@ final class InvestigationTest extends TestCase
         $blueprint = self::blueprint();
         $investigation = Investigation::open(self::owner(), $blueprint, new \DateTimeImmutable());
 
-        foreach ($blueprint->clues as $ignored) {
+        foreach (\array_slice($blueprint->clues, 1) as $ignored) {
             self::assertTrue($investigation->revealFor(new Ulid()));
         }
 
@@ -95,7 +110,7 @@ final class InvestigationTest extends TestCase
         $investigation->accuse($investigation->solution(), $investigation->murderer(), new \DateTimeImmutable());
 
         self::assertFalse($investigation->revealFor(new Ulid()));
-        self::assertSame([], $investigation->revealedClues());
+        self::assertCount(1, $investigation->revealedClues());
     }
 
     public function testNotesKeepWhereEveryoneStandsAndWhichCellsAreCrossed(): void
@@ -194,9 +209,23 @@ final class InvestigationTest extends TestCase
         }
     }
 
-    private static function blueprint(): Blueprint
+    private static function blueprint(bool $given = true): Blueprint
     {
-        return new CaseGenerator(new Randomizer(new Mt19937(5)))->generate();
+        $clues = [
+            new Clue(ClueKind::InRow, person: 1, number: 1),
+            new Clue(ClueKind::InColumn, person: 2, number: 2),
+            new Clue(ClueKind::InRoom, person: 2, room: 1),
+        ];
+
+        return new Blueprint(
+            new Floorplan(3, [0, 0, 1, 0, 0, 1, 1, 1, 1], [RoomKind::Kitchen, RoomKind::LivingRoom], array_fill(0, 9, null)),
+            ['Vesper', 'Basil', 'Clover'],
+            [Gender::Female, Gender::Male, Gender::Female],
+            0,
+            [0, 4, 8],
+            $given ? [new Clue(ClueKind::AloneWithMurderer, person: 0), ...$clues] : $clues,
+            [new Clue(ClueKind::EveryRoomOccupied), new Clue(ClueKind::RoomCap, number: 2)],
+        );
     }
 
     private static function owner(): User

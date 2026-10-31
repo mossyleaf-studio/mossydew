@@ -12,11 +12,13 @@
     "rules": {
         "title": "Comment jouer",
         "grid": "Chaque personne occupe une seule case du plan, et aucune ligne ni colonne n’en accueille deux : chaque ligne et chaque colonne contient une personne.",
-        "murderer": "La pièce de la victime contient exactement deux personnes : la victime et l’auteur du meurtre. Aucune autre personne ne se retrouve en tête-à-tête avec la victime.",
+        "murderer": "Le nom de la victime commence par V, et aucun autre. Sa pièce contient exactement deux personnes : la victime et l’auteur du meurtre. Aucune autre personne ne se retrouve en tête-à-tête avec la victime.",
         "furniture": "Fauteuils, canapés et lits sont des sièges : on peut s’y trouver. Tout autre meuble occupe sa case en entier, donc personne ne s’y tient.",
-        "directions": "Le nord est le haut du plan et l’ouest sa gauche. « À côté » signifie partager un côté, même à travers un mur, dans une autre pièce ; toucher un coin ne compte pas.",
+        "directions": "Le nord est le haut du plan et l’ouest sa gauche. « À côté » signifie partager un côté, dans la même pièce : un mur entre les deux ou un simple coin ne comptent pas. « Exactement 2 lignes plus au nord » ne compte que les lignes, quelle que soit la colonne, « la case juste au nord » est la toute première, et « exactement 3 cases au nord » reste sur la même colonne, quoi qu’il y ait entre les deux.",
+        "terms": "Une case d’angle est l’un des quatre coins du plan. Une personne est dans un coin de sa pièce quand sa case touche un mur ou le bord du plan à la fois au nord ou au sud, et à l’est ou à l’ouest. Deux personnes sont sur la même diagonale quand leurs cases s’alignent à 45°, dans un sens ou dans l’autre. « Seul » signifie que personne d’autre n’était dans sa pièce ; « seul avec une femme », qu’il n’y avait qu’une autre personne, une femme ; « partageait sa pièce avec un homme dans un lit », qu’une autre personne de sa pièce, un homme, était dans un lit. « Dans une pièce avec un piano » signifie qu’un piano se trouvait quelque part dans sa pièce. « La seule personne dans un lit » signifie que personne d’autre, victime comprise, n’était dans un lit, où que ce soit sur le plan. « Plus au nord qu’un piano » signifie sur une ligne plus au nord qu’au moins un piano, quelle que soit la colonne ; l’est et l’ouest comptent les colonnes de la même façon. « Au moins 3 personnes étaient dans la bibliothèque » compte aussi la victime.",
         "counts": "Le nombre de personnes d’une pièce compte la victime : « Personne n’était dans la cuisine » signifie que la victime n’y était pas non plus, et « Exactement 3 personnes étaient dans la bibliothèque » la compte parmi elles.",
-        "clues": "Chaque tâche terminée révèle l’indice suivant.",
+        "clues": "Il y a un indice par personne. Celui de la victime, en tête-à-tête avec le meurtrier, est donné d’emblée ; chaque tâche terminée révèle le suivant. Un indice peut réunir deux faits : le second porte sur la même personne, sauf après « seul avec une femme » ou « seul avec un homme », où il porte sur cette autre personne, ou bien sur une pièce.",
+        "board": "Les règles du plan, au-dessus des indices, valent pour tout le plan et sont connues d’emblée.",
         "marks": "Choisissez une personne, puis touchez une case pour l’y placer. Sans personne choisie, touchez une case vide pour la barrer, ou une personne placée pour la retirer du plan. Vos marques sont enregistrées avec l’affaire.",
         "accusation": "Quand tout le monde est placé, choisissez qui a commis le meurtre et accusez. Une accusation fausse ne coûte rien et ne dit pas ce qui cloche.",
         "seats": "Sièges",
@@ -27,7 +29,7 @@
         "label": "Personnes à placer sur le plan",
         "victim": "victime",
         "hint": "Choisissez une personne, puis touchez une case pour la placer.",
-        "picked": "Placement de {name} : touchez une case, ou choisissez {name} à nouveau pour annuler.",
+        "picked": "{name} à placer : touchez une case, ou choisissez {name} à nouveau pour annuler.",
         "progress": "Placement : {placed} sur {total}",
         "state": {
             "suspect": {
@@ -55,6 +57,9 @@
             "murderer": "{name}, l’auteur du meurtre, est ici"
         }
     },
+    "boardRules": {
+        "title": "Règles du plan"
+    },
     "clues": {
         "title": "Indices",
         "none": "Aucun indice pour l’instant. Terminez une tâche pour révéler le premier.",
@@ -68,11 +73,11 @@
         "submit": "Accuser",
         "needsEveryone": "Placez d’abord tout le monde sur le plan.",
         "needsSuspect": "Choisissez qui vous accusez.",
-        "solved": "Affaire résolue : le crime est l’œuvre de {name}."
+        "solved": "Affaire résolue : {name} a commis le crime."
     },
     "verdict": {
         "title": "Affaire résolue",
-        "culprit": "Le crime est l’œuvre de {name}.",
+        "culprit": "{name} a commis le crime.",
         "story": "{murderer} se trouvait {room} avec {victim}, sans personne d’autre."
     },
     "rooms": {
@@ -92,18 +97,18 @@
         "laundry": { "name": "Buanderie", "in": "dans la buanderie" }
     },
     "furniture": {
-        "armchair": { "name": "Fauteuil", "on": "dans un fauteuil", "beside": "à côté d’un fauteuil" },
-        "sofa": { "name": "Canapé", "on": "sur un canapé", "beside": "à côté d’un canapé" },
-        "bed": { "name": "Lit", "on": "dans un lit", "beside": "à côté d’un lit" },
-        "plant": { "name": "Plante", "beside": "à côté d’une plante" },
-        "books": { "name": "Étagère à livres", "beside": "à côté d’une étagère à livres" },
-        "bath": { "name": "Baignoire", "beside": "à côté d’une baignoire" },
-        "toilet": { "name": "Toilettes", "beside": "à côté des toilettes" },
-        "tv": { "name": "Télévision", "beside": "à côté d’une télévision" },
-        "piano": { "name": "Piano", "beside": "à côté d’un piano" },
-        "lamp": { "name": "Lampadaire", "beside": "à côté d’un lampadaire" },
-        "stove": { "name": "Cuisinière", "beside": "à côté d’une cuisinière" },
-        "washer": { "name": "Lave-linge", "beside": "à côté d’un lave-linge" }
+        "armchair": { "name": "Fauteuil", "on": "dans un fauteuil", "beside": "à côté d’un fauteuil", "a": "un fauteuil", "none": "à côté d’aucun fauteuil", "than": "qu’un fauteuil" },
+        "sofa": { "name": "Canapé", "on": "sur un canapé", "beside": "à côté d’un canapé", "a": "un canapé", "none": "à côté d’aucun canapé", "than": "qu’un canapé" },
+        "bed": { "name": "Lit", "on": "dans un lit", "beside": "à côté d’un lit", "a": "un lit", "none": "à côté d’aucun lit", "than": "qu’un lit" },
+        "plant": { "name": "Plante", "beside": "à côté d’une plante", "a": "une plante", "none": "à côté d’aucune plante", "than": "qu’une plante" },
+        "books": { "name": "Étagère à livres", "beside": "à côté d’une étagère à livres", "a": "une étagère à livres", "none": "à côté d’aucune étagère à livres", "than": "qu’une étagère à livres" },
+        "bath": { "name": "Baignoire", "beside": "à côté d’une baignoire", "a": "une baignoire", "none": "à côté d’aucune baignoire", "than": "qu’une baignoire" },
+        "toilet": { "name": "Toilettes", "beside": "à côté des toilettes", "a": "des toilettes", "none": "à côté d’aucun WC", "than": "qu’un WC" },
+        "tv": { "name": "Télévision", "beside": "à côté d’une télévision", "a": "une télévision", "none": "à côté d’aucune télévision", "than": "qu’une télévision" },
+        "piano": { "name": "Piano", "beside": "à côté d’un piano", "a": "un piano", "none": "à côté d’aucun piano", "than": "qu’un piano" },
+        "lamp": { "name": "Lampadaire", "beside": "à côté d’un lampadaire", "a": "un lampadaire", "none": "à côté d’aucun lampadaire", "than": "qu’un lampadaire" },
+        "stove": { "name": "Cuisinière", "beside": "à côté d’une cuisinière", "a": "une cuisinière", "none": "à côté d’aucune cuisinière", "than": "qu’une cuisinière" },
+        "washer": { "name": "Lave-linge", "beside": "à côté d’un lave-linge", "a": "un lave-linge", "none": "à côté d’aucun lave-linge", "than": "qu’un lave-linge" }
     },
     "sentence": {
         "in_room": "{person} était {room}.",
@@ -112,9 +117,39 @@
         "in_row": "{person} était sur la ligne {row}.",
         "in_column": "{person} était sur la colonne {column}.",
         "same_room": "{person} et {other} étaient dans la même pièce.",
-        "north_of": "{person} était plus au nord que {other}.",
-        "west_of": "{person} était plus à l’ouest que {other}.",
+        "north_of": "{person} était plus au nord {than}.",
+        "west_of": "{person} était plus à l’ouest {than}.",
         "empty_room": "Personne n’était {room}.",
-        "room_holds": "Exactement une personne était {room}. | Exactement {count} personnes étaient {room}."
-    }
+        "room_holds": "Exactement une personne était {room}. | Exactement {count} personnes étaient {room}.",
+        "alone_with_murderer": "{person} se trouvait en tête-à-tête avec le meurtrier.",
+        "north_by": "{person} était exactement 1 ligne plus au nord {than}. | {person} était exactement {count} lignes plus au nord {than}.",
+        "west_by": "{person} était exactement 1 colonne plus à l’ouest {than}. | {person} était exactement {count} colonnes plus à l’ouest {than}.",
+        "furniture_north": "{person} avait {furniture} sur la case juste au nord. | {person} avait {furniture} exactement {count} cases au nord, sur la même colonne.",
+        "furniture_south": "{person} avait {furniture} sur la case juste au sud. | {person} avait {furniture} exactement {count} cases au sud, sur la même colonne.",
+        "furniture_east": "{person} avait {furniture} sur la case juste à l’est. | {person} avait {furniture} exactement {count} cases à l’est, sur la même ligne.",
+        "furniture_west": "{person} avait {furniture} sur la case juste à l’ouest. | {person} avait {furniture} exactement {count} cases à l’ouest, sur la même ligne.",
+        "alone": { "female": "{person} était seule dans sa pièce.", "male": "{person} était seul dans sa pièce." },
+        "alone_with": { "female": "{person} était seule avec {someone}.", "male": "{person} était seul avec {someone}." },
+        "grid_corner": "{person} était sur une case d’angle du plan.",
+        "room_corner": "{person} était dans un coin de sa pièce.",
+        "only_on": "{person} était la seule personne {furniture}.",
+        "room_has": "{person} était dans une pièce avec {furniture}.",
+        "not_beside": "{person} n’était {furniture}.",
+        "someone_on": "{person} partageait sa pièce avec {someone} {furniture}.",
+        "someone_beside": "{person} partageait sa pièce avec quelqu’un {furniture}.",
+        "same_diagonal": "{person} et {other} étaient sur la même diagonale.",
+        "room_at_least": "Au moins une personne était {room}. | Au moins {count} personnes étaient {room}.",
+        "north_of_furniture": "{person} était plus au nord {furniture}.",
+        "south_of_furniture": "{person} était plus au sud {furniture}.",
+        "east_of_furniture": "{person} était plus à l’est {furniture}.",
+        "west_of_furniture": "{person} était plus à l’ouest {furniture}.",
+        "seat_count": { "exactly": "Personne n’était {furniture}. | Exactement une personne était {furniture}. | Exactement {count} personnes étaient {furniture}.", "at_least": "Au moins une personne était {furniture}. | Au moins {count} personnes étaient {furniture}.", "at_most": "Personne n’était {furniture}. | Au plus une personne était {furniture}. | Au plus {count} personnes étaient {furniture}." },
+        "every_room_occupied": "Aucune pièce n’était vide.",
+        "room_cap": "Aucune pièce n’accueillait plus d’une personne. | Aucune pièce n’accueillait plus de {count} personnes.",
+        "gender_seated": { "female": "Aucune femme n’était {furniture}. | Exactement une femme était {furniture}. | Exactement {count} femmes étaient {furniture}.", "male": "Aucun homme n’était {furniture}. | Exactement un homme était {furniture}. | Exactement {count} hommes étaient {furniture}." },
+        "pairing": { "female": "Chaque femme partageait sa pièce avec un homme.", "male": "Chaque homme partageait sa pièce avec une femme." }
+    },
+    "than": { "vowel": "qu’{other}", "consonant": "que {other}" },
+    "pronoun": { "female": "Elle", "male": "Il" },
+    "someone": { "female": "une femme", "male": "un homme" }
 }

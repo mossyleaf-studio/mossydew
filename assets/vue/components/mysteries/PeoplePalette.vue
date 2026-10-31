@@ -2,7 +2,6 @@
 import { computed } from 'vue';
 import { ToggleGroupItem, ToggleGroupRoot } from 'reka-ui';
 import { useI18n } from 'vue-i18n';
-import { Skull } from '../../icons.js';
 import { cellName } from '../../mysteries/board.js';
 
 const props = defineProps({
@@ -42,10 +41,7 @@ const pick = (value) => { picked.value = value ?? null; };
                 :aria-label="label(person)"
                 data-test="person"
             >
-                <span :class="['palette__avatar', { 'palette__avatar--victim': person === victim }]" aria-hidden="true">
-                    <Skull v-if="person === victim" size="1rem" :stroke-width="2.5" />
-                    <template v-else>{{ initial(person) }}</template>
-                </span>
+                <span :class="['palette__avatar', { 'palette__avatar--victim': person === victim }]" aria-hidden="true">{{ initial(person) }}</span>
                 <span class="palette__name">{{ name }}</span>
                 <span v-if="person === victim" class="palette__tag" aria-hidden="true">{{ t('mysteries.palette.victim') }}</span>
                 <span v-if="placements[person] !== null" class="palette__cell tabular" aria-hidden="true">{{ cellName(placements[person], size) }}</span>

@@ -10,22 +10,53 @@ final readonly class CaseGenerator
 {
     private const int MIN_SIZE = 6;
     private const int MAX_SIZE = 14;
-    private const array NAMES = ['Aster', 'Basil', 'Clover', 'Dahlia', 'Elder', 'Fern', 'Ginger', 'Hazel', 'Iris', 'Juniper', 'Laurel', 'Myrtle', 'Nettle', 'Olive', 'Poppy', 'Quince', 'Rowan', 'Sage', 'Thyme', 'Violet', 'Willow', 'Yarrow', 'Zinnia'];
+    private const array SUSPECTS = [
+        'Aster' => Gender::Female, 'Basil' => Gender::Male, 'Cedar' => Gender::Male, 'Dahlia' => Gender::Female, 'Elder' => Gender::Male, 'Fern' => Gender::Female,
+        'Ginger' => Gender::Female, 'Hazel' => Gender::Female, 'Iris' => Gender::Female, 'Juniper' => Gender::Male, 'Linden' => Gender::Male, 'Myrtle' => Gender::Female,
+        'Nettle' => Gender::Male, 'Olive' => Gender::Female, 'Poppy' => Gender::Female, 'Quince' => Gender::Male, 'Rowan' => Gender::Male, 'Sage' => Gender::Male,
+        'Thyme' => Gender::Male, 'Willow' => Gender::Female, 'Yarrow' => Gender::Male, 'Zinnia' => Gender::Female,
+    ];
+    private const array VICTIMS = ['Valerian' => Gender::Male, 'Verbena' => Gender::Female, 'Vervain' => Gender::Male, 'Vetch' => Gender::Male, 'Viola' => Gender::Female, 'Violet' => Gender::Female];
+    private const float SPARSE = 0.12;
+    private const float SPARSE_BLOCKING = 0.07;
+    private const float DENSE = 0.25;
+    private const int SEARCH_BUDGET = 100_000;
 
     public function __construct(private Randomizer $randomizer)
     {
     }
 
-    public function generate(): Blueprint
+    public static function genderOf(string $name): Gender
     {
-        $size = $this->randomizer->getInt(self::MIN_SIZE, self::MAX_SIZE);
-        $kinds = \array_slice($this->randomizer->shuffleArray(RoomKind::cases()), 0, $this->randomizer->getInt((int) ceil($size / 2), (int) ceil(0.8 * $size)));
-        $rooms = $this->rooms($size, \count($kinds));
-        [$solution, $victim] = $this->crime($size, $rooms);
-        $plan = new Floorplan($size, $rooms, $kinds, $this->furnish($size, $rooms, $kinds, $solution));
-        $people = array_map(static fn (int $key): string => self::NAMES[$key], $this->randomizer->pickArrayKeys(self::NAMES, $size));
+        return self::SUSPECTS[$name] ?? self::VICTIMS[$name] ?? Gender::Female;
+    }
 
-        return new Blueprint($plan, $people, $victim, $solution, new ClueDraw($this->randomizer)->draw($plan, $victim, $solution));
+    /**
+     * @param int<6, 14>|null $size
+     */
+    public function generate(?int $size = null): Blueprint
+    {
+        $size ??= $this->randomizer->getInt(self::MIN_SIZE, self::MAX_SIZE);
+        $suspects = $this->randomizer->pickArrayKeys(self::SUSPECTS, $size - 1);
+        $victimName = array_keys(self::VICTIMS)[$this->randomizer->getInt(0, \count(self::VICTIMS) - 1)];
+        do {
+            $kinds = \array_slice($this->randomizer->shuffleArray(RoomKind::cases()), 0, $this->randomizer->getInt((int) ceil($size / 2), $size));
+            $rooms = $this->rooms($size, \count($kinds));
+            [$solution, $victim] = $this->crime($size, $rooms);
+            $people = $suspects;
+            array_splice($people, $victim, 0, [$victimName]);
+            $genders = array_map(self::genderOf(...), $people);
+            $plan = $this->furnish(new Floorplan($size, $rooms, $kinds, array_fill(0, $size * $size, null)), $solution, self::SPARSE, self::SPARSE_BLOCKING);
+            $drawn = new ClueDraw($this->randomizer)->draw($plan, $victim, $genders, $solution);
+            if (null !== $drawn) {
+                [$plan, $rules, $clues] = $drawn;
+                $known = [...$rules, ...$clues];
+                $plan = $this->furnish($plan, $solution, self::DENSE, ClueDraw::BLOCKING, static fn (Floorplan $plan): bool => array_all($known, static fn (Clue $clue): bool => $clue->holdsFor($plan, $solution, $genders))
+                    && Deduction::of($plan, $victim, $genders, $known)->endsWithTheVictim());
+            }
+        } while (null === $drawn || 1 !== new Solver()->count($plan, $victim, $genders, $known, self::SEARCH_BUDGET));
+
+        return new Blueprint($plan, $people, $genders, $victim, $solution, $clues, $rules);
     }
 
     /**
@@ -88,35 +119,42 @@ final readonly class CaseGenerator
     }
 
     /**
-     * @param list<int>      $rooms
-     * @param list<RoomKind> $kinds
-     * @param list<int>      $solution
-     *
-     * @return list<?Furniture>
+     * @param list<int>                  $solution
+     * @param ?\Closure(Floorplan): bool $keeps
      */
-    private function furnish(int $size, array $rooms, array $kinds, array $solution): array
+    private function furnish(Floorplan $plan, array $solution, float $density, float $blocking, ?\Closure $keeps = null): Floorplan
     {
-        $furniture = array_fill(0, $size * $size, null);
         $occupied = array_flip($solution);
         $cellsByRoom = [];
-        foreach ($rooms as $cell => $room) {
+        foreach ($plan->rooms as $cell => $room) {
             $cellsByRoom[$room][] = $cell;
         }
         foreach ($cellsByRoom as $room => $cells) {
-            $affinity = $kinds[$room]->furniture();
-            for ($pieces = max(1, intdiv(\count($cells), 4)); $pieces > 0; --$pieces) {
-                $piece = $affinity[$this->randomizer->getInt(0, \count($affinity) - 1)];
-                $spots = array_values(array_filter(
+            $affinity = $plan->kinds[$room]->furniture();
+            $free = \count(array_filter($cells, static fn (int $cell): bool => !$plan->blocks($cell)));
+            $pieces = (int) round(\count($cells) * $density) - \count(array_filter($cells, static fn (int $cell): bool => null !== $plan->furniture[$cell]));
+            for (; $pieces > 0; --$pieces) {
+                $choice = $plan->spareBlocks($blocking) > 0 ? $affinity : array_values(array_filter($affinity, static fn (Furniture $piece): bool => $piece->canHoldSomeone()));
+                if ([] === $choice) {
+                    break;
+                }
+                $piece = $choice[$this->randomizer->getInt(0, \count($choice) - 1)];
+                $spots = $piece->canHoldSomeone() || $free > 2 ? array_values(array_filter(
                     $cells,
-                    static fn (int $cell): bool => null === $furniture[$cell] && ($piece->canHoldSomeone() || !isset($occupied[$cell])),
-                ));
-                if ([] !== $spots) {
-                    $furniture[$spots[$this->randomizer->getInt(0, \count($spots) - 1)]] = $piece;
+                    static fn (int $cell): bool => null === $plan->furniture[$cell] && ($piece->canHoldSomeone() || !isset($occupied[$cell])),
+                )) : [];
+                if ([] === $spots) {
+                    continue;
+                }
+                $next = $plan->with($spots[$this->randomizer->getInt(0, \count($spots) - 1)], $piece);
+                if (null === $keeps || $keeps($next)) {
+                    $plan = $next;
+                    $free -= (int) !$piece->canHoldSomeone();
                 }
             }
         }
 
-        return array_values($furniture);
+        return $plan;
     }
 
     /**

@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import AccusationPanel from '../components/mysteries/AccusationPanel.vue';
+import BoardRules from '../components/mysteries/BoardRules.vue';
 import CaseBoard from '../components/mysteries/CaseBoard.vue';
 import CaseClues from '../components/mysteries/CaseClues.vue';
 import HowToPlay from '../components/mysteries/HowToPlay.vue';
@@ -114,8 +115,11 @@ async function accuse() {
                             <BaseButton :loading="opening" data-test="open-case" @click="openCase">{{ t(opening ? 'mysteries.opening' : 'mysteries.openNew') }}</BaseButton>
                         </div>
                     </section>
+                    <PageSection v-if="investigation.rules.length" :title="t('mysteries.boardRules.title')">
+                        <BoardRules :investigation="investigation" />
+                    </PageSection>
                     <PageSection :title="t('mysteries.clues.title')" :count="investigation.clues.length">
-                        <CaseClues :clues="investigation.clues" :people="investigation.people" :kinds="investigation.kinds" />
+                        <CaseClues :clues="investigation.clues" :people="investigation.people" :genders="investigation.genders" :kinds="investigation.kinds" />
                     </PageSection>
                 </div>
             </div>
@@ -133,8 +137,11 @@ async function accuse() {
                     </PageSection>
                 </div>
                 <div class="mysteries__side">
+                    <PageSection v-if="investigation.rules.length" :title="t('mysteries.boardRules.title')">
+                        <BoardRules :investigation="investigation" />
+                    </PageSection>
                     <PageSection :title="t('mysteries.clues.title')" :count="investigation.clues.length">
-                        <CaseClues :clues="investigation.clues" :hidden="investigation.hiddenClues" :people="investigation.people" :kinds="investigation.kinds" />
+                        <CaseClues :clues="investigation.clues" :hidden="investigation.hiddenClues" :people="investigation.people" :genders="investigation.genders" :kinds="investigation.kinds" />
                     </PageSection>
                     <PageSection :title="t('mysteries.accusation.title')">
                         <AccusationPanel v-model:murderer="murderer" :suspects="suspects" :ready="ready" :busy="accusing" @accuse="accuse" />

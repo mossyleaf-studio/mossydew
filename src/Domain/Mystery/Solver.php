@@ -7,11 +7,12 @@ namespace App\Domain\Mystery;
 final readonly class Solver
 {
     /**
-     * @param list<Clue> $clues
+     * @param list<Gender> $genders
+     * @param list<Clue>   $clues
      */
-    public function count(Floorplan $plan, int $victim, array $clues, int $budget): ?int
+    public function count(Floorplan $plan, int $victim, array $genders, array $clues, int $budget): ?int
     {
-        $search = new Search($plan, $victim, $clues, $budget);
+        $search = new Search($plan, $victim, $genders, $clues, $budget);
 
         return $search->run() ? \count($search->solutions) : null;
     }

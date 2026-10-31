@@ -6,12 +6,14 @@ namespace App\Tests\Unit\Domain\Mystery;
 
 use App\Domain\Mystery\Floorplan;
 use App\Domain\Mystery\Furniture;
+use App\Domain\Mystery\Gender;
 use App\Domain\Mystery\RoomKind;
 use PHPUnit\Framework\TestCase;
 
 final class FloorplanTest extends TestCase
 {
     public const array SOLUTION = [0, 11, 9, 17, 23];
+    public const array GENDERS = [Gender::Female, Gender::Male, Gender::Female, Gender::Male, Gender::Female];
 
     public static function manor(): Floorplan
     {
@@ -45,17 +47,64 @@ final class FloorplanTest extends TestCase
         self::assertFalse(self::manor()->blocks(0));
     }
 
-    public function testBesideMeansAnOrthogonalNeighbourHoldsThePiece(): void
+    public function testBesideMeansAnOrthogonalNeighbourInTheSameRoomHoldsThePiece(): void
     {
         $manor = self::manor();
 
         self::assertTrue($manor->isBeside(23, Furniture::Toilet));
-        self::assertTrue($manor->isBeside(4, Furniture::Sofa));
-        self::assertTrue($manor->isBeside(10, Furniture::Armchair));
+        self::assertTrue($manor->isBeside(14, Furniture::Sofa));
+        self::assertTrue($manor->isBeside(0, Furniture::Armchair));
+        self::assertFalse($manor->isBeside(4, Furniture::Sofa));
+        self::assertFalse($manor->isBeside(10, Furniture::Armchair));
+        self::assertFalse($manor->isBeside(17, Furniture::Tv));
         self::assertFalse($manor->isBeside(24, Furniture::Toilet));
         self::assertFalse($manor->isBeside(13, Furniture::Sofa));
         self::assertFalse($manor->isBeside(4, Furniture::Armchair));
-        self::assertFalse($manor->isBeside(10, Furniture::Sofa));
+    }
+
+    public function testTellsWhichPiecesARoomHolds(): void
+    {
+        $manor = self::manor();
+
+        self::assertTrue($manor->furnishes(0, Furniture::Stove));
+        self::assertTrue($manor->furnishes(0, Furniture::Armchair));
+        self::assertFalse($manor->furnishes(0, Furniture::Bed));
+        self::assertTrue($manor->furnishes(3, Furniture::Bed));
+    }
+
+    public function testShiftsACellWithoutLeavingTheBoard(): void
+    {
+        $manor = self::manor();
+
+        self::assertSame(2, $manor->shifted(7, -1, 0));
+        self::assertSame(13, $manor->shifted(7, 1, 1));
+        self::assertNull($manor->shifted(9, 0, 1));
+        self::assertNull($manor->shifted(2, -1, 0));
+        self::assertNull($manor->shifted(20, 0, -1));
+    }
+
+    public function testARoomCornerHasTwoPerpendicularSidesOnAWallOrTheEdge(): void
+    {
+        $manor = self::manor();
+
+        self::assertTrue($manor->isRoomCorner(0));
+        self::assertTrue($manor->isRoomCorner(9));
+        self::assertTrue($manor->isRoomCorner(11));
+        self::assertTrue($manor->isRoomCorner(17));
+        self::assertTrue($manor->isRoomCorner(12));
+        self::assertFalse($manor->isRoomCorner(23));
+        self::assertFalse($manor->isRoomCorner(3));
+        self::assertFalse($manor->isRoomCorner(6));
+    }
+
+    public function testFurnishesACellOnACopy(): void
+    {
+        $manor = self::manor();
+        $furnished = $manor->with(2, Furniture::Piano);
+
+        self::assertSame(Furniture::Piano, $furnished->furniture[2]);
+        self::assertNull($manor->furniture[2]);
+        self::assertSame(\array_slice($manor->furniture, 3), \array_slice($furnished->furniture, 3));
     }
 
     public function testTheMurdererIsTheOtherPersonInTheVictimsRoom(): void

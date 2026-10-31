@@ -50,11 +50,12 @@ final class MysteryApiTest extends WebTestCase
         self::assertSame(['investigation', 'solved'], array_keys($body));
         self::assertSame(0, Json::int($body, 'solved'));
         $case = Json::array($body, 'investigation');
-        self::assertSame(['id', 'size', 'rooms', 'kinds', 'furniture', 'people', 'victim', 'clues', 'hiddenClues', 'notes', 'solved', 'solution', 'murderer'], array_keys($case));
+        self::assertSame(['id', 'size', 'rooms', 'kinds', 'furniture', 'people', 'genders', 'victim', 'clues', 'rules', 'hiddenClues', 'notes', 'solved', 'solution', 'murderer'], array_keys($case));
         $size = Json::int($case, 'size');
         self::assertCount($size * $size, Json::array($case, 'rooms'));
         self::assertCount($size * $size, Json::array($case, 'furniture'));
         self::assertCount($size, Json::array($case, 'people'));
+        self::assertCount($size, array_filter(Json::array($case, 'genders'), static fn (mixed $gender): bool => \in_array($gender, ['female', 'male'], true)));
         self::assertContainsOnlyString(Json::array($case, 'kinds'));
         self::assertGreaterThanOrEqual(0, Json::int($case, 'victim'));
         self::assertLessThan($size, Json::int($case, 'victim'));
@@ -225,6 +226,7 @@ final class MysteryApiTest extends WebTestCase
         $client->jsonRequest('POST', '/api/mystery/investigations');
         $hidden = Json::int(self::body($client), 'investigation', 'hiddenClues');
         self::assertGreaterThan(0, $hidden);
+        self::assertSame([['kind' => 'alone_with_murderer', 'person' => Json::int(self::body($client), 'investigation', 'victim')]], Json::array(self::body($client), 'investigation', 'clues'));
 
         self::assertSame(0, self::completeATask($client));
 
@@ -234,9 +236,9 @@ final class MysteryApiTest extends WebTestCase
 
         $client->jsonRequest('GET', '/api/mystery');
         $case = Json::array(self::body($client), 'investigation');
-        self::assertCount(1, Json::array($case, 'clues'));
+        self::assertCount(2, Json::array($case, 'clues'));
         self::assertSame($hidden - 1, Json::int($case, 'hiddenClues'));
-        self::assertContains(Json::string($case, 'clues', 0, 'kind'), ['in_room', 'on_furniture', 'beside_furniture', 'in_row', 'in_column', 'same_room', 'north_of', 'west_of', 'empty_room', 'room_holds']);
+        self::assertNotSame('alone_with_murderer', Json::string($case, 'clues', 1, 'kind'));
 
         $client->jsonRequest('PUT', '/api/me/mysteries', ['enabled' => false]);
         self::assertSame(0, self::completeATask($client));

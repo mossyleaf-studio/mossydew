@@ -4,7 +4,7 @@ import {
     PhArmchair, PhArrowElbowDownRight, PhArrowRight, PhArrowUp, PhBathtub, PhBed, PhBooks, PhCalendarDots, PhCaretDown, PhCaretLeft,
     PhCaretRight, PhChartBar, PhCheck, PhCheckCircle, PhCloudFog, PhCloudRain, PhCompass, PhCookingPot, PhCouch, PhDotsThree, PhDrop,
     PhDropHalfBottom, PhFire, PhFolderSimplePlus, PhGear, PhGridFour, PhLamp, PhLeaf, PhList, PhListChecks, PhLock, PhMagnifyingGlass,
-    PhPencilSimple, PhPianoKeys, PhPlant, PhPlus, PhPottedPlant, PhRecycle, PhRepeat, PhScissors, PhShovel, PhSignOut, PhSkull, PhSun,
+    PhPencilSimple, PhPianoKeys, PhPlant, PhPlus, PhPottedPlant, PhRecycle, PhRepeat, PhScissors, PhShovel, PhSignOut, PhSun,
     PhTelevision, PhTextAlignLeft, PhToilet, PhTrash, PhTray, PhTrophy, PhUserMinus, PhUsers, PhWarehouse, PhWashingMachine, PhX,
 } from '@phosphor-icons/vue';
 import { useSession } from './composables/useSession.js';
@@ -62,7 +62,6 @@ export const Scissors = icon(Lucide.Scissors, PhScissors, 'duotone');
 export const Search = icon(Lucide.Search, PhMagnifyingGlass, 'duotone');
 export const Settings = icon(Lucide.Settings, PhGear, 'duotone');
 export const Shovel = icon(Lucide.Shovel, PhShovel, 'duotone');
-export const Skull = icon(Lucide.Skull, PhSkull, 'duotone');
 export const Sofa = icon(Lucide.Sofa, PhCouch, 'duotone');
 export const Sprout = icon(Lucide.Sprout, PhPlant, 'duotone');
 export const Sun = icon(Lucide.Sun, PhSun, 'duotone');

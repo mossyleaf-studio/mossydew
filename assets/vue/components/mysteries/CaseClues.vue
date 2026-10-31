@@ -1,7 +1,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 import { Lock } from '../../icons.js';
-import { clueMessage } from '../../mysteries/clues.js';
+import { clueText } from '../../mysteries/clues.js';
 
 const LOCKED_ROWS = 4;
 
@@ -9,17 +9,13 @@ const props = defineProps({
     clues: { type: Array, required: true },
     hidden: { type: Number, default: 0 },
     people: { type: Array, required: true },
+    genders: { type: Array, required: true },
     kinds: { type: Array, required: true },
 });
 
 const { t } = useI18n();
 
-function sentence(clue) {
-    const { key, params, phrases, plural } = clueMessage(clue, props);
-    const named = { ...params, ...Object.fromEntries(Object.entries(phrases).map(([name, phrase]) => [name, t(phrase)])) };
-
-    return plural === undefined ? t(key, named) : t(key, named, plural);
-}
+const card = (clue) => clueText(clue, props, t);
 </script>
 
 <template>
@@ -28,7 +24,7 @@ function sentence(clue) {
         <ol v-if="clues.length" class="clues__list">
             <li v-for="(clue, index) in clues" :key="index" class="clues__item" data-test="clue">
                 <span class="clues__number tabular" aria-hidden="true">{{ index + 1 }}</span>
-                <span class="clues__text">{{ sentence(clue) }}</span>
+                <span class="clues__text">{{ card(clue) }}</span>
             </li>
         </ol>
         <ul v-if="hidden" class="clues__locked">

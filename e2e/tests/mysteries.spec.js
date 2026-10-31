@@ -18,10 +18,12 @@ function boardOf(id, size) {
             rooms: Array.from({ length: cells }, (_, cell) => (cell % size < size / 2 ? 0 : 1)),
             kinds: ['kitchen', 'library'],
             furniture: Array(cells).fill(null),
-            people: Array.from({ length: size }, (_, person) => `Guest ${person}`),
+            people: Array.from({ length: size }, (_, person) => (person === 0 ? 'Vesper' : `Guest ${person}`)),
+            genders: Array.from({ length: size }, (_, person) => (person % 2 ? 'male' : 'female')),
             victim: 0,
-            clues: [],
-            hiddenClues: 3,
+            clues: [{ kind: 'alone_with_murderer', person: 0 }],
+            hiddenClues: size - 1,
+            rules: [],
             notes: { placements: Array(size).fill(null), crosses: [] },
             solved: false,
             solution: null,
@@ -104,6 +106,21 @@ test('a smaller case opened on another device replaces the board on this one', a
     await comeBack();
     await expect(page.getByTestId('cell')).toHaveCount(36);
     await expect(page.getByTestId('board-status')).toHaveText('Tap a square to see its room and furniture.');
+});
+
+test('the board rules of a case stand above its clues', async ({ page }) => {
+    await signInAsSleuth(page);
+    expect((await page.request.put('/api/me/mysteries', { data: { enabled: true } })).ok()).toBeTruthy();
+
+    const served = boardOf('ruled', 6);
+    served.investigation.rules = [{ kind: 'room_cap', number: 2 }, { kind: 'pairing', gender: 'male' }];
+    await page.route('**/api/mystery', (route) => route.fulfill({ json: served }));
+    await page.goto('/mysteries');
+    await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+
+    await expect(page.getByRole('heading', { name: 'Board rules' })).toBeVisible();
+    await expect(page.getByTestId('board-rule')).toHaveText(['No room held more than 2 people.', 'Every man shared his room with a woman.']);
+    await expect(page.getByTestId('clue')).toHaveCount(1);
 });
 
 test('a wrong accusation is refused without saying what is wrong', async ({ page }) => {

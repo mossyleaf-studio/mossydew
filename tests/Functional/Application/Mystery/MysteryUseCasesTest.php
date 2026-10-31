@@ -87,7 +87,7 @@ final class MysteryUseCasesTest extends KernelTestCase
         self::assertSame([$clues, 0], [$this->case()->clues, $this->case()->hiddenClues]);
     }
 
-    public function testTheNextCasesHideEveryClueEvenAfterSwitchingMysteriesOffAndOn(): void
+    public function testTheNextCasesShowOnlyTheVictimsClueEvenAfterSwitchingMysteriesOffAndOn(): void
     {
         $this->playMysteries(true);
         $this->open();
@@ -98,8 +98,8 @@ final class MysteryUseCasesTest extends KernelTestCase
         $this->open();
 
         $case = $this->case();
-        self::assertSame([], $case->clues);
-        self::assertGreaterThan(0, $case->hiddenClues);
+        self::assertSame([['kind' => 'alone_with_murderer', 'person' => $case->victim]], $case->clues);
+        self::assertSame($case->size - 1, $case->hiddenClues);
     }
 
     public function testAPlayerWhoNeverHadTheGiftGetsItWithTheirNextCase(): void
@@ -138,9 +138,9 @@ final class MysteryUseCasesTest extends KernelTestCase
         $afterTwo = $this->case();
 
         self::assertSame([1, 1], [$first->cluesRevealed, $second->cluesRevealed]);
-        self::assertCount(1, $afterOne->clues);
-        self::assertCount(2, $afterTwo->clues);
-        self::assertSame($afterOne->clues[0], $afterTwo->clues[0]);
+        self::assertCount(2, $afterOne->clues);
+        self::assertCount(3, $afterTwo->clues);
+        self::assertSame($afterOne->clues, \array_slice($afterTwo->clues, 0, 2));
         self::assertSame([$hidden - 1, $hidden - 2], [$afterOne->hiddenClues, $afterTwo->hiddenClues]);
         self::assertEquals(array_map(static fn (Clue $clue): array => $clue->toArray(), $this->entity()->revealedClues()), $afterTwo->clues);
     }
@@ -158,7 +158,7 @@ final class MysteryUseCasesTest extends KernelTestCase
 
         $case = $this->case();
         self::assertFalse($case->solved);
-        self::assertCount(1, $case->clues);
+        self::assertCount(2, $case->clues);
     }
 
     public function testNothingIsRevealedWithoutAnOpenCase(): void
@@ -172,7 +172,7 @@ final class MysteryUseCasesTest extends KernelTestCase
         $this->solve();
 
         self::assertSame(0, self::completeTask(self::createTask('Repot the aloe'))->cluesRevealed);
-        self::assertSame([], $this->case()->clues);
+        self::assertCount(1, $this->case()->clues);
     }
 
     public function testReopeningATaskHidesNothingAndCompletingItAgainRevealsNothingMore(): void
@@ -183,10 +183,10 @@ final class MysteryUseCasesTest extends KernelTestCase
         self::assertSame(1, self::completeTask($task)->cluesRevealed);
 
         self::getContainer()->get(ReopenTaskHandler::class)(Ulid::fromString($task->id));
-        self::assertCount(1, $this->case()->clues);
+        self::assertCount(2, $this->case()->clues);
 
         self::assertSame(0, self::completeTask($task)->cluesRevealed);
-        self::assertCount(1, $this->case()->clues);
+        self::assertCount(2, $this->case()->clues);
         self::assertSame(1, self::completeTask(self::createTask('Repot the aloe'))->cluesRevealed);
     }
 
@@ -201,20 +201,20 @@ final class MysteryUseCasesTest extends KernelTestCase
         $completion = self::completeTask($windows);
 
         self::assertSame(2, $completion->cluesRevealed);
-        self::assertCount(2, $this->case()->clues);
+        self::assertCount(3, $this->case()->clues);
     }
 
     public function testNothingIsRevealedPastTheLastClue(): void
     {
         $this->playMysteries(true);
-        $this->openWithClues(2);
+        $this->openWithClues(3);
 
         $revealed = array_map(static fn (string $title): int => self::completeTask(self::createTask($title))->cluesRevealed, ['Water the fern', 'Repot the aloe', 'Dust the shelves']);
 
         self::assertSame([1, 1, 0], $revealed);
         $case = $this->case();
-        self::assertSame([2, 0], [\count($case->clues), $case->hiddenClues]);
-        self::assertSame(array_map(static fn (Clue $clue): array => $clue->toArray(), \array_slice(self::blueprint()->clues, 0, 2)), $case->clues);
+        self::assertSame([3, 0], [\count($case->clues), $case->hiddenClues]);
+        self::assertSame(array_map(static fn (Clue $clue): array => $clue->toArray(), \array_slice(self::blueprint()->clues, 0, 3)), $case->clues);
     }
 
     public function testNotesAreSavedWithTheCase(): void
@@ -472,7 +472,7 @@ final class MysteryUseCasesTest extends KernelTestCase
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $entityManager->persist(Investigation::open(
             $this->owner(),
-            new Blueprint($blueprint->floorplan, $blueprint->people, $blueprint->victim, $blueprint->solution, \array_slice($blueprint->clues, 0, $count)),
+            new Blueprint($blueprint->floorplan, $blueprint->people, $blueprint->genders, $blueprint->victim, $blueprint->solution, \array_slice($blueprint->clues, 0, $count), $blueprint->rules),
             Clock::get()->now(),
         ));
         $entityManager->flush();

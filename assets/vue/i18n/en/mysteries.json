@@ -12,11 +12,13 @@
     "rules": {
         "title": "How to play",
         "grid": "Everyone stands on exactly one square, and no two people share a row or a column: each row and each column holds one person.",
-        "murderer": "The victim’s room holds exactly two people: the victim and the murderer. Nobody else is ever alone with the victim.",
+        "murderer": "The victim’s name starts with V, and nobody else’s does. Their room holds exactly two people: the victim and the murderer. Nobody else is ever alone with the victim.",
         "furniture": "Armchairs, sofas and beds are seats: someone can stand there. Every other piece of furniture fills its square, so nobody stands on it.",
-        "directions": "North is the top of the plan and west is its left. “Next to” means sharing a side, even through a wall into another room; touching at a corner does not count.",
+        "directions": "North is the top of the plan and west is its left. “Next to” means sharing a side, in the same room: a wall in between or touching at a corner does not count. “Exactly 2 rows further north” counts rows only, whatever the column, “the very next square to the north” is the one just above, and “exactly 3 squares to the north” stays in the same column, whatever stands between.",
+        "terms": "A corner square is one of the four corners of the plan. Someone is in a corner of a room when their square touches a wall or the edge of the plan both to the north or south and to the east or west. Two people are on the same diagonal when their squares line up at 45°, either way. “Alone” means nobody else was in their room; “alone with a woman” means exactly one other person was there, a woman; “shared a room with a man in a bed” means another person in their room, a man, was in a bed. “In a room with a piano” means a piano stood somewhere in their room. “The only person in a bed” means nobody else, the victim included, was in a bed anywhere on the plan. “Further north than a piano” means in a row further north than at least one piano, whatever the column; east and west count columns the same way. “At least 3 people were in the library” counts the victim too.",
         "counts": "A room’s head count includes the victim: “Nobody was in the kitchen” means the victim was not there either, and “Exactly 3 people were in the library” counts the victim among them.",
-        "clues": "Each task you complete reveals the next clue.",
+        "clues": "There is one clue per person. The victim’s, alone with the murderer, is given from the start; each task you complete reveals the next one. A clue can join two facts: the second is about the same person, except after “alone with a woman” or “alone with a man”, where it is about that one other person, or it is about a room.",
+        "board": "The board rules, above the clues, hold for the whole plan and are known from the start.",
         "marks": "Pick a person, then tap a square to place them. With nobody picked, tap an empty square to cross it out, or tap a placed person to take them back off. Your marks are saved with the case.",
         "accusation": "Once everyone is placed, choose the murderer and accuse. A wrong accusation costs nothing and does not say what is wrong.",
         "seats": "Seats",
@@ -55,6 +57,9 @@
             "murderer": "{name}, the murderer, is here"
         }
     },
+    "boardRules": {
+        "title": "Board rules"
+    },
     "clues": {
         "title": "Clues",
         "none": "No clue yet. Complete a task to reveal the first one.",
@@ -92,18 +97,18 @@
         "laundry": { "name": "Laundry", "in": "in the laundry" }
     },
     "furniture": {
-        "armchair": { "name": "Armchair", "on": "in an armchair", "beside": "next to an armchair" },
-        "sofa": { "name": "Sofa", "on": "on a sofa", "beside": "next to a sofa" },
-        "bed": { "name": "Bed", "on": "in a bed", "beside": "next to a bed" },
-        "plant": { "name": "Plant", "beside": "next to a plant" },
-        "books": { "name": "Bookcase", "beside": "next to a bookcase" },
-        "bath": { "name": "Bathtub", "beside": "next to a bathtub" },
-        "toilet": { "name": "Toilet", "beside": "next to a toilet" },
-        "tv": { "name": "Television", "beside": "next to a television" },
-        "piano": { "name": "Piano", "beside": "next to a piano" },
-        "lamp": { "name": "Floor lamp", "beside": "next to a floor lamp" },
-        "stove": { "name": "Stove", "beside": "next to a stove" },
-        "washer": { "name": "Washing machine", "beside": "next to a washing machine" }
+        "armchair": { "name": "Armchair", "on": "in an armchair", "beside": "next to an armchair", "a": "an armchair", "none": "next to any armchair", "than": "than an armchair" },
+        "sofa": { "name": "Sofa", "on": "on a sofa", "beside": "next to a sofa", "a": "a sofa", "none": "next to any sofa", "than": "than a sofa" },
+        "bed": { "name": "Bed", "on": "in a bed", "beside": "next to a bed", "a": "a bed", "none": "next to any bed", "than": "than a bed" },
+        "plant": { "name": "Plant", "beside": "next to a plant", "a": "a plant", "none": "next to any plant", "than": "than a plant" },
+        "books": { "name": "Bookcase", "beside": "next to a bookcase", "a": "a bookcase", "none": "next to any bookcase", "than": "than a bookcase" },
+        "bath": { "name": "Bathtub", "beside": "next to a bathtub", "a": "a bathtub", "none": "next to any bathtub", "than": "than a bathtub" },
+        "toilet": { "name": "Toilet", "beside": "next to a toilet", "a": "a toilet", "none": "next to any toilet", "than": "than a toilet" },
+        "tv": { "name": "Television", "beside": "next to a television", "a": "a television", "none": "next to any television", "than": "than a television" },
+        "piano": { "name": "Piano", "beside": "next to a piano", "a": "a piano", "none": "next to any piano", "than": "than a piano" },
+        "lamp": { "name": "Floor lamp", "beside": "next to a floor lamp", "a": "a floor lamp", "none": "next to any floor lamp", "than": "than a floor lamp" },
+        "stove": { "name": "Stove", "beside": "next to a stove", "a": "a stove", "none": "next to any stove", "than": "than a stove" },
+        "washer": { "name": "Washing machine", "beside": "next to a washing machine", "a": "a washing machine", "none": "next to any washing machine", "than": "than a washing machine" }
     },
     "sentence": {
         "in_room": "{person} was {room}.",
@@ -112,9 +117,39 @@
         "in_row": "{person} was in row {row}.",
         "in_column": "{person} was in column {column}.",
         "same_room": "{person} and {other} were in the same room.",
-        "north_of": "{person} was further north than {other}.",
-        "west_of": "{person} was further west than {other}.",
+        "north_of": "{person} was further north {than}.",
+        "west_of": "{person} was further west {than}.",
         "empty_room": "Nobody was {room}.",
-        "room_holds": "Exactly one person was {room}. | Exactly {count} people were {room}."
-    }
+        "room_holds": "Exactly one person was {room}. | Exactly {count} people were {room}.",
+        "alone_with_murderer": "{person} was alone with the murderer.",
+        "north_by": "{person} was exactly 1 row further north {than}. | {person} was exactly {count} rows further north {than}.",
+        "west_by": "{person} was exactly 1 column further west {than}. | {person} was exactly {count} columns further west {than}.",
+        "furniture_north": "{person} had {furniture} on the very next square to the north. | {person} had {furniture} exactly {count} squares to the north, in the same column.",
+        "furniture_south": "{person} had {furniture} on the very next square to the south. | {person} had {furniture} exactly {count} squares to the south, in the same column.",
+        "furniture_east": "{person} had {furniture} on the very next square to the east. | {person} had {furniture} exactly {count} squares to the east, in the same row.",
+        "furniture_west": "{person} had {furniture} on the very next square to the west. | {person} had {furniture} exactly {count} squares to the west, in the same row.",
+        "alone": { "female": "{person} was alone in her room.", "male": "{person} was alone in his room." },
+        "alone_with": { "female": "{person} was alone with {someone}.", "male": "{person} was alone with {someone}." },
+        "grid_corner": "{person} was on a corner square of the plan.",
+        "room_corner": "{person} was in a corner of a room.",
+        "only_on": "{person} was the only person {furniture}.",
+        "room_has": "{person} was in a room with {furniture}.",
+        "not_beside": "{person} was not {furniture}.",
+        "someone_on": "{person} shared a room with {someone} {furniture}.",
+        "someone_beside": "{person} shared a room with someone {furniture}.",
+        "same_diagonal": "{person} and {other} were on the same diagonal.",
+        "room_at_least": "At least one person was {room}. | At least {count} people were {room}.",
+        "north_of_furniture": "{person} was further north {furniture}.",
+        "south_of_furniture": "{person} was further south {furniture}.",
+        "east_of_furniture": "{person} was further east {furniture}.",
+        "west_of_furniture": "{person} was further west {furniture}.",
+        "seat_count": { "exactly": "Nobody was {furniture}. | Exactly one person was {furniture}. | Exactly {count} people were {furniture}.", "at_least": "At least one person was {furniture}. | At least {count} people were {furniture}.", "at_most": "Nobody was {furniture}. | At most one person was {furniture}. | At most {count} people were {furniture}." },
+        "every_room_occupied": "Every room held at least one person.",
+        "room_cap": "No room held more than one person. | No room held more than {count} people.",
+        "gender_seated": { "female": "No woman was {furniture}. | Exactly one woman was {furniture}. | Exactly {count} women were {furniture}.", "male": "No man was {furniture}. | Exactly one man was {furniture}. | Exactly {count} men were {furniture}." },
+        "pairing": { "female": "Every woman shared her room with a man.", "male": "Every man shared his room with a woman." }
+    },
+    "than": { "vowel": "than {other}", "consonant": "than {other}" },
+    "pronoun": { "female": "She", "male": "He" },
+    "someone": { "female": "a woman", "male": "a man" }
 }

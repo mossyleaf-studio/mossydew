@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace App\Application\Mystery\ShowInvestigation;
 
 use App\Domain\Mystery\Clue;
+use App\Domain\Mystery\Gender;
 use App\Domain\Mystery\Investigation;
 
+/**
+ * @phpstan-import-type ClueData from Clue
+ */
 final readonly class CaseView
 {
     private function __construct(
@@ -20,9 +24,13 @@ final readonly class CaseView
         public array $furniture,
         /** @var list<string> */
         public array $people,
+        /** @var list<string> */
+        public array $genders,
         public int $victim,
-        /** @var list<array{kind: string, person?: int, other?: int, room?: int, furniture?: string, number?: int}> */
+        /** @var list<ClueData> */
         public array $clues,
+        /** @var list<ClueData> */
+        public array $rules,
         public int $hiddenClues,
         /** @var array{placements: list<?int>, crosses: list<int>} */
         public array $notes,
@@ -45,8 +53,10 @@ final readonly class CaseView
             $floorplan['kinds'],
             $floorplan['furniture'],
             $investigation->people(),
+            array_map(static fn (Gender $gender): string => $gender->value, $investigation->genders()),
             $investigation->victim(),
             array_map(static fn (Clue $clue): array => $clue->toArray(), $investigation->revealedClues()),
+            array_map(static fn (Clue $rule): array => $rule->toArray(), $investigation->rules()),
             $investigation->hiddenClueCount(),
             $investigation->notes(),
             $solved,

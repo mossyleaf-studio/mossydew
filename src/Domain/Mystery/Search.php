@@ -11,6 +11,11 @@ final class Search
     private const int SOUTH = 2;
     private const int WEST = 3;
     private const int EAST = 4;
+    private const int NORTH_BY = 5;
+    private const int SOUTH_BY = 6;
+    private const int WEST_BY = 7;
+    private const int EAST_BY = 8;
+    private const int DIAGONAL = 9;
 
     public private(set) int $nodes = 0;
     /** @var list<list<int>> */
@@ -26,10 +31,13 @@ final class Search
     private readonly array $roomMask;
     /** @var array<int, array<int, int>> */
     private array $domain;
-    /** @var array<int, list<array{int, int}>> */
+    /** @var array<int, list<array{int, int, int}>> */
     private array $links;
     /** @var array<int, int> */
     private array $capacity = [];
+    /** @var list<Clue> */
+    private array $checks = [];
+    private int $roomCap = \PHP_INT_MAX;
     private bool $contradiction = false;
     /** @var array<int, int> */
     private array $cells;
@@ -43,9 +51,10 @@ final class Search
     private int $freeColumns;
 
     /**
-     * @param list<Clue> $clues
+     * @param list<Gender> $genders
+     * @param list<Clue>   $clues
      */
-    public function __construct(private readonly Floorplan $plan, private readonly int $victim, array $clues, private readonly int $budget)
+    public function __construct(private readonly Floorplan $plan, private readonly int $victim, private readonly array $genders, array $clues, private readonly int $budget)
     {
         $size = $plan->size;
         $this->size = $size;
@@ -90,18 +99,53 @@ final class Search
 
     private function learn(Clue $clue): void
     {
-        match ($clue->kind) {
-            ClueKind::InRoom => $this->narrow($clue->person(), $this->roomMask[$clue->room()]),
-            ClueKind::OnFurniture => $this->narrow($clue->person(), $this->spots($clue->furniture(), false)),
-            ClueKind::BesideFurniture => $this->narrow($clue->person(), $this->spots($clue->furniture(), true)),
-            ClueKind::InRow => $this->narrow($clue->person(), array_map(static fn (int $row): int => $row === $clue->number() ? -1 : 0, range(0, $this->size - 1))),
-            ClueKind::InColumn => $this->narrow($clue->person(), array_fill(0, $this->size, 1 << $clue->number())),
-            ClueKind::SameRoom => $this->link($clue->person(), self::SAME, self::SAME, $clue->other()),
-            ClueKind::NorthOf => $this->link($clue->person(), self::NORTH, self::SOUTH, $clue->other()),
-            ClueKind::WestOf => $this->link($clue->person(), self::WEST, self::EAST, $clue->other()),
-            ClueKind::EmptyRoom => $this->limit($clue->room(), 0),
-            ClueKind::RoomHolds => $this->limit($clue->room(), $clue->number()),
-        };
+        foreach (null === $clue->then || $clue->then->companion ? [$clue] : [$clue, $clue->then] as $fact) {
+            match ($fact->kind) {
+                ClueKind::SameRoom => $this->link($fact->person(), self::SAME, self::SAME, $fact->other()),
+                ClueKind::NorthOf => $this->link($fact->person(), self::NORTH, self::SOUTH, $fact->other()),
+                ClueKind::WestOf => $this->link($fact->person(), self::WEST, self::EAST, $fact->other()),
+                ClueKind::EmptyRoom => $this->limit($fact->room(), 0),
+                ClueKind::RoomHolds => $this->limit($fact->room(), $fact->number()),
+                ClueKind::AloneWithMurderer => null,
+                ClueKind::NorthBy => $this->link($fact->person(), self::NORTH_BY, self::SOUTH_BY, $fact->other(), $fact->number()),
+                ClueKind::WestBy => $this->link($fact->person(), self::WEST_BY, self::EAST_BY, $fact->other(), $fact->number()),
+                ClueKind::SameDiagonal => $this->link($fact->person(), self::DIAGONAL, self::DIAGONAL, $fact->other()),
+                ClueKind::Alone, ClueKind::AloneWith, ClueKind::SomeoneOn, ClueKind::SomeoneBeside, ClueKind::RoomAtLeast => $this->checks[] = $clue,
+                ClueKind::EveryRoomOccupied, ClueKind::Pairing => $this->checks[] = $clue,
+                ClueKind::RoomCap => $this->cap($clue, $fact->number()),
+                ClueKind::SeatCount, ClueKind::GenderSeated => $this->seatCount($clue, $fact),
+                ClueKind::OnlyOn => $this->seat($fact->person(), $fact->furniture()),
+                default => $this->narrow($fact->person(), $this->squares($fact)),
+            };
+        }
+    }
+
+    private function cap(Clue $clue, int $heads): void
+    {
+        $this->checks[] = $clue;
+        $this->roomCap = min($this->roomCap, $heads);
+    }
+
+    private function seatCount(Clue $clue, Clue $fact): void
+    {
+        $this->checks[] = $clue;
+        if (0 !== $fact->number() || Bound::AtLeast === $fact->bound) {
+            return;
+        }
+        $seats = array_map(static fn (int $columns): int => ~$columns, $this->squares(new Clue(ClueKind::OnFurniture, furniture: $fact->furniture())));
+        foreach (array_keys($this->domain) as $person) {
+            if (null === $fact->gender || $this->genders[$person] === $fact->gender) {
+                $this->narrow($person, $seats);
+            }
+        }
+    }
+
+    private function seat(int $person, Furniture $furniture): void
+    {
+        $seats = $this->squares(new Clue(ClueKind::OnFurniture, furniture: $furniture));
+        foreach (array_keys($this->domain) as $someone) {
+            $this->narrow($someone, $someone === $person ? $seats : array_map(static fn (int $columns): int => ~$columns, $seats));
+        }
     }
 
     /**
@@ -117,25 +161,22 @@ final class Search
     /**
      * @return array<int, int>
      */
-    private function spots(Furniture $furniture, bool $beside): array
+    private function squares(Clue $fact): array
     {
         $mask = array_fill(0, $this->size, 0);
-        foreach ($this->plan->furniture as $cell => $piece) {
-            if ($piece !== $furniture) {
-                continue;
-            }
-            foreach ($beside ? Floorplan::neighbours($this->size, $cell) : [$cell] as $spot) {
-                $mask[intdiv($spot, $this->size)] |= 1 << $spot % $this->size;
+        foreach (array_keys($this->plan->rooms) as $cell) {
+            if ($fact->holdsAt($this->plan, $cell)) {
+                $mask[intdiv($cell, $this->size)] |= 1 << $cell % $this->size;
             }
         }
 
         return $mask;
     }
 
-    private function link(int $person, int $way, int $back, int $other): void
+    private function link(int $person, int $way, int $back, int $other, int $distance = 0): void
     {
-        $this->links[$person][] = [$way, $other];
-        $this->links[$other][] = [$back, $person];
+        $this->links[$person][] = [$way, $other, $distance];
+        $this->links[$other][] = [$back, $person, $distance];
     }
 
     private function limit(int $room, int $heads): void
@@ -203,10 +244,10 @@ final class Search
         do {
             $changed = false;
             foreach (array_keys($options) as $person) {
-                foreach ($this->links[$person] as [$way, $partner]) {
+                foreach ($this->links[$person] as [$way, $partner, $distance]) {
                     $cell = $this->cells[$partner];
                     $theirs = $cell < 0 ? $options[$partner] : [intdiv($cell, $this->size) => 1 << $cell % $this->size];
-                    $narrowed = $this->narrowed($options[$person], $this->allowedBy($way, $theirs));
+                    $narrowed = $this->narrowed($options[$person], $this->allowedBy($way, $theirs, $distance));
                     if ([] === $narrowed) {
                         return null;
                     }
@@ -242,8 +283,21 @@ final class Search
      *
      * @return array<int, int>
      */
-    private function allowedBy(int $way, array $theirs): array
+    private function allowedBy(int $way, array $theirs, int $distance): array
     {
+        if (self::NORTH_BY === $way || self::SOUTH_BY === $way) {
+            $shift = self::NORTH_BY === $way ? $distance : -$distance;
+
+            return array_map(static fn (int $row): int => isset($theirs[$row + $shift]) ? -1 : 0, range(0, $this->size - 1));
+        }
+        if (self::WEST_BY === $way || self::EAST_BY === $way) {
+            $columns = array_reduce($theirs, static fn (int $union, int $mask): int => $union | $mask, 0);
+
+            return array_fill(0, $this->size, self::WEST_BY === $way ? $columns >> $distance : $columns << $distance & (1 << $this->size) - 1);
+        }
+        if (self::DIAGONAL === $way) {
+            return $this->plan->diagonalsThrough($theirs);
+        }
         if (self::SAME === $way) {
             $allowed = array_fill(0, $this->size, 0);
             foreach ($this->roomMask as $room) {
@@ -443,7 +497,7 @@ final class Search
         $this->freeColumns ^= 1 << $column;
         $heads = ++$this->heads[$room];
         $victimCell = $this->cells[$this->victim];
-        if ($heads === ($this->capacity[$room] ?? -1) || (2 === $heads && $victimCell >= 0 && $this->cellRoom[$victimCell] === $room)) {
+        if ($heads === ($this->capacity[$room] ?? -1) || $heads >= $this->roomCap || (2 === $heads && $victimCell >= 0 && $this->cellRoom[$victimCell] === $room)) {
             $this->shut($room, true);
         } elseif (2 === $heads && $victimCell < 0) {
             $this->shut($room, false);
@@ -478,7 +532,9 @@ final class Search
                 return false;
             }
         }
+        $cells = array_values($this->cells);
 
-        return 2 === $this->heads[$this->cellRoom[$this->cells[$this->victim]]];
+        return 2 === $this->heads[$this->cellRoom[$this->cells[$this->victim]]]
+            && array_all($this->checks, fn (Clue $clue): bool => $clue->holdsFor($this->plan, $cells, $this->genders));
     }
 }

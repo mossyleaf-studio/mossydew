@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ArrowUp, Skull, X } from '../../icons.js';
+import { ArrowUp, X } from '../../icons.js';
 import { blocksCell, cellName, columnLetter, roomTints, wallsOf } from '../../mysteries/board.js';
 import { FURNITURE } from '../../mysteries/furniture.js';
 import { occupantOf } from '../../mysteries/notes.js';
@@ -123,10 +123,7 @@ function move(event) {
                     <span class="board__body" aria-hidden="true">
                         <component :is="FURNITURE[view.piece]" v-if="view.piece" :class="['board__furniture', view.blocked ? 'board__furniture--blocking' : 'board__furniture--seat']" :stroke-width="2" />
                         <X v-if="view.crossed" class="board__cross" :stroke-width="2.5" />
-                        <span v-if="view.person !== null" :class="['board__person', `board__person--${roleOf(view.person)}`]">
-                            <Skull v-if="roleOf(view.person) === 'victim'" class="board__skull" :stroke-width="2.5" />
-                            <template v-else>{{ initial(view.person) }}</template>
-                        </span>
+                        <span v-if="view.person !== null" :class="['board__person', `board__person--${roleOf(view.person)}`]">{{ initial(view.person) }}</span>
                     </span>
                 </button>
             </div>
@@ -206,7 +203,6 @@ function move(event) {
 .board__person { display: grid; place-items: center; width: 82%; height: 82%; border-radius: 50%; background: var(--color-accent); color: var(--color-on-accent); font-size: 44cqw; font-weight: 700; line-height: 1; }
 .board__person--victim { background: var(--color-ink); color: var(--color-surface); }
 .board__person--murderer { background: var(--color-danger); color: var(--color-surface); outline: 0.125rem solid var(--color-danger); outline-offset: 0.125rem; }
-.board__skull { width: 62%; height: 62%; }
 
 .board__status { min-height: 2.75rem; color: var(--color-muted); font-size: var(--font-size-md); }
 </style>

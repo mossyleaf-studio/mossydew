@@ -9,7 +9,7 @@ defineProps({
     defaultOpen: { type: Boolean, default: false },
 });
 
-const RULES = ['grid', 'murderer', 'furniture', 'directions', 'counts', 'clues', 'marks', 'accusation'];
+const RULES = ['grid', 'murderer', 'furniture', 'directions', 'terms', 'counts', 'clues', 'board', 'marks', 'accusation'];
 const LEGEND = [
     { id: 'seats', pieces: SEATS },
     { id: 'blocking', pieces: BLOCKERS },

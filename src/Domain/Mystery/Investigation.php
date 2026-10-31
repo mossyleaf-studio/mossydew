@@ -11,6 +11,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\Ulid;
 
+/**
+ * @phpstan-import-type ClueData from Clue
+ */
 #[ORM\Entity]
 #[ORM\Table(name: 'investigation')]
 #[ORM\UniqueConstraint(name: 'investigation_owner_open', columns: ['owner_id'], options: ['where' => '(solved_at IS NULL)'])]
@@ -32,6 +35,10 @@ class Investigation
     #[ORM\Column(type: 'json')]
     private array $people;
 
+    /** @var list<string> */
+    #[ORM\Column(type: 'json')]
+    private array $genders;
+
     #[ORM\Column(type: 'smallint')]
     private int $victim;
 
@@ -39,9 +46,13 @@ class Investigation
     #[ORM\Column(type: 'json')]
     private array $solution;
 
-    /** @var list<array{kind: string, person?: int, other?: int, room?: int, furniture?: string, number?: int}> */
+    /** @var list<ClueData> */
     #[ORM\Column(type: 'json')]
     private array $clues;
+
+    /** @var list<ClueData> */
+    #[ORM\Column(type: 'json')]
+    private array $rules;
 
     /** @var list<string> */
     #[ORM\Column(type: 'json')]
@@ -66,9 +77,11 @@ class Investigation
         $this->owner = $owner;
         $this->floorplan = $blueprint->floorplan->toArray();
         $this->people = $blueprint->people;
+        $this->genders = array_map(static fn (Gender $gender): string => $gender->value, $blueprint->genders);
         $this->victim = $blueprint->victim;
         $this->solution = $blueprint->solution;
         $this->clues = array_map(static fn (Clue $clue): array => $clue->toArray(), $blueprint->clues);
+        $this->rules = array_map(static fn (Clue $rule): array => $rule->toArray(), $blueprint->rules);
         $this->notes = ['placements' => array_fill(0, $blueprint->floorplan->size, null), 'crosses' => []];
         $this->gift = $gift;
         $this->openedAt = $now;
@@ -148,6 +161,14 @@ class Investigation
         return $this->people;
     }
 
+    /**
+     * @return list<Gender>
+     */
+    public function genders(): array
+    {
+        return array_map(Gender::from(...), $this->genders);
+    }
+
     public function victim(): int
     {
         return $this->victim;
@@ -172,6 +193,14 @@ class Investigation
     public function revealedClues(): array
     {
         return array_map(Clue::fromArray(...), \array_slice($this->clues, 0, $this->revealedClueCount()));
+    }
+
+    /**
+     * @return list<Clue>
+     */
+    public function rules(): array
+    {
+        return array_map(Clue::fromArray(...), $this->rules);
     }
 
     public function hiddenClueCount(): int
@@ -199,6 +228,9 @@ class Investigation
 
     private function revealedClueCount(): int
     {
-        return $this->gift ? \count($this->clues) : \count($this->revealedBy);
+        $total = \count($this->clues);
+        $given = \count(array_filter($this->clues, static fn (array $clue): bool => ClueKind::from($clue['kind'])->isGiven()));
+
+        return $this->gift ? $total : min($total, $given + \count($this->revealedBy));
     }
 }

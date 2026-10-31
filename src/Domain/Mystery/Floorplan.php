@@ -29,15 +29,76 @@ final readonly class Floorplan
         return false === $this->furniture[$cell]?->canHoldSomeone();
     }
 
+    public function spareBlocks(float $share): int
+    {
+        return (int) round($share * \count($this->rooms)) - \count(array_filter(array_keys($this->furniture), $this->blocks(...)));
+    }
+
     public function isBeside(int $cell, Furniture $furniture): bool
     {
         foreach (self::neighbours($this->size, $cell) as $neighbour) {
-            if ($furniture === $this->furniture[$neighbour]) {
+            if ($furniture === $this->furniture[$neighbour] && $this->rooms[$neighbour] === $this->rooms[$cell]) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    public function furnishes(int $room, Furniture $furniture): bool
+    {
+        foreach ($this->furniture as $cell => $piece) {
+            if ($furniture === $piece && $this->rooms[$cell] === $room) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param array<int, int> $rows
+     *
+     * @return list<int>
+     */
+    public function diagonalsThrough(array $rows): array
+    {
+        $diagonals = array_fill(0, $this->size, 0);
+        foreach ($rows as $row => $columns) {
+            foreach (array_keys($diagonals) as $line) {
+                $shift = abs($line - $row);
+                $diagonals[$line] |= ($columns << $shift | $columns >> $shift) & (1 << $this->size) - 1;
+            }
+        }
+
+        return $diagonals;
+    }
+
+    public function isRoomCorner(int $cell): bool
+    {
+        $walled = function (int $rows, int $columns) use ($cell): bool {
+            $next = $this->shifted($cell, $rows, $columns);
+
+            return null === $next || $this->rooms[$next] !== $this->rooms[$cell];
+        };
+
+        return ($walled(-1, 0) || $walled(1, 0)) && ($walled(0, -1) || $walled(0, 1));
+    }
+
+    public function with(int $cell, Furniture $piece): self
+    {
+        $furniture = $this->furniture;
+        $furniture[$cell] = $piece;
+
+        return new self($this->size, $this->rooms, $this->kinds, array_values($furniture));
+    }
+
+    public function shifted(int $cell, int $rows, int $columns): ?int
+    {
+        $row = intdiv($cell, $this->size) + $rows;
+        $column = $cell % $this->size + $columns;
+
+        return $row >= 0 && $row < $this->size && $column >= 0 && $column < $this->size ? $row * $this->size + $column : null;
     }
 
     /**
