@@ -127,7 +127,7 @@ async function accuse() {
             <div v-else-if="notes" class="mysteries__layout">
                 <div class="mysteries__main">
                     <PageSection :title="t('mysteries.palette.title')">
-                        <PeoplePalette v-model:picked="picked" :people="investigation.people" :victim="investigation.victim" :placements="notes.placements" :size="investigation.size" />
+                        <PeoplePalette v-model:picked="picked" :people="investigation.people" :genders="investigation.genders" :victim="investigation.victim" :placements="notes.placements" :size="investigation.size" />
                     </PageSection>
                     <PageSection :title="t('mysteries.board.title')">
                         <template #actions>

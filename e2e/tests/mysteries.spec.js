@@ -123,6 +123,21 @@ test('the board rules of a case stand above its clues', async ({ page }) => {
     await expect(page.getByTestId('clue')).toHaveCount(1);
 });
 
+test('everyone on the case shows whether they are a woman or a man', async ({ page }) => {
+    await signInAsSleuth(page);
+    expect((await page.request.put('/api/me/mysteries', { data: { enabled: true } })).ok()).toBeTruthy();
+
+    await page.route('**/api/mystery', (route) => route.fulfill({ json: boardOf('gendered', 6) }));
+    await page.goto('/mysteries');
+    await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+
+    const people = page.getByTestId('person');
+    await expect(people.nth(0)).toHaveAttribute('aria-label', 'Vesper (woman), the victim, not placed yet');
+    await expect(people.nth(1)).toHaveAttribute('aria-label', 'Guest 1 (man), not placed yet');
+    await expect(people.nth(0).getByTestId('gender')).toHaveAttribute('title', 'Woman');
+    await expect(people.nth(1).getByTestId('gender')).toHaveAttribute('title', 'Man');
+});
+
 test('a wrong accusation is refused without saying what is wrong', async ({ page }) => {
     await signInAsSleuth(page);
     expect((await page.request.put('/api/me/mysteries', { data: { enabled: true } })).ok()).toBeTruthy();

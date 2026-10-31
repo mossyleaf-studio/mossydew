@@ -3,7 +3,7 @@ import * as Lucide from '@lucide/vue';
 import {
     PhArmchair, PhArrowElbowDownRight, PhArrowRight, PhArrowUp, PhBathtub, PhBed, PhBooks, PhCalendarDots, PhCaretDown, PhCaretLeft,
     PhCaretRight, PhChartBar, PhCheck, PhCheckCircle, PhCloudFog, PhCloudRain, PhCompass, PhCookingPot, PhCouch, PhDotsThree, PhDrop,
-    PhDropHalfBottom, PhFire, PhFolderSimplePlus, PhGear, PhGridFour, PhLamp, PhLeaf, PhList, PhListChecks, PhLock, PhMagnifyingGlass,
+    PhDropHalfBottom, PhFire, PhFolderSimplePlus, PhGear, PhGenderFemale, PhGenderMale, PhGridFour, PhLamp, PhLeaf, PhList, PhListChecks, PhLock, PhMagnifyingGlass,
     PhPencilSimple, PhPianoKeys, PhPlant, PhPlus, PhPottedPlant, PhRecycle, PhRepeat, PhScissors, PhShovel, PhSignOut, PhSun,
     PhTelevision, PhTextAlignLeft, PhToilet, PhTrash, PhTray, PhTrophy, PhUserMinus, PhUsers, PhWarehouse, PhWashingMachine, PhX,
 } from '@phosphor-icons/vue';
@@ -51,6 +51,7 @@ export const LibraryBig = icon(Lucide.LibraryBig, PhBooks, 'duotone');
 export const ListChecks = icon(Lucide.ListChecks, PhListChecks);
 export const Lock = icon(Lucide.Lock, PhLock, 'duotone');
 export const LogOut = icon(Lucide.LogOut, PhSignOut);
+export const Mars = icon(Lucide.Mars, PhGenderMale);
 export const Menu = icon(Lucide.Menu, PhList);
 export const Pencil = icon(Lucide.Pencil, PhPencilSimple);
 export const Piano = icon(Lucide.Piano, PhPianoKeys, 'duotone');
@@ -71,6 +72,7 @@ export const Trophy = icon(Lucide.Trophy, PhTrophy, 'duotone');
 export const Tv = icon(Lucide.Tv, PhTelevision, 'duotone');
 export const UserMinus = icon(Lucide.UserMinus, PhUserMinus);
 export const Users = icon(Lucide.Users, PhUsers, 'duotone');
+export const Venus = icon(Lucide.Venus, PhGenderFemale);
 export const Warehouse = icon(Lucide.Warehouse, PhWarehouse, 'duotone');
 export const WashingMachine = icon(Lucide.WashingMachine, PhWashingMachine, 'duotone');
 export const X = icon(Lucide.X, PhX);

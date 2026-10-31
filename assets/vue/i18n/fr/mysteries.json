@@ -30,15 +30,16 @@
         "victim": "victime",
         "hint": "Choisissez une personne, puis touchez une case pour la placer.",
         "picked": "{name} à placer : touchez une case, ou choisissez {name} à nouveau pour annuler.",
+        "gender": { "female": "Femme", "male": "Homme" },
         "progress": "Placement : {placed} sur {total}",
         "state": {
             "suspect": {
-                "placed": "{name}, sur la case {cell}",
-                "unplaced": "{name}, pas encore sur le plan"
+                "placed": "{name} ({gender}), sur la case {cell}",
+                "unplaced": "{name} ({gender}), pas encore sur le plan"
             },
             "victim": {
-                "placed": "{name}, la victime, sur la case {cell}",
-                "unplaced": "{name}, la victime, pas encore sur le plan"
+                "placed": "{name} ({gender}), la victime, sur la case {cell}",
+                "unplaced": "{name} ({gender}), la victime, pas encore sur le plan"
             }
         }
     },

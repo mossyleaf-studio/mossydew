@@ -2,10 +2,12 @@
 import { computed } from 'vue';
 import { ToggleGroupItem, ToggleGroupRoot } from 'reka-ui';
 import { useI18n } from 'vue-i18n';
+import { Mars, Venus } from '../../icons.js';
 import { cellName } from '../../mysteries/board.js';
 
 const props = defineProps({
     people: { type: Array, required: true },
+    genders: { type: Array, required: true },
     victim: { type: Number, required: true },
     placements: { type: Array, required: true },
     size: { type: Number, required: true },
@@ -17,14 +19,16 @@ const { t } = useI18n();
 const placedCount = computed(() => props.placements.filter((cell) => cell !== null).length);
 
 const initial = (person) => [...props.people[person]][0].toUpperCase();
+const genderName = (person) => t(`mysteries.palette.gender.${props.genders[person]}`);
 
 function label(person) {
     const role = person === props.victim ? 'victim' : 'suspect';
     const cell = props.placements[person];
+    const who = { name: props.people[person], gender: genderName(person).toLocaleLowerCase() };
 
     return cell === null
-        ? t(`mysteries.palette.state.${role}.unplaced`, { name: props.people[person] })
-        : t(`mysteries.palette.state.${role}.placed`, { name: props.people[person], cell: cellName(cell, props.size) });
+        ? t(`mysteries.palette.state.${role}.unplaced`, who)
+        : t(`mysteries.palette.state.${role}.placed`, { ...who, cell: cellName(cell, props.size) });
 }
 
 const pick = (value) => { picked.value = value ?? null; };
@@ -43,6 +47,9 @@ const pick = (value) => { picked.value = value ?? null; };
             >
                 <span :class="['palette__avatar', { 'palette__avatar--victim': person === victim }]" aria-hidden="true">{{ initial(person) }}</span>
                 <span class="palette__name">{{ name }}</span>
+                <span class="palette__gender" :title="genderName(person)" aria-hidden="true" data-test="gender">
+                    <component :is="genders[person] === 'female' ? Venus : Mars" size="0.875rem" :stroke-width="2.25" />
+                </span>
                 <span v-if="person === victim" class="palette__tag" aria-hidden="true">{{ t('mysteries.palette.victim') }}</span>
                 <span v-if="placements[person] !== null" class="palette__cell tabular" aria-hidden="true">{{ cellName(placements[person], size) }}</span>
             </ToggleGroupItem>
@@ -81,6 +88,7 @@ const pick = (value) => { picked.value = value ?? null; };
 .palette__avatar--victim, .palette__chip--placed .palette__avatar--victim { background: var(--color-ink); color: var(--color-surface); }
 
 .palette__name { font-weight: 500; }
+.palette__gender { display: inline-flex; flex-shrink: 0; color: var(--color-muted); }
 .palette__tag { color: var(--color-muted); font-size: var(--font-size-xs); }
 .palette__cell { padding: 0 var(--space-2); border-radius: var(--radius-pill); background: var(--color-bg); color: var(--color-muted); font-size: var(--font-size-xs); font-weight: 600; }
 

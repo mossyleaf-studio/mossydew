@@ -30,15 +30,16 @@
         "victim": "victim",
         "hint": "Pick a person, then tap a square to place them.",
         "picked": "Placing {name}: tap a square, or pick {name} again to cancel.",
+        "gender": { "female": "Woman", "male": "Man" },
         "progress": "{placed} of {total} placed",
         "state": {
             "suspect": {
-                "placed": "{name}, placed on {cell}",
-                "unplaced": "{name}, not placed yet"
+                "placed": "{name} ({gender}), placed on {cell}",
+                "unplaced": "{name} ({gender}), not placed yet"
             },
             "victim": {
-                "placed": "{name}, the victim, placed on {cell}",
-                "unplaced": "{name}, the victim, not placed yet"
+                "placed": "{name} ({gender}), the victim, placed on {cell}",
+                "unplaced": "{name} ({gender}), the victim, not placed yet"
             }
         }
     },
