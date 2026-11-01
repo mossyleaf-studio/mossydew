@@ -95,7 +95,8 @@ final class CaseGeneratorTest extends TestCase
             self::assertNull($rule->person, $shape);
             self::assertNull($rule->then, $shape);
             self::assertTrue($rule->holdsFor($plan, $case->solution, $case->genders), $shape);
-            self::assertFalse(ClueKind::EmptyRoom === $rule->kind && $crimeScene === $rule->room, $shape);
+            self::assertFalse($rule->kind->describesARoom() && $crimeScene === $rule->room, $shape);
+            self::assertFalse(ClueKind::RoomAtLeast === $rule->kind && $rule->number() < 2, $shape);
             self::assertFalse(ClueKind::Pairing === $rule->kind && $case->genders[$case->victim] === $rule->gender, $shape);
             if (ClueKind::RoomCap === $rule->kind) {
                 self::assertGreaterThanOrEqual(2, $rule->number());
@@ -104,7 +105,7 @@ final class CaseGeneratorTest extends TestCase
         }
         foreach ($case->clues as $clue) {
             foreach (self::facts($clue) as $fact) {
-                self::assertTrue(ClueKind::EmptyRoom === $fact->kind || !$fact->kind->isRule(), (string) json_encode($clue->toArray()));
+                self::assertFalse($fact->kind->isRule(), (string) json_encode($clue->toArray()));
             }
         }
     }
@@ -132,7 +133,7 @@ final class CaseGeneratorTest extends TestCase
     {
         $kinds = [];
         $withRules = 0;
-        foreach (self::timedSeeds() as [$seed]) {
+        foreach (range(1, 100) as $seed) {
             $rules = self::generate($seed)->rules;
             $withRules += (int) ([] !== $rules);
             foreach ($rules as $rule) {
@@ -140,8 +141,8 @@ final class CaseGeneratorTest extends TestCase
             }
         }
 
-        self::assertGreaterThanOrEqual(24, $withRules);
-        self::assertEqualsCanonicalizing(['seat_count', 'every_room_occupied', 'room_cap', 'empty_room', 'gender_seated', 'pairing'], array_keys($kinds));
+        self::assertGreaterThanOrEqual(60, $withRules);
+        self::assertEqualsCanonicalizing(['seat_count', 'every_room_occupied', 'room_cap', 'empty_room', 'room_holds', 'room_at_least', 'gender_seated', 'pairing'], array_keys($kinds));
     }
 
     #[DataProvider('seeds')]
@@ -216,22 +217,6 @@ final class CaseGeneratorTest extends TestCase
     }
 
     #[DataProvider('seeds')]
-    public function testOnlyCountsAtLeastTwoPeopleInAnotherRoomThanTheAnchors(int $seed): void
-    {
-        $case = self::generate($seed);
-        $plan = $case->floorplan;
-        $pointless = [];
-        foreach (\array_slice($case->clues, 1) as $clue) {
-            $then = $clue->then;
-            if (null !== $then && ClueKind::RoomAtLeast === $then->kind && ($then->number() < 2 || $then->room() === $plan->roomOf($case->solution[$clue->person()]))) {
-                $pointless[] = $clue->toArray();
-            }
-        }
-
-        self::assertSame([], $pointless);
-    }
-
-    #[DataProvider('seeds')]
     public function testOnlySaysSomeoneIsNotBesideAPieceTheirRoomHolds(int $seed): void
     {
         $case = self::generate($seed);
@@ -268,7 +253,7 @@ final class CaseGeneratorTest extends TestCase
                 self::assertNull($then->person, $shape);
                 self::assertTrue($then->kind->describesASquare(), $shape);
             } else {
-                self::assertTrue($then->person === $clue->person || (null === $then->person && null !== $then->room), $shape);
+                self::assertSame($clue->person, $then->person, $shape);
             }
         }
     }
@@ -302,7 +287,9 @@ final class CaseGeneratorTest extends TestCase
         self::assertLessThan(0.4, \count($furniture) / \count($kinds));
         self::assertGreaterThan(0.3, $compounds / $clues);
         foreach (ClueKind::cases() as $kind) {
-            self::assertTrue($kind->isGiven() || ($kind->isRule() && ClueKind::EmptyRoom !== $kind) || \in_array($kind, $kinds, true), $kind->value);
+            $retired = \in_array($kind, [ClueKind::NorthOfFurniture, ClueKind::SouthOfFurniture, ClueKind::EastOfFurniture, ClueKind::WestOfFurniture], true);
+            self::assertTrue($kind->isGiven() || $kind->isRule() || $retired || \in_array($kind, $kinds, true), $kind->value);
+            self::assertFalse($retired && \in_array($kind, $kinds, true), $kind->value);
         }
         self::assertContains(Gender::Female, $genders);
         self::assertContains(Gender::Male, $genders);
@@ -371,19 +358,21 @@ final class CaseGeneratorTest extends TestCase
         self::assertLessThan(2 * $standing / $bare, $seated / $seats);
     }
 
-    public function testPointsAtFurnitureFurtherAwayThanTheNextSquare(): void
+    public function testPointsAtFurnitureOnTheNextSquareOnly(): void
     {
         $distances = [];
-        foreach (self::seeds() as [$seed]) {
+        foreach (self::timedSeeds() as [$seed]) {
             foreach (self::generate($seed)->clues as $clue) {
-                if (\in_array($clue->kind, [ClueKind::FurnitureNorth, ClueKind::FurnitureSouth, ClueKind::FurnitureEast, ClueKind::FurnitureWest], true)) {
-                    $distances[] = $clue->number();
+                foreach (self::facts($clue) as $fact) {
+                    if ($fact->kind->pointsAtFurniture()) {
+                        $distances[] = $fact->number();
+                    }
                 }
             }
         }
 
-        self::assertContains(1, $distances);
-        self::assertNotEmpty(array_filter($distances, static fn (int $distance): bool => $distance > 1));
+        self::assertNotEmpty($distances);
+        self::assertSame([1], array_values(array_unique($distances)));
     }
 
     public function testCoversTheSmallestAndLargestGrids(): void

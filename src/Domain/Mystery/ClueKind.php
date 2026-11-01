@@ -76,7 +76,7 @@ enum ClueKind: string
 
     public function isRule(): bool
     {
-        return \in_array($this, [self::SeatCount, self::EveryRoomOccupied, self::RoomCap, self::EmptyRoom, self::GenderSeated, self::Pairing], true);
+        return \in_array($this, [self::SeatCount, self::EveryRoomOccupied, self::RoomCap, self::EmptyRoom, self::RoomHolds, self::RoomAtLeast, self::GenderSeated, self::Pairing], true);
     }
 
     public function describesARoom(): bool

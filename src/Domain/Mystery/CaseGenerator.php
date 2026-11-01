@@ -51,7 +51,7 @@ final readonly class CaseGenerator
             if (null !== $drawn) {
                 [$plan, $rules, $clues] = $drawn;
                 $known = [...$rules, ...$clues];
-                $plan = $this->furnish($plan, $solution, self::DENSE, ClueDraw::BLOCKING, static fn (Floorplan $plan): bool => array_all($known, static fn (Clue $clue): bool => $clue->holdsFor($plan, $solution, $genders))
+                $plan = $this->furnish($plan, $solution, self::DENSE, ClueDraw::BLOCKING, static fn (Floorplan $plan): bool => array_all($known, static fn (Clue $clue): bool => $clue->holdsFor($plan, $solution, $genders) && (null === $clue->then || !ClueDraw::givesAway($plan, $clue, $clue->then)))
                     && Deduction::of($plan, $victim, $genders, $known)->endsWithTheVictim());
             }
         } while (null === $drawn || 1 !== new Solver()->count($plan, $victim, $genders, $known, self::SEARCH_BUDGET));
