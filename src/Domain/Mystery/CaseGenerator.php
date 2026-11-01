@@ -33,6 +33,7 @@ final readonly class CaseGenerator
     private const float SPARSE = 0.12;
     private const float SPARSE_BLOCKING = 0.07;
     private const float DENSE = 0.25;
+    private const float BLOCKING = 0.14;
     private const int SEARCH_BUDGET = 100_000;
 
     public function __construct(private Randomizer $randomizer)
@@ -58,13 +59,12 @@ final readonly class CaseGenerator
             [$solution, $victim] = $this->crime($size, $rooms);
             $people = [...$suspects, $victimName];
             $genders = array_map(self::genderOf(...), $people);
-            $plan = $this->furnish(new Floorplan($size, $rooms, $kinds, array_fill(0, $size * $size, null)), $solution, self::SPARSE, self::SPARSE_BLOCKING);
+            $empty = new Floorplan($size, $rooms, $kinds, array_fill(0, $size * $size, null));
+            $plan = $this->furnish($this->furnish($empty, $solution, self::SPARSE, self::SPARSE_BLOCKING), $solution, self::DENSE, self::BLOCKING);
             $drawn = new ClueDraw($this->randomizer)->draw($plan, $victim, $genders, $solution);
             if (null !== $drawn) {
-                [$plan, $rules, $clues] = $drawn;
+                [$rules, $clues] = $drawn;
                 $known = [...$rules, ...$clues];
-                $plan = $this->furnish($plan, $solution, self::DENSE, ClueDraw::BLOCKING, static fn (Floorplan $plan): bool => array_all($known, static fn (Clue $clue): bool => $clue->holdsFor($plan, $solution, $genders) && (null === $clue->then || !ClueDraw::givesAway($plan, $clue, $clue->then)))
-                    && Deduction::of($plan, $victim, $genders, $known)->endsWithTheVictim());
             }
         } while (null === $drawn || 1 !== new Solver()->count($plan, $victim, $genders, $known, self::SEARCH_BUDGET));
 
@@ -132,10 +132,9 @@ final readonly class CaseGenerator
     }
 
     /**
-     * @param list<int>                  $solution
-     * @param ?\Closure(Floorplan): bool $keeps
+     * @param list<int> $solution
      */
-    private function furnish(Floorplan $plan, array $solution, float $density, float $blocking, ?\Closure $keeps = null): Floorplan
+    private function furnish(Floorplan $plan, array $solution, float $density, float $blocking): Floorplan
     {
         $occupied = array_flip($solution);
         $cellsByRoom = [];
@@ -159,11 +158,8 @@ final readonly class CaseGenerator
                 if ([] === $spots) {
                     continue;
                 }
-                $next = $plan->with($spots[$this->randomizer->getInt(0, \count($spots) - 1)], $piece);
-                if (null === $keeps || $keeps($next)) {
-                    $plan = $next;
-                    $free -= (int) !$piece->canHoldSomeone();
-                }
+                $plan = $plan->with($spots[$this->randomizer->getInt(0, \count($spots) - 1)], $piece);
+                $free -= (int) !$piece->canHoldSomeone();
             }
         }
 

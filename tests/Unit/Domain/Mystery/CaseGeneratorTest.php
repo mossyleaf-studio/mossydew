@@ -282,12 +282,12 @@ final class CaseGeneratorTest extends TestCase
             }
             array_push($genders, ...$case->genders);
         }
-        $furniture = array_filter($kinds, static fn (ClueKind $kind): bool => \in_array($kind, [ClueKind::FurnitureNorth, ClueKind::FurnitureSouth, ClueKind::FurnitureEast, ClueKind::FurnitureWest], true));
+        $furniture = array_filter($kinds, static fn (ClueKind $kind): bool => ClueKind::BesideFurniture === $kind);
 
         self::assertLessThan(0.4, \count($furniture) / \count($kinds));
         self::assertGreaterThan(0.3, $compounds / $clues);
         foreach (ClueKind::cases() as $kind) {
-            $retired = \in_array($kind, [ClueKind::NorthOfFurniture, ClueKind::SouthOfFurniture, ClueKind::EastOfFurniture, ClueKind::WestOfFurniture], true);
+            $retired = $kind->pointsAtFurniture() || \in_array($kind, [ClueKind::NorthOfFurniture, ClueKind::SouthOfFurniture, ClueKind::EastOfFurniture, ClueKind::WestOfFurniture], true);
             self::assertTrue($kind->isGiven() || $kind->isRule() || $retired || \in_array($kind, $kinds, true), $kind->value);
             self::assertFalse($retired && \in_array($kind, $kinds, true), $kind->value);
         }
@@ -380,23 +380,6 @@ final class CaseGeneratorTest extends TestCase
         }
 
         self::assertLessThan(2 * $standing / $bare, $seated / $seats);
-    }
-
-    public function testPointsAtFurnitureOnTheNextSquareOnly(): void
-    {
-        $distances = [];
-        foreach (self::timedSeeds() as [$seed]) {
-            foreach (self::generate($seed)->clues as $clue) {
-                foreach (self::facts($clue) as $fact) {
-                    if ($fact->kind->pointsAtFurniture()) {
-                        $distances[] = $fact->number();
-                    }
-                }
-            }
-        }
-
-        self::assertNotEmpty($distances);
-        self::assertSame([1], array_values(array_unique($distances)));
     }
 
     public function testCoversTheSmallestAndLargestGrids(): void

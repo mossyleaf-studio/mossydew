@@ -9,11 +9,9 @@ use Random\Randomizer;
 final readonly class ClueDraw
 {
     public const int ATTEMPTS = 3;
-    public const float BLOCKING = 0.14;
     private const int RULE_TRIES = 6;
-    private const int TRIES = 40;
+    private const int TRIES = 150;
     private const float FURNITURE_SHARE = 0.3;
-    private const array DIRECTIONS = [ClueKind::FurnitureNorth, ClueKind::FurnitureSouth, ClueKind::FurnitureEast, ClueKind::FurnitureWest];
 
     public function __construct(private Randomizer $randomizer)
     {
@@ -23,7 +21,7 @@ final readonly class ClueDraw
      * @param list<Gender> $genders
      * @param list<int>    $solution
      *
-     * @return ?array{Floorplan, list<Clue>, list<Clue>}
+     * @return ?array{list<Clue>, list<Clue>}
      */
     public function draw(Floorplan $plan, int $victim, array $genders, array $solution): ?array
     {
@@ -41,7 +39,7 @@ final readonly class ClueDraw
      * @param list<Gender> $genders
      * @param list<int>    $solution
      *
-     * @return ?array{Floorplan, list<Clue>, list<Clue>}
+     * @return ?array{list<Clue>, list<Clue>}
      */
     private function chain(Floorplan $plan, int $victim, array $genders, array $solution): ?array
     {
@@ -53,18 +51,13 @@ final readonly class ClueDraw
             $slack = $plan->size - \count($clues) > $plan->size - 1 - \count($deduction->placed());
             $next = $this->next($plan, $deduction, $facts, $clues, $slack);
             if (null === $next) {
-                $next = $this->furnishFor($deduction, $plan, $victim, $genders, $solution, $rules, $clues);
-                if (null === $next) {
-                    return null;
-                }
-                $plan = $next[2];
-                $facts = $this->facts($plan, $victim, $genders, $solution);
+                return null;
             }
             [$clue, $deduction] = $next;
             $clues[] = $clue;
         }
 
-        return $deduction->endsWithTheVictim() ? [$plan, $rules, $clues] : null;
+        return $deduction->endsWithTheVictim() ? [$rules, $clues] : null;
     }
 
     /**
@@ -188,10 +181,11 @@ final readonly class ClueDraw
                 array_push($open, ...$about);
             }
         }
+        $narrowing = null;
         for ($try = 0; $try < self::TRIES; ++$try) {
             $first = $this->pick($open, $used);
             if (null === $first) {
-                return null;
+                break;
             }
             $clue = $this->extend($plan, $first, $facts, $used);
             if (\in_array($clue, $clues, false)) {
@@ -199,12 +193,18 @@ final readonly class ClueDraw
             }
             $further = clone $deduction;
             $further->learn($clue);
-            if (($slack || \count($further->placed()) > \count($placed)) && !$further->placesTheVictimTooSoon()) {
+            if ($further->placesTheVictimTooSoon()) {
+                continue;
+            }
+            if ($slack || \count($further->placed()) > \count($placed)) {
                 return [$clue, $further];
+            }
+            if ($further->freedom() < ($narrowing ?? [1 => $deduction])[1]->freedom()) {
+                $narrowing = [$clue, $further];
             }
         }
 
-        return null;
+        return $narrowing;
     }
 
     /**
@@ -224,7 +224,7 @@ final readonly class ClueDraw
         return null === $then || self::givesAway($plan, $first, $then) ? $first : new Clue($first->kind, $first->person, $first->other, $first->room, $first->furniture, $first->number, $first->gender, then: $then);
     }
 
-    public static function givesAway(Floorplan $plan, Clue $first, Clue $then): bool
+    private static function givesAway(Floorplan $plan, Clue $first, Clue $then): bool
     {
         $basis = $first->square();
 
@@ -255,11 +255,11 @@ final readonly class ClueDraw
             $byKind[$fact->kind->value][] = $fact;
         }
         $total = array_sum($used);
-        $furniture = array_sum(array_map(static fn (ClueKind $kind): int => $used[$kind->value] ?? 0, self::DIRECTIONS));
+        $furniture = $used[ClueKind::BesideFurniture->value] ?? 0;
         $weights = [];
         foreach ($byKind as $kind => $group) {
             $kind = ClueKind::from($kind);
-            $weights[] = [$group, $kind->pointsAtFurniture() && $furniture > self::FURNITURE_SHARE * $total ? 0 : intdiv(12 * $kind->weight(), 1 + 2 * ($used[$kind->value] ?? 0))];
+            $weights[] = [$group, ClueKind::BesideFurniture === $kind && $furniture > self::FURNITURE_SHARE * $total ? 0 : intdiv(12 * $kind->weight(), 1 + 2 * ($used[$kind->value] ?? 0))];
         }
         $sum = array_sum(array_column($weights, 1));
         if (0 === $sum) {
@@ -274,65 +274,6 @@ final readonly class ClueDraw
         }
 
         throw new \LogicException('Every weight is already spent.');
-    }
-
-    /**
-     * @param list<Gender> $genders
-     * @param list<int>    $solution
-     * @param list<Clue>   $rules
-     * @param list<Clue>   $clues
-     *
-     * @return ?array{Clue, Deduction, Floorplan}
-     */
-    private function furnishFor(Deduction $deduction, Floorplan $plan, int $victim, array $genders, array $solution, array $rules, array $clues): ?array
-    {
-        $placed = $deduction->placed();
-        $anchored = array_flip(array_map(static fn (Clue $clue): int => $clue->person(), $clues));
-        $occupied = array_flip($solution);
-        foreach ($this->randomizer->shuffleArray(array_keys($solution)) as $person) {
-            if (isset($anchored[$person]) || isset($placed[$person])) {
-                continue;
-            }
-            foreach ($this->randomizer->shuffleArray($this->reach($plan, $solution[$person])) as [$direction, $distance, $spot]) {
-                if (null !== $plan->furniture[$spot] || isset($occupied[$spot]) || $this->freeCells($plan, $plan->roomOf($spot)) <= 2 || $plan->spareBlocks(self::BLOCKING) <= 0) {
-                    continue;
-                }
-                $pieces = array_filter($plan->kinds[$plan->roomOf($spot)]->furniture(), static fn (Furniture $piece): bool => !$piece->canHoldSomeone());
-                foreach ($this->randomizer->shuffleArray($pieces) as $piece) {
-                    $furnished = $plan->with($spot, $piece);
-                    $clue = new Clue($direction, person: $person, furniture: $piece, number: $distance);
-                    $further = Deduction::of($furnished, $victim, $genders, [...$rules, ...$clues, $clue]);
-                    if (\count($further->placed()) > \count($placed) && !$further->placesTheVictimTooSoon()
-                        && array_all($clues, static fn (Clue $known): bool => $known->holdsFor($furnished, $solution, $genders) && (null === $known->then || !self::givesAway($furnished, $known, $known->then)))) {
-                        return [$clue, $further, $furnished];
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @return list<array{ClueKind, int, int}>
-     */
-    private function reach(Floorplan $plan, int $cell): array
-    {
-        $squares = [];
-        foreach (self::DIRECTIONS as $direction) {
-            [$rows, $columns] = $direction->offset();
-            $spot = $plan->shifted($cell, $rows, $columns);
-            if (null !== $spot) {
-                $squares[] = [$direction, 1, $spot];
-            }
-        }
-
-        return $squares;
-    }
-
-    private function freeCells(Floorplan $plan, int $room): int
-    {
-        return \count(array_filter(array_keys($plan->rooms, $room, true), static fn (int $cell): bool => !$plan->blocks($cell)));
     }
 
     /**
@@ -376,12 +317,6 @@ final readonly class ClueDraw
             }
             if (2 === \count($guests[$room]) && $crimeScene !== $room) {
                 $about[] = new Clue(ClueKind::AloneWith, person: $person, gender: $genders[array_sum($guests[$room]) - $person]);
-            }
-            foreach ($this->reach($plan, $cell) as [$direction, $distance, $spot]) {
-                $piece = $plan->furniture[$spot];
-                if (null !== $piece) {
-                    $about[] = new Clue($direction, person: $person, furniture: $piece, number: $distance);
-                }
             }
             foreach (array_filter(Furniture::cases(), static fn (Furniture $piece): bool => $plan->furnishes($room, $piece)) as $piece) {
                 $about[] = $plan->isBeside($cell, $piece)
