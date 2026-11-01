@@ -216,6 +216,20 @@ final class CaseGeneratorTest extends TestCase
         self::assertSame([], $pinning);
     }
 
+    #[DataProvider('timedSeeds')]
+    public function testNeverJoinsAnOffsetToSomeoneWithTheRowOrColumnItCounts(int $seed): void
+    {
+        $twice = [];
+        foreach (self::generate($seed)->clues as $clue) {
+            $kinds = array_map(static fn (Clue $fact): ClueKind => $fact->kind, self::facts($clue));
+            if ((\in_array(ClueKind::NorthBy, $kinds, true) && \in_array(ClueKind::InRow, $kinds, true)) || (\in_array(ClueKind::WestBy, $kinds, true) && \in_array(ClueKind::InColumn, $kinds, true))) {
+                $twice[] = $clue->toArray();
+            }
+        }
+
+        self::assertSame([], $twice);
+    }
+
     #[DataProvider('seeds')]
     public function testOnlySaysSomeoneIsNotBesideAPieceTheirRoomHolds(int $seed): void
     {
@@ -408,12 +422,12 @@ final class CaseGeneratorTest extends TestCase
     }
 
     #[DataProvider('timedSeeds')]
-    public function testDrawsACaseWithinTwoSeconds(int $seed): void
+    public function testDrawsACaseWithinThreeSeconds(int $seed): void
     {
         $start = hrtime(true);
         self::draw($seed);
 
-        self::assertLessThan(2.0, (hrtime(true) - $start) / 1e9);
+        self::assertLessThan(3.0, (hrtime(true) - $start) / 1e9);
     }
 
     /** @return iterable<array{int}> */

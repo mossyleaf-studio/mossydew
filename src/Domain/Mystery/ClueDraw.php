@@ -12,6 +12,7 @@ final readonly class ClueDraw
     private const int RULE_TRIES = 6;
     private const int TRIES = 150;
     private const float FURNITURE_SHARE = 0.3;
+    private const array SAME_LINE = [[ClueKind::NorthBy, ClueKind::InRow], [ClueKind::InRow, ClueKind::NorthBy], [ClueKind::WestBy, ClueKind::InColumn], [ClueKind::InColumn, ClueKind::WestBy]];
 
     public function __construct(private Randomizer $randomizer)
     {
@@ -217,7 +218,7 @@ final readonly class ClueDraw
         $roll = $this->randomizer->getInt(1, 100);
         $then = match (true) {
             ClueKind::AloneWith === $first->kind && $roll <= 80 => $this->pick($facts['companions'][$person] ?? [], $used),
-            $roll <= 40 => $this->pick(array_values(array_filter($facts['people'][$person], static fn (Clue $fact): bool => $fact->kind !== $first->kind)), $used),
+            $roll <= 40 => $this->pick(array_values(array_filter($facts['people'][$person], static fn (Clue $fact): bool => $fact->kind !== $first->kind && !\in_array([$first->kind, $fact->kind], self::SAME_LINE, true))), $used),
             default => null,
         };
 
