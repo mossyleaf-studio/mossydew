@@ -11,8 +11,21 @@ final readonly class CaseGenerator
     private const int MIN_SIZE = 6;
     private const int MAX_SIZE = 14;
     private const array SUSPECTS = [
-        'Aster' => Gender::Female, 'Basil' => Gender::Male, 'Cedar' => Gender::Male, 'Dahlia' => Gender::Female, 'Elder' => Gender::Male, 'Fern' => Gender::Female,
-        'Ginger' => Gender::Female, 'Hazel' => Gender::Female, 'Iris' => Gender::Female, 'Juniper' => Gender::Male, 'Linden' => Gender::Male, 'Myrtle' => Gender::Female,
+        'A' => ['Aster' => Gender::Female, 'Alder' => Gender::Male, 'Angelica' => Gender::Female, 'Ash' => Gender::Male, 'Acacia' => Gender::Female],
+        'B' => ['Basil' => Gender::Male, 'Bryony' => Gender::Female, 'Bramble' => Gender::Male, 'Briar' => Gender::Female, 'Begonia' => Gender::Female],
+        'C' => ['Cedar' => Gender::Male, 'Camellia' => Gender::Female, 'Clover' => Gender::Female, 'Cypress' => Gender::Male, 'Chicory' => Gender::Male],
+        'D' => ['Dahlia' => Gender::Female, 'Daisy' => Gender::Female, 'Dill' => Gender::Male, 'Damson' => Gender::Male, 'Dogwood' => Gender::Male],
+        'E' => ['Elder' => Gender::Male, 'Elm' => Gender::Male, 'Eglantine' => Gender::Female, 'Edelweiss' => Gender::Female, 'Ebony' => Gender::Female],
+        'F' => ['Fern' => Gender::Female, 'Flax' => Gender::Male, 'Fennel' => Gender::Male, 'Freesia' => Gender::Female, 'Forsythia' => Gender::Female],
+        'G' => ['Ginger' => Gender::Female, 'Gorse' => Gender::Male, 'Gardenia' => Gender::Female, 'Gale' => Gender::Male],
+        'H' => ['Hazel' => Gender::Female, 'Heather' => Gender::Female, 'Hawthorn' => Gender::Male, 'Holly' => Gender::Female, 'Hyssop' => Gender::Male],
+        'I' => ['Iris' => Gender::Female, 'Ivy' => Gender::Female, 'Indigo' => Gender::Male, 'Ilex' => Gender::Male],
+        'J' => ['Juniper' => Gender::Male, 'Jasmine' => Gender::Female, 'Jonquil' => Gender::Female, 'Jarrah' => Gender::Male],
+        'K' => ['Kale' => Gender::Male, 'Kerria' => Gender::Female, 'Kalmia' => Gender::Female, 'Kauri' => Gender::Male],
+        'L' => ['Linden' => Gender::Male, 'Lavender' => Gender::Female, 'Lily' => Gender::Female, 'Larch' => Gender::Male, 'Laurel' => Gender::Male],
+        'M' => ['Myrtle' => Gender::Female, 'Maple' => Gender::Male, 'Marigold' => Gender::Female, 'Mallow' => Gender::Male],
+    ];
+    private const array RETIRED = [
         'Nettle' => Gender::Male, 'Olive' => Gender::Female, 'Poppy' => Gender::Female, 'Quince' => Gender::Male, 'Rowan' => Gender::Male, 'Sage' => Gender::Male,
         'Thyme' => Gender::Male, 'Willow' => Gender::Female, 'Yarrow' => Gender::Male, 'Zinnia' => Gender::Female,
     ];
@@ -28,7 +41,7 @@ final readonly class CaseGenerator
 
     public static function genderOf(string $name): Gender
     {
-        return self::SUSPECTS[$name] ?? self::VICTIMS[$name] ?? Gender::Female;
+        return self::SUSPECTS[$name[0]][$name] ?? self::RETIRED[$name] ?? self::VICTIMS[$name] ?? Gender::Female;
     }
 
     /**
@@ -37,14 +50,13 @@ final readonly class CaseGenerator
     public function generate(?int $size = null): Blueprint
     {
         $size ??= $this->randomizer->getInt(self::MIN_SIZE, self::MAX_SIZE);
-        $suspects = $this->randomizer->pickArrayKeys(self::SUSPECTS, $size - 1);
+        $suspects = array_map(fn (array $names): string => $this->randomizer->pickArrayKeys($names, 1)[0], \array_slice(array_values(self::SUSPECTS), 0, $size - 1));
         $victimName = array_keys(self::VICTIMS)[$this->randomizer->getInt(0, \count(self::VICTIMS) - 1)];
         do {
             $kinds = \array_slice($this->randomizer->shuffleArray(RoomKind::cases()), 0, $this->randomizer->getInt((int) ceil($size / 2), $size));
             $rooms = $this->rooms($size, \count($kinds));
             [$solution, $victim] = $this->crime($size, $rooms);
-            $people = $suspects;
-            array_splice($people, $victim, 0, [$victimName]);
+            $people = [...$suspects, $victimName];
             $genders = array_map(self::genderOf(...), $people);
             $plan = $this->furnish(new Floorplan($size, $rooms, $kinds, array_fill(0, $size * $size, null)), $solution, self::SPARSE, self::SPARSE_BLOCKING);
             $drawn = new ClueDraw($this->randomizer)->draw($plan, $victim, $genders, $solution);
@@ -114,8 +126,9 @@ final readonly class CaseGenerator
         } while ([] === $pairs);
 
         $pair = $pairs[$this->randomizer->getInt(0, \count($pairs) - 1)];
+        $victim = $pair[$this->randomizer->getInt(0, 1)];
 
-        return [$solution, $pair[$this->randomizer->getInt(0, 1)]];
+        return [[...array_values(array_diff_key($solution, [$victim => true])), $solution[$victim]], $size - 1];
     }
 
     /**

@@ -322,6 +322,30 @@ final class CaseGeneratorTest extends TestCase
     }
 
     #[DataProvider('seeds')]
+    public function testListsTheSuspectsFromAInAlphabeticalOrderThenTheVictim(int $seed): void
+    {
+        $case = self::generate($seed);
+        $suspects = \count($case->people) - 1;
+
+        self::assertSame($suspects, $case->victim);
+        self::assertSame(\array_slice(range('A', 'Z'), 0, $suspects), array_map(static fn (string $name): string => $name[0], \array_slice($case->people, 0, $suspects)));
+    }
+
+    public function testDrawsAmongSeveralNamesForEachLetter(): void
+    {
+        $names = [];
+        foreach (self::timedSeeds() as [$seed]) {
+            foreach (self::generate($seed)->people as $name) {
+                $names[$name[0]][$name] = true;
+            }
+        }
+
+        foreach ($names as $letter => $drawn) {
+            self::assertGreaterThan(1, \count($drawn), (string) $letter);
+        }
+    }
+
+    #[DataProvider('seeds')]
     public function testFurnishesAQuarterOfTheSquaresBlockingFewAndLeavesTwoFreeCellsInEveryRoom(int $seed): void
     {
         $plan = self::generate($seed)->floorplan;
