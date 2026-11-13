@@ -109,7 +109,7 @@ docker compose down -v         # stop and DELETE the database
 
 ## duprat.cloud setup
 
-On `debian@duprat.cloud` the app does not publish a port: `compose.override.yaml` (server only) joins the shared nginx network `docker-onlyoffice-nextcloud_default` with the alias `mossydew`, and the `mossydew.mossyleaf.studio` server block in `/mnt/docker-onlyoffice-nextcloud/data/nginx/default.conf` proxies to `http://mossydew`. The TLS certificate is the shared `duprat.cloud` Let's Encrypt certificate (certbot `--expand` with `-d mossydew.mossyleaf.studio` added).
+On `debian@duprat.cloud` the app does not publish a port: `compose.override.yaml` (server only) joins the shared proxy network `web` with the alias `mossydew`, and the `mossydew.mossyleaf.studio` block of the Caddyfile (repo `duprat-cloud`, `proxy/conf/Caddyfile`) proxies to `mossydew:80`. Caddy issues and renews the TLS certificate itself.
 
 ```yaml
 services:
@@ -122,6 +122,6 @@ services:
           - mossydew
 networks:
   proxy:
-    name: docker-onlyoffice-nextcloud_default
+    name: web
     external: true
 ```
