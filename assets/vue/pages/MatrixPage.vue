@@ -114,7 +114,7 @@ const draggable = computed(() => ({ group: 'matrix', animation: 160, delay: 180,
 .matrix__tasks { display: flex; flex: 1; flex-direction: column; gap: var(--space-2); min-height: 4rem; margin: 0; padding: 0.125rem var(--space-1) 0.125rem 0.125rem; overflow-y: auto; overscroll-behavior: contain; list-style: none; }
 .matrix__tasks :deep(.task-row) { flex-shrink: 0; }
 .matrix__tray { grid-area: tray; display: flex; flex-direction: column; gap: var(--space-3); max-height: 24rem; margin-top: var(--space-3); padding: var(--space-4) var(--space-3) var(--space-3) var(--space-4); border: 0.0625rem dashed var(--color-border-strong); border-radius: var(--radius); }
-.matrix__tasks--tray { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); align-content: start; }
+.matrix__tasks--tray { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(20rem, 100%), 1fr)); grid-auto-rows: max-content; align-content: start; }
 :deep(.matrix__ghost) { opacity: 0.4; }
 
 @media (max-width: 48rem) {

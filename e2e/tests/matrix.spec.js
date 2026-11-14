@@ -81,3 +81,24 @@ test('sorting a parent asks whether its subtasks move along', async ({ page }) =
     await expect(row(page, parent)).toHaveClass(/task-row--schedule/);
     await expect(row(page, sketch)).toHaveClass(/task-row--schedule/);
 });
+
+test('a crowded unsorted tray keeps every card whole and fits a phone', async ({ page }) => {
+    await signIn(page);
+    await page.goto('/inbox');
+    const titles = Array.from({ length: 16 }, (_, index) => unique(`Repot the cushion moss on the north windowsill before the frost, batch ${index}`));
+    for (const title of titles) {
+        await page.getByLabel('New task').fill(title);
+        await page.getByLabel('New task').press('Enter');
+        await expect(row(page, title)).toBeVisible();
+    }
+
+    await page.locator('.shell__rail').getByRole('link', { name: 'Matrix' }).click();
+    const tray = page.locator('.matrix__tasks--tray');
+    await expect(tray.locator('> .task-row', { hasText: titles[15] })).toBeAttached();
+    const clipped = await tray.locator('> .task-row').evaluateAll((rows) => rows.filter((element) => element.scrollHeight > element.clientHeight + 1).length);
+    expect(clipped).toBe(0);
+
+    await page.setViewportSize({ width: 360, height: 740 });
+    const overflow = await tray.evaluate((element) => element.scrollWidth - element.clientWidth);
+    expect(overflow).toBeLessThanOrEqual(1);
+});
