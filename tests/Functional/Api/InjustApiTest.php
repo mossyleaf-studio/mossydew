@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\Api;
 
+use App\Domain\Planning\Injust\InjustLink;
+use App\Domain\Planning\Project;
+use App\Domain\Planning\Task;
 use App\Tests\Support\FreezesClock;
 use App\Tests\Support\Json;
 use App\Tests\Support\SignsInClient;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -75,14 +79,14 @@ final class InjustApiTest extends WebTestCase
         self::assertResponseStatusCodeSame(204);
 
         $tasks = self::injustTasks($client);
-        self::assertSame(['Cover revealed', 'Guitar playthrough', 'Mixing: She Needs Help'], array_keys($tasks));
-        self::assertSame(['2026-10-09', null, null, 'Untitled EP, due Fri 9 Oct.'], [Json::at($tasks['Cover revealed'], 'dueOn'), Json::at($tasks['Cover revealed'], 'plannedOn'), Json::at($tasks['Cover revealed'], 'quadrant'), Json::at($tasks['Cover revealed'], 'notes')]);
-        self::assertSame(['Untitled EP', 'Posts', 'Studio'], [Json::at($tasks['Cover revealed'], 'parentTitle'), Json::at($tasks['Guitar playthrough'], 'parentTitle'), Json::at($tasks['Mixing: She Needs Help'], 'parentTitle')], 'each item sits under its first tag');
-        self::assertSame(['Posts', 'Studio', 'Untitled EP'], array_keys(self::injustTasks($client, groups: true)));
+        self::assertSame(['Cover revealed · Untitled EP', 'Guitar playthrough', 'Mixing: She Needs Help'], array_keys($tasks));
+        self::assertSame(['2026-10-09', null, null, 'Untitled EP, due Fri 9 Oct.'], [Json::at($tasks['Cover revealed · Untitled EP'], 'dueOn'), Json::at($tasks['Cover revealed · Untitled EP'], 'plannedOn'), Json::at($tasks['Cover revealed · Untitled EP'], 'quadrant'), Json::at($tasks['Cover revealed · Untitled EP'], 'notes')]);
+        self::assertSame([null, null, null], array_values(array_map(static fn (array $task): mixed => Json::at($task, 'parentTitle'), $tasks)), 'every item is a plain task');
+        self::assertSame([], self::injustTasks($client, groups: true));
 
         $client->jsonRequest('PATCH', '/api/tasks/'.Json::string($tasks['Mixing: She Needs Help'], 'id'), ['title' => 'Mix it my way', 'projectId' => Json::at($tasks['Mixing: She Needs Help'], 'projectId')]);
         self::assertResponseIsSuccessful();
-        $client->jsonRequest('POST', '/api/tasks/'.Json::string($tasks['Cover revealed'], 'id').'/complete');
+        $client->jsonRequest('POST', '/api/tasks/'.Json::string($tasks['Cover revealed · Untitled EP'], 'id').'/complete');
         self::assertResponseIsSuccessful();
         $client->jsonRequest('DELETE', '/api/tasks/'.Json::string($tasks['Guitar playthrough'], 'id'));
 
@@ -103,30 +107,29 @@ final class InjustApiTest extends WebTestCase
         self::assertSame(['Mix it my way'], array_keys(self::injustTasks($client, open: true)), 'waiting events win, and an unchanged revision keeps local edits');
 
         self::feed($client, $token, self::feedOf(3, [
-            self::item('stage:mix', 'b2', 'Mixing: She Needs Help', '2026-10-12', ['Studio'], 'Needed by Mon 12 Oct.'),
+            self::item('stage:mix', 'b2', 'Mixing: She Needs Help', '2026-10-12', ['Untitled EP'], 'Needed by Mon 12 Oct.'),
             self::item('step:new', 'd1', 'Pitch playlists', '2026-10-20', ['Untitled EP'], 'Spotify for Artists.'),
         ], [['id' => 'step:cover', 'status' => 'done', 'at' => '2026-10-06T08:00:00.000Z']], $epoch, 2));
         self::assertSame([], Json::array(self::journal($client, $token), 'events'));
         $open = self::injustTasks($client, open: true);
-        self::assertSame(['Mixing: She Needs Help', 'Pitch playlists'], array_keys($open));
-        self::assertSame('2026-10-12', Json::at($open['Mixing: She Needs Help'], 'dueOn'));
-        self::assertSame(['Studio', 'Untitled EP'], array_keys(self::injustTasks($client, open: true, groups: true)), 'an emptied group goes, a new item reopens its done group');
+        self::assertSame(['Mixing: She Needs Help · Untitled EP', 'Pitch playlists · Untitled EP'], array_keys($open));
+        self::assertSame('2026-10-12', Json::at($open['Mixing: She Needs Help · Untitled EP'], 'dueOn'));
 
         $client->jsonRequest('GET', '/api/player');
         $xp = Json::int(self::body($client), 'xp');
         self::feed($client, $token, self::feedOf(4, [
             self::item('step:new', 'd1', 'Pitch playlists', '2026-10-20', ['Untitled EP'], 'Spotify for Artists.'),
         ], [['id' => 'stage:mix', 'status' => 'done', 'at' => '2026-10-06T08:00:00.000Z']], $epoch, 2));
-        self::assertSame(['Pitch playlists'], array_keys(self::injustTasks($client, open: true)));
+        self::assertSame(['Pitch playlists · Untitled EP'], array_keys(self::injustTasks($client, open: true)));
         $client->jsonRequest('GET', '/api/player');
         self::assertGreaterThan($xp, Json::int(self::body($client), 'xp'), 'an item done in Injust Release earns its reward here');
         self::assertSame(['seq' => 3, 'instance' => self::INSTANCE, 'item' => 'stage:mix', 'type' => 'done', 'at' => '2026-10-06T08:00:00.000Z'], Json::array(self::journal($client, $token), 'events', 0));
 
-        $client->jsonRequest('POST', '/api/tasks/'.Json::string(self::injustTasks($client)['Pitch playlists'], 'id').'/complete');
+        $client->jsonRequest('POST', '/api/tasks/'.Json::string(self::injustTasks($client)['Pitch playlists · Untitled EP'], 'id').'/complete');
         self::feed($client, $token, self::feedOf(5, [
             self::item('step:new', 'd1', 'Pitch playlists', '2026-10-20', ['Untitled EP'], 'Spotify for Artists.'),
         ], [], $epoch, 4));
-        self::assertSame(['Pitch playlists'], array_keys(self::injustTasks($client, open: true)), 'a tick Injust Release refused comes back open');
+        self::assertSame(['Pitch playlists · Untitled EP'], array_keys(self::injustTasks($client, open: true)), 'a tick Injust Release refused comes back open');
     }
 
     public function testOnlyLateUndatedAndNearItemsBecomeTasks(): void
@@ -141,7 +144,7 @@ final class InjustApiTest extends WebTestCase
             self::item('stage:mix', 'd1', 'Mixing: She Needs Help', null, ['Studio'], 'Current stage.'),
         ]));
         self::assertResponseStatusCodeSame(204);
-        self::assertSame(['Cover revealed', 'Mixing: She Needs Help', 'Pitch sent'], array_keys(self::injustTasks($client)));
+        self::assertSame(['Cover revealed · Untitled EP', 'Mixing: She Needs Help', 'Pitch sent · Untitled EP'], array_keys(self::injustTasks($client)));
 
         self::feed($client, $token, self::feedOf(2, [
             self::item('step:pitch', 'a1', 'Pitch sent', '2026-09-30', ['Untitled EP'], 'Late.'),
@@ -149,16 +152,95 @@ final class InjustApiTest extends WebTestCase
             self::item('step:stats', 'c2', 'Stats reviewed', '2026-10-19', ['Untitled EP'], 'Moved closer.'),
             self::item('stage:mix', 'd1', 'Mixing: She Needs Help', null, ['Studio'], 'Current stage.'),
         ]));
-        self::assertSame(['Mixing: She Needs Help', 'Pitch sent', 'Stats reviewed'], array_keys(self::injustTasks($client)), 'a task now due later goes, an item that comes closer arrives');
+        self::assertSame(['Mixing: She Needs Help', 'Pitch sent · Untitled EP', 'Stats reviewed · Untitled EP'], array_keys(self::injustTasks($client)), 'a task now due later goes, an item that comes closer arrives');
         $journal = self::journal($client, $token);
         self::assertSame([], $journal['events'], 'a task removed for being due later is not a skip');
 
-        $client->jsonRequest('POST', '/api/tasks/'.Json::string(self::injustTasks($client)['Pitch sent'], 'id').'/complete');
+        $client->jsonRequest('POST', '/api/tasks/'.Json::string(self::injustTasks($client)['Pitch sent · Untitled EP'], 'id').'/complete');
         self::assertResponseIsSuccessful();
         self::feed($client, $token, self::feedOf(3, [
             self::item('step:pitch', 'a2', 'Pitch sent', '2026-11-03', ['Untitled EP'], 'Refused and moved away.'),
         ], [], Json::string($journal, 'epoch'), 1));
-        self::assertTrue(Json::at(self::injustTasks($client)['Pitch sent'] ?? [], 'done'), 'a done task stays, even when its item is due later');
+        $tasks = self::injustTasks($client) + self::injustTasks($client, groups: true);
+        self::assertSame(['Pitch sent · Untitled EP'], array_keys($tasks));
+        self::assertTrue(Json::at($tasks['Pitch sent · Untitled EP'], 'done'), 'a done task stays, even when its item is due later');
+    }
+
+    public function testTasksLeaveTheParentsOfTheEarlierGrouping(): void
+    {
+        $client = self::signedInClient();
+        $token = self::token($client);
+        $open = [
+            self::item('step:cover', 'a1', 'Cover revealed', '2026-10-09', ['Untitled EP'], 'Cover.'),
+            self::item('step:pitch', 'b1', 'Pitch playlists', '2026-10-12', ['Untitled EP'], 'Pitch.'),
+            self::item('post:r:2026-10-08', 'c1', 'Guitar playthrough', '2026-10-08', ['Posts'], 'Reels first.'),
+        ];
+        self::feed($client, $token, self::feedOf(1, [...$open, self::item('cut:r:2026-10-08', 'd1', 'Cut: Darkest Memories', '2026-10-08', ['Cut'], 'Cut it.')]));
+        self::assertResponseStatusCodeSame(204);
+
+        self::group('Untitled EP', ['step:cover' => 'Cover revealed', 'step:pitch' => 'Pitch playlists']);
+        self::group('Posts', ['post:r:2026-10-08' => 'Guitar playthrough']);
+        self::group('Cut', ['cut:r:2026-10-08' => 'Cut: Darkest Memories']);
+        self::group('Shoot', []);
+        self::group('Studio', [], 'My own note');
+        self::assertSame(['Cut', 'Posts', 'Studio', 'Untitled EP'], array_keys(self::injustTasks($client, groups: true)));
+        self::assertSame(['Cover revealed' => 'Untitled EP', 'Cut: Darkest Memories' => 'Cut', 'Guitar playthrough' => 'Posts', 'My own note' => 'Studio', 'Pitch playlists' => 'Untitled EP', 'Shoot' => null], array_map(static fn (array $task): mixed => Json::at($task, 'parentTitle'), self::injustTasks($client)));
+
+        $client->jsonRequest('POST', '/api/tasks/'.Json::string(self::injustTasks($client)['Cut: Darkest Memories'], 'id').'/complete');
+        self::assertResponseIsSuccessful();
+        $client->request('GET', '/integrations/injust/journal', server: ['HTTP_AUTHORIZATION' => "Bearer $token"]);
+        $epoch = Json::string(self::body($client), 'epoch');
+
+        self::feed($client, $token, self::feedOf(2, $open, [['id' => 'cut:r:2026-10-08', 'status' => 'done', 'at' => '2026-10-06T08:00:00.000Z']], $epoch, 1));
+        self::assertResponseStatusCodeSame(204);
+
+        $tasks = self::injustTasks($client, open: true);
+        self::assertSame(['Cover revealed · Untitled EP', 'Guitar playthrough', 'My own note', 'Pitch playlists · Untitled EP'], array_keys($tasks), 'the steps are rewritten although their revision did not change');
+        self::assertSame('Studio', Json::at($tasks['My own note'], 'parentTitle'));
+        foreach (['Cover revealed · Untitled EP', 'Guitar playthrough', 'Pitch playlists · Untitled EP'] as $title) {
+            self::assertSame([null, null], [Json::at($tasks[$title], 'parentTitle'), Json::at($tasks[$title], 'plannedOn')], $title);
+        }
+        $all = self::injustTasks($client) + self::injustTasks($client, groups: true);
+        self::assertSame(['Cover revealed · Untitled EP', 'Cut', 'Cut: Darkest Memories', 'Guitar playthrough', 'My own note', 'Pitch playlists · Untitled EP', 'Studio'], array_keys(self::sorted($all)), 'the open parents left empty are deleted');
+        self::assertSame([true, true, null], [Json::at($all['Cut'], 'done'), Json::at($all['Cut: Darkest Memories'], 'done'), Json::at($all['Cut: Darkest Memories'], 'parentTitle')]);
+        self::assertSame(['Studio'], array_keys(self::injustTasks($client, open: true, groups: true)));
+    }
+
+    /**
+     * @param array<string, string> $items
+     */
+    private static function group(string $name, array $items, ?string $own = null): void
+    {
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $project = $entityManager->getRepository(Project::class)->findOneBy(['name' => 'Injust']);
+        self::assertInstanceOf(Project::class, $project);
+        $now = new \DateTimeImmutable('2026-10-06 08:00 UTC');
+        $parent = Task::create($project->owner(), $name, $now);
+        $parent->linkTo(InjustLink::GROUP.$name);
+        $parent->fileUnder($project);
+        $entityManager->persist($parent);
+        foreach ($items as $itemId => $title) {
+            $task = $entityManager->getRepository(Task::class)->findOneBy(['externalId' => InjustLink::PREFIX.$itemId]);
+            self::assertInstanceOf(Task::class, $task);
+            $task->rename($title);
+            $task->nestUnder($parent);
+        }
+        if (null !== $own) {
+            $entityManager->persist($parent->addSubtask($own, $now));
+        }
+        $entityManager->flush();
+    }
+
+    /**
+     * @param array<string, array<mixed>> $tasks
+     *
+     * @return array<string, array<mixed>>
+     */
+    private static function sorted(array $tasks): array
+    {
+        ksort($tasks);
+
+        return $tasks;
     }
 
     public function testTheInjustProjectGoesLast(): void

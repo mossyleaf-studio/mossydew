@@ -6,15 +6,19 @@ namespace App\Application\Planning\ReceiveInjustFeed;
 
 final readonly class InjustFeedItem
 {
+    private const string STEP = 'step';
+    private const string STAGE = 'stage';
+
     /**
      * @param list<string> $tags
      */
     public function __construct(
         public string $id,
+        private string $kind,
         public string $revision,
-        public string $title,
+        private string $title,
         public ?string $due,
-        public array $tags,
+        private array $tags,
         public string $block,
     ) {
     }
@@ -24,10 +28,11 @@ final readonly class InjustFeedItem
         return null === $this->due || $this->due <= $day;
     }
 
-    public function group(): ?string
+    public function title(): string
     {
-        $tag = trim($this->tags[0] ?? '');
+        $release = trim($this->tags[0] ?? '');
+        $ofRelease = self::STEP === $this->kind || (self::STAGE === $this->kind && null !== $this->due);
 
-        return '' === $tag ? null : $tag;
+        return $ofRelease && '' !== $release ? $this->title.' · '.$release : $this->title;
     }
 }

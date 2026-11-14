@@ -48,11 +48,6 @@ class InjustLink
         return new self($owner);
     }
 
-    public static function groupOf(string $tag): string
-    {
-        return self::GROUP.substr(hash('sha256', $tag), 0, 32);
-    }
-
     public static function epochOf(User $owner): string
     {
         return substr(hash('sha256', 'injust:'.$owner->id()), 0, 8);

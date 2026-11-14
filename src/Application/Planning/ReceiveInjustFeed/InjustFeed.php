@@ -76,7 +76,7 @@ final readonly class InjustFeed
             throw new UnreadableFeed();
         }
 
-        return new InjustFeedItem(self::id($item['id'] ?? null), $item['rev'], mb_substr($item['title'], 0, Task::MAX_TITLE_LENGTH), $due, $tags, $item['block']);
+        return new InjustFeedItem(self::id($item['id'] ?? null), is_string($item['kind'] ?? null) ? $item['kind'] : '', $item['rev'], mb_substr($item['title'], 0, Task::MAX_TITLE_LENGTH), $due, $tags, $item['block']);
     }
 
     private static function id(mixed $id): string

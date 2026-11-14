@@ -57,13 +57,7 @@ final readonly class ReceiveInjustFeedHandler
 
         $waiting = array_flip(array_map(static fn (InjustEvent $event): string => $event->item(), $this->links->pending($owner)));
         $linked = $this->tasks->linked(InjustLink::PREFIX);
-        $groups = $this->tasks->linked(InjustLink::GROUP);
-        foreach ($groups as $externalId => $group) {
-            if (!$group->isDone() && 0 === $group->subtaskCount()) {
-                $this->tasks->remove($group);
-                unset($groups[$externalId]);
-            }
-        }
+        $adopted = $this->ungroup($linked);
         $limit = (string) Day::format($owner->today($now)->modify(\sprintf('+%d days', self::WINDOW_DAYS)));
         $project = null;
         $seen = [];
@@ -72,38 +66,23 @@ final readonly class ReceiveInjustFeedHandler
                 continue;
             }
             $seen[$item->id] = true;
-            $task = $linked[InjustFeed::externalId($item->id)] ?? null;
+            $externalId = InjustFeed::externalId($item->id);
+            $task = $linked[$externalId] ?? null;
             if (isset($waiting[$item->id])) {
                 continue;
             }
             if (null === $task) {
                 $project ??= $this->projects->named(self::PROJECT) ?? $this->createProject($owner, $now);
-                $task = Task::create($owner, $item->title, $now);
+                $task = Task::create($owner, $item->title(), $now);
                 $task->fileUnder($project);
                 $this->tasks->add($task);
                 $this->update($task, $item);
-            } elseif ($task->externalRevision() !== $item->revision) {
-                $task->rename($item->title);
+            } elseif (isset($adopted[$externalId]) || $task->externalRevision() !== $item->revision) {
+                $task->rename($item->title());
                 $this->update($task, $item);
             }
             if ($task->isDone()) {
                 $task->reopen();
-            }
-            $tag = $item->group();
-            if (null === $tag || 0 !== $task->subtaskCount() || null !== $task->recurrence()) {
-                continue;
-            }
-            $group = $groups[InjustLink::groupOf($tag)] ?? null;
-            if (null === $group) {
-                $project ??= $this->projects->named(self::PROJECT) ?? $this->createProject($owner, $now);
-                $group = Task::create($owner, $tag, $now);
-                $group->linkTo(InjustLink::groupOf($tag));
-                $group->fileUnder($project);
-                $this->tasks->add($group);
-                $groups[InjustLink::groupOf($tag)] = $group;
-            }
-            if ($task->parent() !== $group) {
-                $task->nestUnder($group);
             }
         }
 
@@ -129,6 +108,29 @@ final readonly class ReceiveInjustFeedHandler
                 continue;
             }
         }
+    }
+
+    /**
+     * @param array<string, Task> $linked
+     *
+     * @return array<string, true>
+     */
+    private function ungroup(array $linked): array
+    {
+        $adopted = [];
+        foreach ($linked as $externalId => $task) {
+            if (str_starts_with((string) $task->parent()?->externalId(), InjustLink::GROUP)) {
+                $task->promote();
+                $adopted[$externalId] = true;
+            }
+        }
+        foreach ($this->tasks->linked(InjustLink::GROUP) as $group) {
+            if (!$group->isDone() && 0 === $group->subtaskCount()) {
+                $this->tasks->remove($group);
+            }
+        }
+
+        return $adopted;
     }
 
     private function update(Task $task, InjustFeedItem $item): void
