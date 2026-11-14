@@ -298,6 +298,7 @@ function onKeydown(event) {
 .task-row--dense .task-row__main { flex-direction: row; align-items: center; gap: var(--space-3); }
 .task-row--dense .task-row__title { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
 .task-row--dense .task-row__meta { flex-shrink: 0; flex-wrap: nowrap; white-space: nowrap; }
+.task-row--dense .task-row__actions { margin-block: calc(-1 * var(--space-1)); }
 
 @media (hover: hover) {
     .task-row--dense:not(:hover, :focus-within, :has([data-state="open"])) .task-row__actions > :deep(:not(.task-row__sun[aria-pressed="true"])) { display: none; }

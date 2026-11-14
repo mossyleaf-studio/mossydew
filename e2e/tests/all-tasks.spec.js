@@ -1,5 +1,24 @@
 import { expect, test } from '@playwright/test';
-import { row, signInWithAccount, unique } from './support/session.js';
+import { row, signIn, signInWithAccount, unique } from './support/session.js';
+
+test('pointing at a task in all tasks shows its actions without resizing its line', async ({ page }) => {
+    await signIn(page);
+    const task = unique('Water the ferns');
+    await page.goto('/inbox');
+    await page.getByLabel('New task').fill(task);
+    await page.getByLabel('New task').press('Enter');
+    await expect(row(page, task)).toBeVisible();
+
+    await page.locator('.shell__rail').getByRole('link', { name: 'All tasks' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'All tasks' })).toBeVisible();
+    const line = row(page, task);
+    await expect(line.getByRole('button', { name: 'Add to today' })).toBeHidden();
+    const resting = await line.boundingBox();
+
+    await line.hover();
+    await expect(line.getByRole('button', { name: 'Add to today' })).toBeVisible();
+    expect((await line.boundingBox()).height).toBe(resting.height);
+});
 
 test('all tasks folds the subtasks of a task until it is opened', async ({ page }) => {
     const account = unique('bryum').replace(' ', '-');
