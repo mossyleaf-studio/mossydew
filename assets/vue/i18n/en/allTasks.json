@@ -1,0 +1,14 @@
+{
+    "title": "All tasks",
+    "summary": "{total} open: {tasks} and {subtasks}, folded in their task until you open it.",
+    "summaryFlat": "Nothing open | 1 open task | {count} open tasks",
+    "tasks": "{count} task | {count} tasks",
+    "subtasks": "{count} subtask | {count} subtasks",
+    "showAll": "Show all {count}",
+    "showFewer": "Show fewer",
+    "unknownProject": "Another project",
+    "empty": {
+        "title": "Nothing left to do",
+        "hint": "Every open task shows up here, grouped by project."
+    }
+}

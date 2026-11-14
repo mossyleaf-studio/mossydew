@@ -28,7 +28,12 @@ const props = defineProps({
     nested: { type: Boolean, default: false },
     nestable: { type: Boolean, default: false },
     collapsible: { type: Boolean, default: false },
+    dense: { type: Boolean, default: false },
+    expanded: { type: Boolean, default: null },
+    nextDue: { type: String, default: null },
 });
+
+const emit = defineEmits(['fold']);
 
 const { t } = useI18n();
 const dates = useDates();
@@ -40,13 +45,15 @@ const drag = useTaskDrag();
 const toast = useToast();
 const selection = useSelection();
 const collapse = useCollapsed();
-const expanded = computed(() => !collapse.isCollapsed(props.task));
+const controlled = computed(() => props.expanded !== null);
+const unfolded = computed(() => (controlled.value ? props.expanded : !collapse.isCollapsed(props.task)));
 const planOpen = ref(false);
 const dropping = ref(false);
 
 const project = computed(() => (props.task.projectId ? byId.value.get(props.task.projectId) : null));
 const inToday = computed(() => isPlannedFor(props.task, dates.today.value));
-const overdue = computed(() => isOverdue(props.task, dates.today.value));
+const due = computed(() => props.task.dueOn ?? props.nextDue);
+const overdue = computed(() => isOverdue({ done: props.task.done, dueOn: due.value }, dates.today.value));
 
 function dayLabel(day) {
     const relative = dates.relative(day);
@@ -92,7 +99,12 @@ const repeatLabel = computed(() => recurrenceLabel(props.task.recurrence, t));
 
 const showQuadrant = computed(() => !props.compact && !props.task.done && props.task.quadrant !== null);
 
-const dueLabel = computed(() => (props.task.dueOn ? t('tasks.due', { day: dayLabel(props.task.dueOn) }) : null));
+const dueLabel = computed(() => (due.value ? t('tasks.due', { day: dayLabel(due.value) }) : null));
+
+function fold(open) {
+    if (controlled.value) emit('fold', open);
+    else collapse.toggle(props.task, !open);
+}
 
 function toggle() {
     if (locked.value) return null;
@@ -153,7 +165,7 @@ function onKeydown(event) {
         e: () => editor.edit(props.task),
         s: () => addSubtask(),
         x: () => select(),
-        ...(props.collapsible ? { ArrowLeft: () => collapse.toggle(props.task, true), ArrowRight: () => collapse.toggle(props.task, false) } : {}),
+        ...(props.collapsible || controlled.value ? { ArrowLeft: () => fold(false), ArrowRight: () => fold(true) } : {}),
         Enter: () => editor.edit(props.task),
         ' ': () => toggle(),
     };
@@ -166,7 +178,7 @@ function onKeydown(event) {
 
 <template>
     <li
-        :class="['task-row', `task-row--${task.quadrant ?? 'unsorted'}`, { 'task-row--done': task.done, 'task-row--compact': compact, 'task-row--nested': nested, 'task-row--drop': dropping, 'task-row--dragged': dragged, 'task-row--selected': selected, 'task-row--selectable': selection.count.value > 0 && !task.done }]"
+        :class="['task-row', `task-row--${task.quadrant ?? 'unsorted'}`, { 'task-row--done': task.done, 'task-row--compact': compact, 'task-row--nested': nested, 'task-row--dense': dense, 'task-row--drop': dropping, 'task-row--dragged': dragged, 'task-row--selected': selected, 'task-row--selectable': selection.count.value > 0 && !task.done }]"
         tabindex="0"
         :draggable="draggable ? 'true' : undefined"
         @dragstart="onDragStart"
@@ -178,23 +190,26 @@ function onKeydown(event) {
         @keydown="onKeydown"
         @click="onClick"
     >
-        <button v-if="collapsible" type="button" :class="['task-row__fold', { 'task-row__fold--open': expanded }]" :aria-expanded="expanded" :aria-label="t(expanded ? 'tasks.subtasks.hide' : 'tasks.subtasks.show', { title: task.title })" @click="collapse.toggle(task)">
+        <button v-if="collapsible && !controlled" type="button" :class="['task-row__fold', { 'task-row__fold--open': unfolded }]" :aria-expanded="unfolded" :aria-label="t(unfolded ? 'tasks.subtasks.hide' : 'tasks.subtasks.show', { title: task.title })" @click="fold(!unfolded)">
             <ChevronRight size="1rem" aria-hidden="true" />
         </button>
         <DropCheck :done="task.done" :disabled="locked" :label="checkLabel" @toggle="toggle" />
         <div class="task-row__main">
-            <button type="button" class="task-row__title">{{ task.title }}</button>
+            <button type="button" class="task-row__title" :title="dense ? task.title : undefined">{{ task.title }}</button>
             <p v-if="showQuadrant || parentLabel || (showProject && project) || task.subtaskCount || plannedLabel || dueLabel || repeatLabel || task.notes" class="task-row__meta">
                 <QuadrantTag v-if="showQuadrant" :quadrant="task.quadrant" />
                 <span v-if="parentLabel" class="task-row__parent"><CornerDownRight size="0.875rem" aria-hidden="true" />{{ t('tasks.subtasks.of', { title: parentLabel }) }}</span>
                 <span v-if="showProject && project" class="task-row__project" :style="{ '--project': `var(--project-${project.color})` }">{{ project.name }}</span>
-                <span v-if="task.subtaskCount" class="task-row__subtasks" :aria-label="t('tasks.subtasks.progress', { done: task.subtasksDone, total: task.subtaskCount })">
+                <span v-if="task.subtaskCount && !controlled" class="task-row__subtasks" :aria-label="t('tasks.subtasks.progress', { done: task.subtasksDone, total: task.subtaskCount })">
                     <ListChecks size="0.875rem" aria-hidden="true" /><span aria-hidden="true">{{ task.subtasksDone }}/{{ task.subtaskCount }}</span>
                 </span>
                 <span v-if="plannedLabel" class="task-row__planned">{{ plannedLabel }}</span>
                 <span v-if="dueLabel" :class="['task-row__due', { 'task-row__due--overdue': overdue }]">{{ dueLabel }}</span>
                 <span v-if="repeatLabel" class="task-row__repeat"><Repeat size="0.875rem" aria-hidden="true" />{{ repeatLabel }}</span>
                 <AlignLeft v-if="task.notes" size="0.875rem" class="task-row__notes" :aria-label="t('tasks.hasNotes')" role="img" />
+                <button v-if="controlled" type="button" :class="['task-row__folder', { 'task-row__folder--open': expanded }]" :aria-expanded="expanded" :aria-label="t(expanded ? 'tasks.subtasks.hide' : 'tasks.subtasks.show', { title: task.title })" @click="fold(!expanded)">
+                    <ListChecks size="0.875rem" aria-hidden="true" /><span>{{ task.subtasksDone }}/{{ task.subtaskCount }}</span><ChevronRight size="0.75rem" class="task-row__folder-chevron" aria-hidden="true" />
+                </button>
             </p>
         </div>
         <div v-if="!task.done" class="task-row__actions">
@@ -270,8 +285,28 @@ function onKeydown(event) {
 .task-row--compact { min-height: 3rem; gap: var(--space-2); padding-left: var(--space-3); cursor: grab; }
 .task-row--compact .task-row__title { font-size: var(--font-size-md); }
 
+.task-row__folder { display: inline-flex; flex-shrink: 0; align-items: center; gap: var(--space-1); min-height: 1.75rem; padding: 0.125rem var(--space-2); border: var(--border-width) solid var(--color-border-strong); border-radius: var(--radius-pill); background: none; color: var(--color-text); font-size: var(--font-size-sm); font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer; }
+.task-row__folder:hover { background: var(--color-hover); }
+.task-row__folder:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.task-row__folder--open { border-color: var(--color-accent); background: var(--color-accent-soft); }
+.task-row__folder :deep(svg) { flex-shrink: 0; color: var(--color-muted); }
+.task-row__folder-chevron { transition: transform var(--transition); }
+.task-row__folder--open .task-row__folder-chevron { transform: rotate(90deg); }
+
+.task-row--dense { min-height: 2.75rem; padding-block: var(--space-1); border-radius: var(--radius-inner); }
+.task-row--dense::before { border-radius: var(--radius-inner); }
+.task-row--dense .task-row__main { flex-direction: row; align-items: center; gap: var(--space-3); }
+.task-row--dense .task-row__title { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
+.task-row--dense .task-row__meta { flex-shrink: 0; flex-wrap: nowrap; white-space: nowrap; }
+
+@media (hover: hover) {
+    .task-row--dense:not(:hover, :focus-within, :has([data-state="open"])) .task-row__actions > :deep(:not(.task-row__sun[aria-pressed="true"])) { display: none; }
+}
+
 @media (max-width: 30rem) {
     .task-row { gap: var(--space-2); padding-left: var(--space-3); }
     .task-row__sun { display: none; }
+    .task-row--dense .task-row__main { flex-wrap: wrap; gap: 0 var(--space-3); }
+    .task-row--dense .task-row__title { display: -webkit-box; flex-basis: 9rem; white-space: normal; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 }
 </style>

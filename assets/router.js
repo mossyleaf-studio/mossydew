@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AchievementsPage from './vue/pages/AchievementsPage.vue';
+import AllTasksPage from './vue/pages/AllTasksPage.vue';
 import CreditsPage from './vue/pages/CreditsPage.vue';
 import DonePage from './vue/pages/DonePage.vue';
 import FriendsPage from './vue/pages/FriendsPage.vue';
@@ -23,6 +24,7 @@ export const router = createRouter({
         { path: '/', name: 'today', component: TodayPage },
         { path: '/today', redirect: '/' },
         { path: '/upcoming', name: 'upcoming', component: UpcomingPage },
+        { path: '/all', name: 'all', component: AllTasksPage },
         { path: '/inbox', name: 'inbox', component: InboxPage },
         { path: '/matrix', name: 'matrix', component: MatrixPage },
         { path: '/done', name: 'done', component: DonePage },

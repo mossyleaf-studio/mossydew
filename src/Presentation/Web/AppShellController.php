@@ -37,6 +37,7 @@ final class AppShellController extends AbstractController
         return match ($path) {
             '', 'today' => ['/api/tasks/today'],
             'upcoming' => ['/api/tasks/upcoming'],
+            'all' => ['/api/matrix'],
             'inbox' => ['/api/tasks/inbox'],
             'matrix' => ['/api/matrix'],
             'done' => ['/api/tasks/done'],

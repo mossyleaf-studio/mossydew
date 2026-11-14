@@ -4,7 +4,7 @@ import {
     PhArmchair, PhArrowElbowDownRight, PhArrowRight, PhArrowUp, PhBathtub, PhBed, PhBooks, PhCalendarDots, PhCaretDown, PhCaretLeft,
     PhCaretRight, PhChartBar, PhCheck, PhCheckCircle, PhCloudFog, PhCloudRain, PhCompass, PhCookingPot, PhCouch, PhDotsThree, PhDrop,
     PhDropHalfBottom, PhFire, PhFolderSimplePlus, PhGear, PhGenderFemale, PhGenderMale, PhGridFour, PhLamp, PhLeaf, PhList, PhListChecks, PhLock, PhMagnifyingGlass,
-    PhPencilSimple, PhPianoKeys, PhPlant, PhPlus, PhPottedPlant, PhRecycle, PhRepeat, PhScissors, PhShovel, PhSignOut, PhSun,
+    PhPencilSimple, PhPianoKeys, PhPlant, PhPlus, PhPottedPlant, PhRecycle, PhRepeat, PhScissors, PhShovel, PhSignOut, PhStack, PhSun,
     PhTelevision, PhTextAlignLeft, PhToilet, PhTrash, PhTray, PhTrophy, PhUserMinus, PhUsers, PhWarehouse, PhWashingMachine, PhX,
 } from '@phosphor-icons/vue';
 import { useSession } from './composables/useSession.js';
@@ -46,6 +46,7 @@ export const FolderInput = icon(Lucide.FolderInput, PhFolderSimplePlus);
 export const Grid2x2 = icon(Lucide.Grid2x2, PhGridFour, 'duotone');
 export const Inbox = icon(Lucide.Inbox, PhTray, 'duotone');
 export const LampFloor = icon(Lucide.LampFloor, PhLamp, 'duotone');
+export const Layers = icon(Lucide.Layers, PhStack, 'duotone');
 export const Leaf = icon(Lucide.Leaf, PhLeaf, 'duotone');
 export const LibraryBig = icon(Lucide.LibraryBig, PhBooks, 'duotone');
 export const ListChecks = icon(Lucide.ListChecks, PhListChecks);

@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
-import { CalendarDays, ChartColumn, CircleCheckBig, Grid2x2, Inbox, Leaf, Plus, Search, Settings, Sun, Trophy, Users, Warehouse } from '../../icons.js';
+import { CalendarDays, ChartColumn, CircleCheckBig, Grid2x2, Inbox, Layers, Leaf, Plus, Search, Settings, Sun, Trophy, Users, Warehouse } from '../../icons.js';
 import { useI18n } from 'vue-i18n';
 import IconButton from '../ui/IconButton.vue';
 import { mysteriesEnabled } from '../../composables/useMysteries.js';
@@ -15,6 +15,7 @@ const { projects } = useProjects();
 const MAIN = [
     { to: '/', icon: Sun, label: 'nav.today' },
     { to: '/upcoming', icon: CalendarDays, label: 'nav.upcoming' },
+    { to: '/all', icon: Layers, label: 'nav.all' },
     { to: '/inbox', icon: Inbox, label: 'nav.inbox' },
     { to: '/matrix', icon: Grid2x2, label: 'nav.matrix' },
     { to: '/done', icon: CircleCheckBig, label: 'nav.done' },

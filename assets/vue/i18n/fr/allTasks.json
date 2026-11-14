@@ -1,0 +1,14 @@
+{
+    "title": "Toutes les tâches",
+    "summary": "{total} en cours : {tasks} et {subtasks}, rangées dans leur tâche tant que vous ne l’ouvrez pas.",
+    "summaryFlat": "Rien en cours | 1 tâche en cours | {count} tâches en cours",
+    "tasks": "{count} tâche | {count} tâches",
+    "subtasks": "{count} sous-tâche | {count} sous-tâches",
+    "showAll": "Afficher les {count}",
+    "showFewer": "Afficher moins",
+    "unknownProject": "Un autre projet",
+    "empty": {
+        "title": "Plus rien à faire",
+        "hint": "Toutes les tâches en cours s’affichent ici, regroupées par projet."
+    }
+}
