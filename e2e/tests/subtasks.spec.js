@@ -127,7 +127,7 @@ test('moving steps between tasks leaves every task once on the page', async ({ p
     await expect(subtasks).toHaveText([new RegExp(fold)]);
 });
 
-test('a task with subtasks folds them away and remembers it', async ({ page }) => {
+test('a task with subtasks folds them away with its progress pill and remembers it', async ({ page }) => {
     await signIn(page);
     const drawing = unique('Owl drawing');
     const sketch = unique('Sketch');
@@ -142,13 +142,18 @@ test('a task with subtasks folds them away and remembers it', async ({ page }) =
     await editor.getByRole('button', { name: 'Cancel' }).click();
 
     await expect(row(page, sketch)).toBeVisible();
-    await row(page, drawing).getByRole('button', { name: `Hide the subtasks of “${drawing}”` }).click();
+    const pill = row(page, drawing).getByRole('button', { name: `Hide the subtasks of “${drawing}”` });
+    await expect(pill).toHaveText('0/1');
+    await pill.click();
     await expect(row(page, sketch)).toBeHidden();
     await page.reload();
-    await expect(row(page, drawing)).toContainText('0/1');
+    await expect(row(page, drawing).getByRole('button', { name: `Show the subtasks of “${drawing}”` })).toHaveText('0/1');
     await expect(row(page, sketch)).toBeHidden();
 
     await row(page, drawing).focus();
     await page.keyboard.press('ArrowRight');
     await expect(row(page, sketch)).toBeVisible();
+
+    await page.locator('.shell__rail').getByRole('link', { name: 'Matrix' }).click();
+    await expect(row(page, drawing).getByRole('img', { name: '0 of 1 subtasks done' })).toBeVisible();
 });

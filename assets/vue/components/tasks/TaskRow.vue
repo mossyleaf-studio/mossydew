@@ -46,6 +46,7 @@ const toast = useToast();
 const selection = useSelection();
 const collapse = useCollapsed();
 const controlled = computed(() => props.expanded !== null);
+const foldable = computed(() => props.collapsible || controlled.value);
 const unfolded = computed(() => (controlled.value ? props.expanded : !collapse.isCollapsed(props.task)));
 const planOpen = ref(false);
 const dropping = ref(false);
@@ -165,7 +166,7 @@ function onKeydown(event) {
         e: () => editor.edit(props.task),
         s: () => addSubtask(),
         x: () => select(),
-        ...(props.collapsible || controlled.value ? { ArrowLeft: () => fold(false), ArrowRight: () => fold(true) } : {}),
+        ...(foldable.value ? { ArrowLeft: () => fold(false), ArrowRight: () => fold(true) } : {}),
         Enter: () => editor.edit(props.task),
         ' ': () => toggle(),
     };
@@ -190,9 +191,6 @@ function onKeydown(event) {
         @keydown="onKeydown"
         @click="onClick"
     >
-        <button v-if="collapsible && !controlled" type="button" :class="['task-row__fold', { 'task-row__fold--open': unfolded }]" :aria-expanded="unfolded" :aria-label="t(unfolded ? 'tasks.subtasks.hide' : 'tasks.subtasks.show', { title: task.title })" @click="fold(!unfolded)">
-            <ChevronRight size="1rem" aria-hidden="true" />
-        </button>
         <DropCheck :done="task.done" :disabled="locked" :label="checkLabel" @toggle="toggle" />
         <div class="task-row__main">
             <button type="button" class="task-row__title" :title="dense ? task.title : undefined">{{ task.title }}</button>
@@ -200,16 +198,16 @@ function onKeydown(event) {
                 <QuadrantTag v-if="showQuadrant" :quadrant="task.quadrant" />
                 <span v-if="parentLabel" class="task-row__parent"><CornerDownRight size="0.875rem" aria-hidden="true" />{{ t('tasks.subtasks.of', { title: parentLabel }) }}</span>
                 <span v-if="showProject && project" class="task-row__project" :style="{ '--project': `var(--project-${project.color})` }">{{ project.name }}</span>
-                <span v-if="task.subtaskCount && !controlled" class="task-row__subtasks" :aria-label="t('tasks.subtasks.progress', { done: task.subtasksDone, total: task.subtaskCount })">
-                    <ListChecks size="0.875rem" aria-hidden="true" /><span aria-hidden="true">{{ task.subtasksDone }}/{{ task.subtaskCount }}</span>
-                </span>
                 <span v-if="plannedLabel" class="task-row__planned">{{ plannedLabel }}</span>
                 <span v-if="dueLabel" :class="['task-row__due', { 'task-row__due--overdue': overdue }]">{{ dueLabel }}</span>
                 <span v-if="repeatLabel" class="task-row__repeat"><Repeat size="0.875rem" aria-hidden="true" />{{ repeatLabel }}</span>
                 <AlignLeft v-if="task.notes" size="0.875rem" class="task-row__notes" :aria-label="t('tasks.hasNotes')" role="img" />
-                <button v-if="controlled" type="button" :class="['task-row__folder', { 'task-row__folder--open': expanded }]" :aria-expanded="expanded" :aria-label="t(expanded ? 'tasks.subtasks.hide' : 'tasks.subtasks.show', { title: task.title })" @click="fold(!expanded)">
+                <button v-if="task.subtaskCount && foldable" type="button" :class="['task-row__folder', { 'task-row__folder--open': unfolded }]" :aria-expanded="unfolded" :aria-label="t(unfolded ? 'tasks.subtasks.hide' : 'tasks.subtasks.show', { title: task.title })" @click="fold(!unfolded)">
                     <ListChecks size="0.875rem" aria-hidden="true" /><span>{{ task.subtasksDone }}/{{ task.subtaskCount }}</span><ChevronRight size="0.75rem" class="task-row__folder-chevron" aria-hidden="true" />
                 </button>
+                <span v-else-if="task.subtaskCount" class="task-row__folder" role="img" :aria-label="t('tasks.subtasks.progress', { done: task.subtasksDone, total: task.subtaskCount })">
+                    <ListChecks size="0.875rem" aria-hidden="true" /><span aria-hidden="true">{{ task.subtasksDone }}/{{ task.subtaskCount }}</span>
+                </span>
             </p>
         </div>
         <div v-if="!task.done" class="task-row__actions">
@@ -260,15 +258,10 @@ function onKeydown(event) {
 .task-row__project { display: inline-flex; align-items: center; gap: var(--space-1); }
 .task-row__project::before { content: ""; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--project); }
 .task-row__due--overdue { color: var(--color-danger); font-weight: 600; }
-.task-row__repeat, .task-row__parent, .task-row__subtasks { display: inline-flex; align-items: center; gap: var(--space-1); }
+.task-row__repeat, .task-row__parent { display: inline-flex; align-items: center; gap: var(--space-1); }
 .task-row__parent { min-width: 0; overflow-wrap: anywhere; }
-.task-row__subtasks { font-variant-numeric: tabular-nums; }
 .task-row__notes { color: var(--color-subtle); }
 .task-row__actions { display: flex; align-items: center; flex-shrink: 0; }
-.task-row__fold { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; margin-left: calc(-1 * var(--space-2)); margin-right: calc(-1 * var(--space-2)); padding: 0; border: none; border-radius: var(--radius-pill); background: none; color: var(--color-muted); cursor: pointer; transition: transform var(--transition); }
-.task-row__fold:hover { background: var(--color-hover); color: var(--color-text); }
-.task-row__fold:focus-visible { outline: none; box-shadow: var(--focus-ring); }
-.task-row__fold--open { transform: rotate(90deg); }
 .task-row__sun[aria-pressed="true"] { color: var(--color-warning); }
 
 .task-row--done { border-color: transparent; background: transparent; }
@@ -285,8 +278,9 @@ function onKeydown(event) {
 .task-row--compact { min-height: 3rem; gap: var(--space-2); padding-left: var(--space-3); cursor: grab; }
 .task-row--compact .task-row__title { font-size: var(--font-size-md); }
 
-.task-row__folder { display: inline-flex; flex-shrink: 0; align-items: center; gap: var(--space-1); min-height: 1.75rem; padding: 0.125rem var(--space-2); border: var(--border-width) solid var(--color-border-strong); border-radius: var(--radius-pill); background: none; color: var(--color-text); font-size: var(--font-size-sm); font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer; }
-.task-row__folder:hover { background: var(--color-hover); }
+.task-row__folder { display: inline-flex; flex-shrink: 0; align-items: center; gap: var(--space-1); min-height: 1.75rem; padding: 0.125rem var(--space-2); border: var(--border-width) solid var(--color-border-strong); border-radius: var(--radius-pill); background: none; color: var(--color-text); font-size: var(--font-size-sm); font-weight: 600; font-variant-numeric: tabular-nums; }
+button.task-row__folder { cursor: pointer; }
+button.task-row__folder:hover { background: var(--color-hover); }
 .task-row__folder:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .task-row__folder--open { border-color: var(--color-accent); background: var(--color-accent-soft); }
 .task-row__folder :deep(svg) { flex-shrink: 0; color: var(--color-muted); }
