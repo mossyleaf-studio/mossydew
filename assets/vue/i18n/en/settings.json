@@ -17,7 +17,7 @@
     },
     "injust": {
         "title": "Injust Release",
-        "intro": "Injust Release can send its steps, studio stages and posts to an Injust project here, and gets back what you tick, skip or reopen. Create a token, then paste this address and the token in Injust Release › Settings › Tasks › MossyDew.",
+        "intro": "Injust Release can send its steps, studio stages and posts to an Injust project here, and gets back what you tick, skip or reopen. MossyDew only shows what is late or due within 14 days. Create a token, then paste this address and the token in Injust Release › Settings › Tasks › MossyDew.",
         "off": "Not connected.",
         "waitingFirst": "Token ready: waiting for Injust Release to send its tasks.",
         "lastFeed": "Injust Release last sent its tasks on {moment}. Changes waiting for it: {count}.",

@@ -129,6 +129,38 @@ final class InjustApiTest extends WebTestCase
         self::assertSame(['Pitch playlists'], array_keys(self::injustTasks($client, open: true)), 'a tick Injust Release refused comes back open');
     }
 
+    public function testOnlyLateUndatedAndNearItemsBecomeTasks(): void
+    {
+        $client = self::signedInClient();
+        $token = self::token($client);
+
+        self::feed($client, $token, self::feedOf(1, [
+            self::item('step:pitch', 'a1', 'Pitch sent', '2026-09-30', ['Untitled EP'], 'Late.'),
+            self::item('step:cover', 'b1', 'Cover revealed', '2026-10-20', ['Untitled EP'], 'The last day of the 14.'),
+            self::item('step:stats', 'c1', 'Stats reviewed', '2026-10-21', ['Untitled EP'], 'One day too far.'),
+            self::item('stage:mix', 'd1', 'Mixing: She Needs Help', null, ['Studio'], 'Current stage.'),
+        ]));
+        self::assertResponseStatusCodeSame(204);
+        self::assertSame(['Cover revealed', 'Mixing: She Needs Help', 'Pitch sent'], array_keys(self::injustTasks($client)));
+
+        self::feed($client, $token, self::feedOf(2, [
+            self::item('step:pitch', 'a1', 'Pitch sent', '2026-09-30', ['Untitled EP'], 'Late.'),
+            self::item('step:cover', 'b2', 'Cover revealed', '2026-11-03', ['Untitled EP'], 'Moved away.'),
+            self::item('step:stats', 'c2', 'Stats reviewed', '2026-10-19', ['Untitled EP'], 'Moved closer.'),
+            self::item('stage:mix', 'd1', 'Mixing: She Needs Help', null, ['Studio'], 'Current stage.'),
+        ]));
+        self::assertSame(['Mixing: She Needs Help', 'Pitch sent', 'Stats reviewed'], array_keys(self::injustTasks($client)), 'a task now due later goes, an item that comes closer arrives');
+        $journal = self::journal($client, $token);
+        self::assertSame([], $journal['events'], 'a task removed for being due later is not a skip');
+
+        $client->jsonRequest('POST', '/api/tasks/'.Json::string(self::injustTasks($client)['Pitch sent'], 'id').'/complete');
+        self::assertResponseIsSuccessful();
+        self::feed($client, $token, self::feedOf(3, [
+            self::item('step:pitch', 'a2', 'Pitch sent', '2026-11-03', ['Untitled EP'], 'Refused and moved away.'),
+        ], [], Json::string($journal, 'epoch'), 1));
+        self::assertTrue(Json::at(self::injustTasks($client)['Pitch sent'] ?? [], 'done'), 'a done task stays, even when its item is due later');
+    }
+
     public function testTheInjustProjectGoesLast(): void
     {
         $client = self::signedInClient();

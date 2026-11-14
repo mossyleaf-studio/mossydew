@@ -19,6 +19,11 @@ final readonly class InjustFeedItem
     ) {
     }
 
+    public function dueBy(string $day): bool
+    {
+        return null === $this->due || $this->due <= $day;
+    }
+
     public function group(): ?string
     {
         $tag = trim($this->tags[0] ?? '');

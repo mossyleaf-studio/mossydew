@@ -24,6 +24,7 @@ use Psr\Clock\ClockInterface;
 final readonly class ReceiveInjustFeedHandler
 {
     private const string PROJECT = 'Injust';
+    private const int WINDOW_DAYS = 14;
 
     public function __construct(
         private InjustLinkRepository $links,
@@ -63,9 +64,13 @@ final readonly class ReceiveInjustFeedHandler
                 unset($groups[$externalId]);
             }
         }
+        $limit = (string) Day::format($owner->today($now)->modify(\sprintf('+%d days', self::WINDOW_DAYS)));
         $project = null;
         $seen = [];
         foreach ($feed->open as $item) {
+            if (!$item->dueBy($limit)) {
+                continue;
+            }
             $seen[$item->id] = true;
             $task = $linked[InjustFeed::externalId($item->id)] ?? null;
             if (isset($waiting[$item->id])) {
