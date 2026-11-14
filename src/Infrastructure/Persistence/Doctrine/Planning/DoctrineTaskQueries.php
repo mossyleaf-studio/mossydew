@@ -49,11 +49,11 @@ final readonly class DoctrineTaskQueries implements TaskQueries
             ->setMaxResults(1))[0] ?? null;
     }
 
-    public function openPlannedBetween(\DateTimeImmutable $first, \DateTimeImmutable $last): array
+    public function openUpcomingBetween(\DateTimeImmutable $first, \DateTimeImmutable $last): array
     {
         return $this->list($this->ordered()
             ->andWhere('t.completedAt IS NULL')
-            ->andWhere('t.plannedOn BETWEEN :first AND :last')
+            ->andWhere('t.plannedOn BETWEEN :first AND :last OR (t.plannedOn IS NULL AND t.dueOn BETWEEN :first AND :last)')
             ->setParameter('first', $first, 'date_immutable')
             ->setParameter('last', $last, 'date_immutable'));
     }

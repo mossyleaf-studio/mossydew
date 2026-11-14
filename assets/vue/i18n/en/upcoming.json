@@ -1,6 +1,6 @@
 {
     "title": "Upcoming",
-    "subtitle": "Drag a task to another day to move it.",
+    "subtitle": "Tasks on their planned day, or on their deadline if not planned. Drag one to another day to plan it.",
     "previous": "Previous week",
     "next": "Next week",
     "thisWeek": "This week",

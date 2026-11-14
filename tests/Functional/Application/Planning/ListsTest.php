@@ -35,7 +35,6 @@ final class ListsTest extends KernelTestCase
         self::createTask('Today', PlanShortcut::Today);
         self::createTask('Monday', planDate: '2026-10-12');
         self::createTask('In a week', planDate: '2026-10-13');
-        self::createTask('Due Thursday', dueOn: '2026-10-08');
         self::completeTask(self::createTask('Done tomorrow', PlanShortcut::Tomorrow));
 
         $upcoming = self::getContainer()->get(ListUpcomingTasksHandler::class)();
@@ -43,6 +42,22 @@ final class ListsTest extends KernelTestCase
         self::assertSame('2026-10-06', $upcoming->today);
         self::assertSame(['2026-10-06', '2026-10-07', '2026-10-08', '2026-10-09', '2026-10-10', '2026-10-11', '2026-10-12'], $upcoming->days);
         self::assertEqualsCanonicalizing(['Today', 'Monday'], self::titles($upcoming->tasks));
+    }
+
+    public function testUpcomingShowsATaskWithoutPlannedDayOnItsDeadline(): void
+    {
+        self::createTask('Due Thursday', dueOn: '2026-10-08');
+        self::createTask('Due today', dueOn: '2026-10-06');
+        self::createTask('Due yesterday', dueOn: '2026-10-05');
+        self::createTask('Due in a week', dueOn: '2026-10-13');
+        self::createTask('Planned Friday, due Thursday', planDate: '2026-10-09', dueOn: '2026-10-08');
+        self::createTask('Planned yesterday, due Thursday', planDate: '2026-10-05', dueOn: '2026-10-08');
+        self::createTask('Planned in a week, due Thursday', planDate: '2026-10-13', dueOn: '2026-10-08');
+        self::completeTask(self::createTask('Done, due Thursday', dueOn: '2026-10-08'));
+
+        $upcoming = self::getContainer()->get(ListUpcomingTasksHandler::class)();
+
+        self::assertEqualsCanonicalizing(['Due Thursday', 'Due today', 'Planned Friday, due Thursday'], self::titles($upcoming->tasks));
     }
 
     public function testUpcomingFromAChosenDay(): void

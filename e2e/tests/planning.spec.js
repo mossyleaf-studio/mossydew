@@ -72,6 +72,31 @@ test('planning a task for tomorrow moves it from today to upcoming', async ({ pa
     await expect(page.locator('.upcoming__day', { hasText: 'Tomorrow' }).locator('.task-row', { hasText: task })).toBeVisible();
 });
 
+test('a task with a deadline and no planned day waits on its deadline in upcoming until it is planned', async ({ page }) => {
+    const task = unique('Send the invoice');
+    await page.goto('/inbox');
+    await page.getByLabel('New task').fill(task);
+    await page.getByLabel('New task').press('Enter');
+    await row(page, task).getByRole('button', { name: task, exact: true }).click();
+    const editor = page.getByRole('dialog');
+    const deadline = new Date(Date.now() + 2 * 86400000);
+    await editor.getByRole('spinbutton').first().click();
+    await page.keyboard.type(`${String(deadline.getDate()).padStart(2, '0')}${String(deadline.getMonth() + 1).padStart(2, '0')}${deadline.getFullYear()}`);
+    await editor.getByRole('button', { name: 'Save' }).click();
+    await expect(editor).toBeHidden();
+
+    await page.locator('.shell__rail').getByRole('link', { name: 'Upcoming' }).click();
+    const shown = page.locator('.upcoming .task-row', { hasText: task });
+    const day = page.locator('.upcoming__day', { has: page.locator('.task-row', { hasText: task }) });
+    await expect(shown).toHaveCount(1);
+    await expect(shown).toContainText(`Due ${await day.locator('.upcoming__weekday').textContent()}`);
+
+    await shown.getByRole('button', { name: 'Plan' }).click();
+    await page.getByRole('button', { name: 'Tomorrow' }).click();
+    await expect(page.locator('.upcoming__day', { has: page.locator('.upcoming__weekday', { hasText: 'Tomorrow' }) }).locator('.task-row', { hasText: task })).toBeVisible();
+    await expect(shown).toHaveCount(1);
+});
+
 test('a date picked on the calendar plans the task', async ({ page }) => {
     const task = unique('Dentist');
     await page.getByLabel('New task').fill(task);

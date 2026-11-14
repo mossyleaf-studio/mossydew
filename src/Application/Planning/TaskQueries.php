@@ -24,7 +24,7 @@ interface TaskQueries
     /**
      * @return list<Task>
      */
-    public function openPlannedBetween(\DateTimeImmutable $first, \DateTimeImmutable $last): array;
+    public function openUpcomingBetween(\DateTimeImmutable $first, \DateTimeImmutable $last): array;
 
     /**
      * @return list<Task>

@@ -33,7 +33,7 @@ watch(from, (day) => {
 
 watch(view, (value) => {
     if (!value) return;
-    columns.value = value.days.map((day) => ({ day, tasks: sortTasks(value.tasks.filter((task) => task.plannedOn === day)) }));
+    columns.value = value.days.map((day) => ({ day, tasks: sortTasks(value.tasks.filter((task) => (task.plannedOn ?? task.dueOn) === day)) }));
 }, { immediate: true });
 
 function shift(days) {

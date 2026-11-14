@@ -29,6 +29,6 @@ final readonly class ListUpcomingTasksHandler
             $days[] = (string) Day::format($day);
         }
 
-        return new UpcomingView((string) Day::format($today), $days, TaskView::list($this->tasks->openPlannedBetween($first, $last)));
+        return new UpcomingView((string) Day::format($today), $days, TaskView::list($this->tasks->openUpcomingBetween($first, $last)));
     }
 }
