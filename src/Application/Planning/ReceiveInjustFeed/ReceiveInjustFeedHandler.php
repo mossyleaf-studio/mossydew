@@ -139,7 +139,7 @@ final readonly class ReceiveInjustFeedHandler
 
     private function createProject(User $owner, \DateTimeImmutable $now): Project
     {
-        $project = Project::create($owner, self::PROJECT, ProjectColor::Berry, $now);
+        $project = Project::create($owner, self::PROJECT, ProjectColor::Berry, $now, $this->projects->nextPosition());
         $this->projects->add($project);
 
         return $project;

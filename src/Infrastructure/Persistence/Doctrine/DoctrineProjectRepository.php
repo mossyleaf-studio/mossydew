@@ -45,6 +45,15 @@ final readonly class DoctrineProjectRepository implements ProjectRepository
 
     public function all(): array
     {
-        return $this->scope->findBy(Project::class, orderBy: ['name' => 'ASC']);
+        return $this->scope->findBy(Project::class, orderBy: ['position' => 'ASC', 'name' => 'ASC']);
+    }
+
+    public function nextPosition(): int
+    {
+        $last = $this->scope->restrict($this->entityManager->createQueryBuilder()->select('MAX(p.position)')->from(Project::class, 'p'), 'p')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return null === $last ? 0 : (int) $last + 1;
     }
 }

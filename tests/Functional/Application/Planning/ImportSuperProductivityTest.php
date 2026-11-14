@@ -8,6 +8,8 @@ use App\Application\Planning\ImportSuperProductivity\ImportReport;
 use App\Application\Planning\ImportSuperProductivity\ImportSuperProductivity;
 use App\Application\Planning\ImportSuperProductivity\ImportSuperProductivityHandler;
 use App\Application\Planning\ImportSuperProductivity\SuperProductivityBackup;
+use App\Application\Planning\ListProjects\ListProjectsHandler;
+use App\Application\Planning\ProjectView;
 use App\Domain\Planning\ProjectRepository;
 use App\Domain\Planning\Quadrant;
 use App\Domain\Planning\Task;
@@ -53,6 +55,16 @@ final class ImportSuperProductivityTest extends KernelTestCase
         self::assertLessThan($tasks['sp:tax']->rank(), $tasks['sp:call']->rank());
         self::assertNull($tasks['sp:loose']->quadrant());
         self::assertNull($tasks['sp:loose']->plannedOn());
+    }
+
+    public function testImportedProjectsGoLast(): void
+    {
+        self::createProject('Zoo');
+        self::createProject('musique');
+
+        self::import();
+
+        self::assertSame(['Zoo', 'musique', 'Travail'], array_map(static fn (ProjectView $project): string => $project->name, self::getContainer()->get(ListProjectsHandler::class)()));
     }
 
     public function testImportingTheSameBackupAgainAddsNothing(): void

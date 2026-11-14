@@ -10,9 +10,12 @@ use App\Application\Planning\EditProject\EditProjectHandler;
 use App\Application\Planning\ListInboxTasks\ListInboxTasksHandler;
 use App\Application\Planning\ListProjects\ListProjectsHandler;
 use App\Application\Planning\ProjectView;
+use App\Application\Planning\ReorderProjects\ReorderProjects;
+use App\Application\Planning\ReorderProjects\ReorderProjectsHandler;
 use App\Domain\Planning\Exception\DuplicateProjectName;
 use App\Domain\Planning\Exception\EmptyProjectName;
 use App\Domain\Planning\ProjectColor;
+use App\Domain\Shared\Exception\NotFound;
 use App\Tests\Support\ActsAsUser;
 use App\Tests\Support\FreezesClock;
 use App\Tests\Support\PlansTasks;
@@ -85,7 +88,7 @@ final class ProjectUseCasesTest extends KernelTestCase
         $this->edit($work, 'home', ProjectColor::Fjord);
     }
 
-    public function testListsProjectsByNameWithTheirOpenTaskCount(): void
+    public function testListsProjectsInTheOwnersOrderWithTheirOpenTaskCount(): void
     {
         $work = self::createProject('Work');
         $home = self::createProject('Home');
@@ -96,8 +99,68 @@ final class ProjectUseCasesTest extends KernelTestCase
 
         $projects = self::getContainer()->get(ListProjectsHandler::class)();
 
-        self::assertSame([['Home', 2], ['Work', 0]], array_map(static fn (ProjectView $project): array => [$project->name, $project->openTasks], $projects), 'DoctrineTaskQueries::openCountByProject() keys counts by the RFC 4122 form of the project id, ListProjectsHandler looks them up by its base 32 form.');
-        self::assertSame($work->id, $projects[1]->id);
+        self::assertSame([['Work', 0], ['Home', 2]], array_map(static fn (ProjectView $project): array => [$project->name, $project->openTasks], $projects), 'DoctrineTaskQueries::openCountByProject() keys counts by the RFC 4122 form of the project id, ListProjectsHandler looks them up by its base 32 form.');
+        self::assertSame($work->id, $projects[0]->id);
+    }
+
+    public function testReorderingProjectsChangesTheList(): void
+    {
+        $home = self::createProject('Home');
+        $work = self::createProject('Work');
+        $music = self::createProject('Music');
+
+        $this->reorder($music, $home, $work);
+
+        self::assertSame(['Music', 'Home', 'Work'], $this->names());
+    }
+
+    public function testProjectsLeftOutKeepTheirOrderAfterTheListedOnes(): void
+    {
+        self::createProject('Home');
+        self::createProject('Work');
+        $music = self::createProject('Music');
+        $garden = self::createProject('Garden');
+
+        $this->reorder($garden, $music);
+
+        self::assertSame(['Garden', 'Music', 'Home', 'Work'], $this->names());
+    }
+
+    public function testAnotherUsersProjectCannotBeReordered(): void
+    {
+        $secret = self::createProject('Secret');
+        self::actAsNewUser();
+        $home = self::createProject('Home');
+
+        $this->expectException(NotFound::class);
+
+        $this->reorder($home, $secret);
+    }
+
+    public function testANewProjectGoesLast(): void
+    {
+        $home = self::createProject('Home');
+        $work = self::createProject('Work');
+        $this->reorder($work, $home);
+        $garden = self::createProject('Garden');
+        self::getContainer()->get(DeleteProjectHandler::class)(Ulid::fromString($garden->id));
+        self::createProject('Attic');
+
+        self::assertSame(['Work', 'Home', 'Attic'], $this->names());
+    }
+
+    private function reorder(ProjectView ...$projects): void
+    {
+        self::getContainer()->get(ReorderProjectsHandler::class)(new ReorderProjects(array_values(array_map(static fn (ProjectView $project): Ulid => Ulid::fromString($project->id), $projects))));
+        self::getContainer()->get(EntityManagerInterface::class)->clear();
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function names(): array
+    {
+        return array_map(static fn (ProjectView $project): string => $project->name, self::getContainer()->get(ListProjectsHandler::class)());
     }
 
     public function testDeletingAProjectMovesItsTasksToTheInbox(): void

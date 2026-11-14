@@ -28,7 +28,7 @@ final readonly class CreateProjectHandler
             throw new DuplicateProjectName(trim($command->name));
         }
 
-        $project = Project::create($this->currentUser->get(), $command->name, $command->color, $this->clock->now());
+        $project = Project::create($this->currentUser->get(), $command->name, $command->color, $this->clock->now(), $this->projects->nextPosition());
         $this->projects->add($project);
         $this->transaction->commit();
 

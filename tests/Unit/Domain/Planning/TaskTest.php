@@ -178,7 +178,7 @@ final class TaskTest extends TestCase
     {
         $owner = $this->user('louis@example.com');
         $task = Task::create($owner, 'Vet', new \DateTimeImmutable(self::NOW));
-        $project = Project::create($owner, 'Home', ProjectColor::Berry, new \DateTimeImmutable(self::NOW));
+        $project = Project::create($owner, 'Home', ProjectColor::Berry, new \DateTimeImmutable(self::NOW), 0);
 
         $task->fileUnder($project);
         self::assertSame($project, $task->project());
@@ -190,7 +190,7 @@ final class TaskTest extends TestCase
     public function testCannotBeFiledUnderAnotherOwnersProject(): void
     {
         $task = Task::create($this->user('louis@example.com'), 'Vet', new \DateTimeImmutable(self::NOW));
-        $project = Project::create($this->user('other@example.com'), 'Home', ProjectColor::Berry, new \DateTimeImmutable(self::NOW));
+        $project = Project::create($this->user('other@example.com'), 'Home', ProjectColor::Berry, new \DateTimeImmutable(self::NOW), 0);
 
         $this->expectExceptionObject(new ProjectOfAnotherOwner());
 
@@ -275,7 +275,7 @@ final class TaskTest extends TestCase
     public function testTheNextOccurrenceCarriesTheSeries(): void
     {
         $owner = $this->user('louis@example.com');
-        $project = Project::create($owner, 'Home', ProjectColor::Moss, new \DateTimeImmutable(self::NOW));
+        $project = Project::create($owner, 'Home', ProjectColor::Moss, new \DateTimeImmutable(self::NOW), 0);
         $task = Task::create($owner, 'Water the ferns', new \DateTimeImmutable('2026-09-01 09:00'));
         $task->describe('The big one too');
         $task->fileUnder($project);

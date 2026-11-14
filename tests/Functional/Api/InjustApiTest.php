@@ -129,6 +129,19 @@ final class InjustApiTest extends WebTestCase
         self::assertSame(['Pitch playlists'], array_keys(self::injustTasks($client, open: true)), 'a tick Injust Release refused comes back open');
     }
 
+    public function testTheInjustProjectGoesLast(): void
+    {
+        $client = self::signedInClient();
+        $client->jsonRequest('POST', '/api/projects', ['name' => 'Zoo']);
+        $token = self::token($client);
+
+        self::feed($client, $token, self::feedOf(1, [self::item('step:cover', 'a1', 'Cover revealed', null, [], 'Cover.')]));
+        self::assertResponseStatusCodeSame(204);
+
+        $client->jsonRequest('GET', '/api/projects');
+        self::assertSame(['Zoo', 'Injust'], array_column(self::body($client), 'name'));
+    }
+
     public function testAPausedFeedChangesNoTaskAndABrokenOneIsRefused(): void
     {
         $client = self::signedInClient();

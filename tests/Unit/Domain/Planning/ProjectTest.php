@@ -37,10 +37,20 @@ final class ProjectTest extends TestCase
         self::assertSame(ProjectColor::Lichen, $project->color());
     }
 
-    private function project(string $name): Project
+    public function testTakesTheGivenPlaceAndMoves(): void
+    {
+        $project = $this->project('Home', 3);
+        self::assertSame(3, $project->position());
+
+        $project->moveTo(0);
+
+        self::assertSame(0, $project->position());
+    }
+
+    private function project(string $name, int $position = 0): Project
     {
         $now = new \DateTimeImmutable('2026-10-06 09:00');
 
-        return Project::create(User::join('account', 'louis@example.com', 'Louis', 'Europe/Paris', $now), $name, ProjectColor::Berry, $now);
+        return Project::create(User::join('account', 'louis@example.com', 'Louis', 'Europe/Paris', $now), $name, ProjectColor::Berry, $now, $position);
     }
 }

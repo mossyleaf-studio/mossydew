@@ -24,6 +24,7 @@ final class ProjectFactory extends PersistentObjectFactory
             'name' => ucfirst(self::faker()->unique()->word()),
             'color' => self::faker()->randomElement(ProjectColor::cases()),
             'now' => new \DateTimeImmutable(),
+            'position' => 0,
         ];
     }
 

@@ -285,7 +285,7 @@ final class SubtaskTest extends TestCase
 
     private function project(string $name): Project
     {
-        return Project::create($this->owner, $name, ProjectColor::Moss, $this->now());
+        return Project::create($this->owner, $name, ProjectColor::Moss, $this->now(), 0);
     }
 
     private function now(): \DateTimeImmutable

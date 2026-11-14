@@ -72,6 +72,27 @@ final class ProjectApiTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
+    public function testReorderProjects(): void
+    {
+        $client = self::signedInClient();
+        $client->jsonRequest('POST', '/api/projects', ['name' => 'Home']);
+        $home = Json::string(self::body($client), 'id');
+        $client->jsonRequest('POST', '/api/projects', ['name' => 'Work']);
+        $work = Json::string(self::body($client), 'id');
+
+        $client->jsonRequest('PUT', '/api/projects/order', ['ids' => [$work, $home]]);
+        self::assertResponseStatusCodeSame(204);
+        $client->jsonRequest('GET', '/api/projects');
+        self::assertSame(['Work', 'Home'], array_column(self::body($client), 'name'));
+
+        $client->jsonRequest('PUT', '/api/projects/order', ['ids' => ['not-a-ulid']]);
+        self::assertResponseStatusCodeSame(422);
+
+        $client->loginUser(SecurityUser::fromUser(self::createUser()));
+        $client->jsonRequest('PUT', '/api/projects/order', ['ids' => [$home]]);
+        self::assertResponseStatusCodeSame(404);
+    }
+
     /**
      * @return array<mixed>
      */

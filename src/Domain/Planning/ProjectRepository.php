@@ -20,4 +20,6 @@ interface ProjectRepository
      * @return list<Project>
      */
     public function all(): array;
+
+    public function nextPosition(): int;
 }

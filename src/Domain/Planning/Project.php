@@ -34,18 +34,27 @@ class Project
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
-    private function __construct(User $owner, string $name, ProjectColor $color, \DateTimeImmutable $now)
+    #[ORM\Column]
+    private int $position;
+
+    private function __construct(User $owner, string $name, ProjectColor $color, \DateTimeImmutable $now, int $position)
     {
         $this->id = new Ulid();
         $this->owner = $owner;
         $this->name = self::validName($name);
         $this->color = $color;
         $this->createdAt = $now;
+        $this->position = $position;
     }
 
-    public static function create(User $owner, string $name, ProjectColor $color, \DateTimeImmutable $now): self
+    public static function create(User $owner, string $name, ProjectColor $color, \DateTimeImmutable $now, int $position): self
     {
-        return new self($owner, $name, $color, $now);
+        return new self($owner, $name, $color, $now, $position);
+    }
+
+    public function moveTo(int $position): void
+    {
+        $this->position = $position;
     }
 
     public function rename(string $name): void
@@ -81,6 +90,11 @@ class Project
     public function createdAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function position(): int
+    {
+        return $this->position;
     }
 
     private static function validName(string $name): string

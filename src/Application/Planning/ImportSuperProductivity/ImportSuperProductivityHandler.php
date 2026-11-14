@@ -37,6 +37,7 @@ final readonly class ImportSuperProductivityHandler
         $linked = $this->tasks->linked(self::PREFIX);
         $projects = [];
         $projectCount = count($this->projects->all());
+        $position = $this->projects->nextPosition();
         $created = 0;
         $ranks = [];
         $imported = [];
@@ -65,7 +66,7 @@ final readonly class ImportSuperProductivityHandler
                     $projects[$key] = $this->projects->named($name);
                 }
                 if (null === $projects[$key]) {
-                    $projects[$key] = Project::create($owner, $name, ProjectColor::cases()[($projectCount + $created) % count(ProjectColor::cases())], $now);
+                    $projects[$key] = Project::create($owner, $name, ProjectColor::cases()[($projectCount + $created) % count(ProjectColor::cases())], $now, $position + $created);
                     $this->projects->add($projects[$key]);
                     ++$created;
                 }
