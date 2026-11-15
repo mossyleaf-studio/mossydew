@@ -31,6 +31,7 @@ final class TodayTest extends KernelTestCase
         self::createTask('Planned today', PlanShortcut::Today);
         self::createTask('Due today, planned next week', planDate: '2026-10-12', dueOn: '2026-10-06');
         self::createTask('Missed deadline', dueOn: '2026-10-01');
+        self::createTask('Missed deadline, planned tomorrow', PlanShortcut::Tomorrow, dueOn: '2026-10-01');
         self::createTask('From last week', planDate: '2026-09-29');
         self::createTask('From yesterday, due tomorrow', planDate: '2026-10-05', dueOn: '2026-10-07');
         self::createTask('From yesterday, due today', planDate: '2026-10-05', dueOn: '2026-10-06');
@@ -45,7 +46,7 @@ final class TodayTest extends KernelTestCase
         $today = $this->listToday();
 
         self::assertSame('2026-10-06', $today->date);
-        self::assertEqualsCanonicalizing(['Planned today', 'Due today, planned next week', 'Missed deadline', 'From yesterday, due today'], self::titles($today->today));
+        self::assertEqualsCanonicalizing(['Planned today', 'Missed deadline', 'From yesterday, due today'], self::titles($today->today));
         self::assertEqualsCanonicalizing(['From last week', 'From yesterday, due tomorrow'], self::titles($today->earlier));
         self::assertSame(['Done today'], self::titles($today->done));
     }

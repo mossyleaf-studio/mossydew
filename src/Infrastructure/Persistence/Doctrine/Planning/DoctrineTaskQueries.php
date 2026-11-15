@@ -26,7 +26,7 @@ final readonly class DoctrineTaskQueries implements TaskQueries
     {
         return $this->list($this->ordered()
             ->andWhere('t.completedAt IS NULL')
-            ->andWhere('t.plannedOn <= :day OR t.dueOn <= :day')
+            ->andWhere('t.plannedOn <= :day OR (t.plannedOn IS NULL AND t.dueOn <= :day)')
             ->setParameter('day', $day, 'date_immutable'));
     }
 
