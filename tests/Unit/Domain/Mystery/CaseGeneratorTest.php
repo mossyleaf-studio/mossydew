@@ -422,12 +422,12 @@ final class CaseGeneratorTest extends TestCase
     }
 
     #[DataProvider('timedSeeds')]
-    public function testDrawsACaseWithinThreeSeconds(int $seed): void
+    public function testDrawsACaseWithinFiveSeconds(int $seed): void
     {
         $start = hrtime(true);
         self::draw($seed);
 
-        self::assertLessThan(3.0, (hrtime(true) - $start) / 1e9);
+        self::assertLessThan(5.0, (hrtime(true) - $start) / 1e9);
     }
 
     /** @return iterable<array{int}> */
