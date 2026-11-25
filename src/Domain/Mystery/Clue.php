@@ -44,17 +44,11 @@ final readonly class Clue
     {
         return match ($this->kind) {
             ClueKind::InRoom => $plan->roomOf($cell) === $this->room(),
-            ClueKind::OnFurniture => $plan->furniture[$cell] === $this->furniture(),
-            ClueKind::BesideFurniture => $plan->isBeside($cell, $this->furniture()),
             ClueKind::InRow => intdiv($cell, $plan->size) === $this->number(),
             ClueKind::InColumn => $cell % $plan->size === $this->number(),
             ClueKind::GridCorner => \in_array(intdiv($cell, $plan->size), [0, $plan->size - 1], true) && \in_array($cell % $plan->size, [0, $plan->size - 1], true),
             ClueKind::RoomCorner => $plan->isRoomCorner($cell),
-            ClueKind::RoomHas => $plan->furnishes($plan->roomOf($cell), $this->furniture()),
-            ClueKind::NotBeside => !$plan->isBeside($cell, $this->furniture()),
-            ClueKind::NorthOfFurniture, ClueKind::SouthOfFurniture, ClueKind::EastOfFurniture, ClueKind::WestOfFurniture => $this->liesBeyondFurniture($plan, $cell),
-            ClueKind::FurnitureNorth, ClueKind::FurnitureSouth, ClueKind::FurnitureEast, ClueKind::FurnitureWest => $this->pointsAtFurniture($plan, $cell),
-            default => throw new \LogicException(\sprintf('A %s clue is not about a single square.', $this->kind->value)),
+            default => $this->holdsByFurnitureAt($plan, $cell),
         };
     }
 
@@ -148,11 +142,7 @@ final readonly class Clue
     private function holds(Floorplan $plan, array $cells, array $genders, ?int $person): bool
     {
         if ($this->kind->describesARoom()) {
-            return match ($this->kind) {
-                ClueKind::EmptyRoom => 0 === $this->headCount($plan, $cells),
-                ClueKind::RoomAtLeast => $this->headCount($plan, $cells) >= $this->number(),
-                default => $this->headCount($plan, $cells) === $this->number(),
-            };
+            return $this->holdsInTheRoom($plan, $cells);
         }
         if ($this->kind->isRule()) {
             return $this->holdsOnTheBoard($plan, $cells, $genders);
@@ -162,20 +152,53 @@ final readonly class Clue
         }
 
         return match ($this->kind) {
+            ClueKind::SameRoom, ClueKind::NorthOf, ClueKind::WestOf, ClueKind::NorthBy, ClueKind::WestBy, ClueKind::SameDiagonal => $this->relates($plan, $cells, $person),
+            ClueKind::Alone, ClueKind::AloneWith, ClueKind::SomeoneOn, ClueKind::SomeoneBeside, ClueKind::OnlyOn => $this->holdsAmongOthers($plan, $cells, $genders, $person),
+            ClueKind::AloneWithMurderer => null !== $plan->murdererIn($cells, $person),
+            default => $this->holdsAt($plan, $cells[$person]),
+        };
+    }
+
+    /**
+     * @param list<int> $cells
+     */
+    private function holdsInTheRoom(Floorplan $plan, array $cells): bool
+    {
+        return match ($this->kind) {
+            ClueKind::EmptyRoom => 0 === $this->headCount($plan, $cells),
+            ClueKind::RoomAtLeast => $this->headCount($plan, $cells) >= $this->number(),
+            default => $this->headCount($plan, $cells) === $this->number(),
+        };
+    }
+
+    /**
+     * @param list<int> $cells
+     */
+    private function relates(Floorplan $plan, array $cells, int $person): bool
+    {
+        return match ($this->kind) {
             ClueKind::SameRoom => $plan->roomOf($cells[$person]) === $plan->roomOf($cells[$this->other()]),
             ClueKind::NorthOf => intdiv($cells[$person], $plan->size) < intdiv($cells[$this->other()], $plan->size),
             ClueKind::WestOf => $cells[$person] % $plan->size < $cells[$this->other()] % $plan->size,
             ClueKind::NorthBy => intdiv($cells[$this->other()], $plan->size) - intdiv($cells[$person], $plan->size) === $this->number(),
             ClueKind::WestBy => $cells[$this->other()] % $plan->size - $cells[$person] % $plan->size === $this->number(),
-            ClueKind::AloneWithMurderer => null !== $plan->murdererIn($cells, $person),
+            default => abs(intdiv($cells[$person], $plan->size) - intdiv($cells[$this->other()], $plan->size)) === abs($cells[$person] % $plan->size - $cells[$this->other()] % $plan->size),
+        };
+    }
+
+    /**
+     * @param list<int>    $cells
+     * @param list<Gender> $genders
+     */
+    private function holdsAmongOthers(Floorplan $plan, array $cells, array $genders, int $person): bool
+    {
+        return match ($this->kind) {
             ClueKind::Alone => 1 === \count(array_keys(array_map($plan->roomOf(...), $cells), $plan->roomOf($cells[$person]), true)),
             ClueKind::AloneWith => \in_array($this->companionOf($plan, $cells, $person), array_keys($genders, $this->gender(), true), true),
-            ClueKind::SameDiagonal => abs(intdiv($cells[$person], $plan->size) - intdiv($cells[$this->other()], $plan->size)) === abs($cells[$person] % $plan->size - $cells[$this->other()] % $plan->size),
             ClueKind::SomeoneOn => array_any($this->roommates($plan, $cells, $person), fn (int $other): bool => $genders[$other] === $this->gender() && $plan->furniture[$cells[$other]] === $this->furniture()),
             ClueKind::SomeoneBeside => array_any($this->roommates($plan, $cells, $person), fn (int $other): bool => $plan->isBeside($cells[$other], $this->furniture())),
-            ClueKind::OnlyOn => $plan->furniture[$cells[$person]] === $this->furniture()
+            default => $plan->furniture[$cells[$person]] === $this->furniture()
                 && 1 === \count(array_filter($cells, fn (int $cell): bool => $plan->furniture[$cell] === $this->furniture())),
-            default => $this->holdsAt($plan, $cells[$person]),
         };
     }
 
@@ -229,6 +252,19 @@ final readonly class Clue
     private function headCount(Floorplan $plan, array $cells): int
     {
         return \count(array_filter($cells, fn (int $cell): bool => $plan->roomOf($cell) === $this->room()));
+    }
+
+    private function holdsByFurnitureAt(Floorplan $plan, int $cell): bool
+    {
+        return match ($this->kind) {
+            ClueKind::OnFurniture => $plan->furniture[$cell] === $this->furniture(),
+            ClueKind::BesideFurniture => $plan->isBeside($cell, $this->furniture()),
+            ClueKind::RoomHas => $plan->furnishes($plan->roomOf($cell), $this->furniture()),
+            ClueKind::NotBeside => !$plan->isBeside($cell, $this->furniture()),
+            ClueKind::NorthOfFurniture, ClueKind::SouthOfFurniture, ClueKind::EastOfFurniture, ClueKind::WestOfFurniture => $this->liesBeyondFurniture($plan, $cell),
+            ClueKind::FurnitureNorth, ClueKind::FurnitureSouth, ClueKind::FurnitureEast, ClueKind::FurnitureWest => $this->pointsAtFurniture($plan, $cell),
+            default => throw new \LogicException(\sprintf('A %s clue is not about a single square.', $this->kind->value)),
+        };
     }
 
     private function liesBeyondFurniture(Floorplan $plan, int $cell): bool

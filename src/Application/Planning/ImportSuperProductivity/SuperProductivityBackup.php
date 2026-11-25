@@ -32,14 +32,7 @@ final readonly class SuperProductivityBackup
             throw new UnreadableBackup();
         }
 
-        $projects = [];
-        foreach (self::map(self::map($data['project'] ?? null)['entities'] ?? null) as $id => $project) {
-            $title = self::text(self::map($project)['title'] ?? null);
-            if (null !== $title) {
-                $projects[(string) $id] = $title;
-            }
-        }
-
+        $projects = self::projects($data);
         $order = self::matrixOrder($data);
         $tasks = [];
         foreach ($entities as $id => $entity) {
@@ -72,6 +65,24 @@ final readonly class SuperProductivityBackup
         }
 
         return new self($tasks);
+    }
+
+    /**
+     * @param array<mixed> $data
+     *
+     * @return array<string, string>
+     */
+    private static function projects(array $data): array
+    {
+        $projects = [];
+        foreach (self::map(self::map($data['project'] ?? null)['entities'] ?? null) as $id => $project) {
+            $title = self::text(self::map($project)['title'] ?? null);
+            if (null !== $title) {
+                $projects[(string) $id] = $title;
+            }
+        }
+
+        return $projects;
     }
 
     /**

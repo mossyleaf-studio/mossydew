@@ -21,26 +21,28 @@ enum RoomKind: string
     case Attic = 'attic';
     case Laundry = 'laundry';
 
+    private const array FURNITURE = [
+        'kitchen' => [Furniture::Stove, Furniture::Armchair, Furniture::Plant, Furniture::Lamp],
+        'living_room' => [Furniture::Sofa, Furniture::Armchair, Furniture::Tv, Furniture::Lamp, Furniture::Plant],
+        'bedroom' => [Furniture::Bed, Furniture::Armchair, Furniture::Lamp, Furniture::Books],
+        'bathroom' => [Furniture::Bath, Furniture::Toilet, Furniture::Washer, Furniture::Plant],
+        'library' => [Furniture::Books, Furniture::Armchair, Furniture::Sofa, Furniture::Lamp],
+        'music_room' => [Furniture::Piano, Furniture::Armchair, Furniture::Sofa, Furniture::Lamp],
+        'study' => [Furniture::Books, Furniture::Armchair, Furniture::Lamp, Furniture::Plant],
+        'dining_room' => [Furniture::Armchair, Furniture::Plant, Furniture::Lamp, Furniture::Piano],
+        'hall' => [Furniture::Plant, Furniture::Sofa, Furniture::Armchair, Furniture::Lamp],
+        'conservatory' => [Furniture::Plant, Furniture::Armchair, Furniture::Sofa, Furniture::Books],
+        'guest_room' => [Furniture::Bed, Furniture::Armchair, Furniture::Tv, Furniture::Lamp],
+        'nursery' => [Furniture::Bed, Furniture::Armchair, Furniture::Books, Furniture::Plant],
+        'attic' => [Furniture::Books, Furniture::Bed, Furniture::Lamp, Furniture::Armchair],
+        'laundry' => [Furniture::Washer, Furniture::Armchair, Furniture::Plant, Furniture::Lamp],
+    ];
+
     /**
      * @return non-empty-list<Furniture>
      */
     public function furniture(): array
     {
-        return match ($this) {
-            self::Kitchen => [Furniture::Stove, Furniture::Armchair, Furniture::Plant, Furniture::Lamp],
-            self::LivingRoom => [Furniture::Sofa, Furniture::Armchair, Furniture::Tv, Furniture::Lamp, Furniture::Plant],
-            self::Bedroom => [Furniture::Bed, Furniture::Armchair, Furniture::Lamp, Furniture::Books],
-            self::Bathroom => [Furniture::Bath, Furniture::Toilet, Furniture::Washer, Furniture::Plant],
-            self::Library => [Furniture::Books, Furniture::Armchair, Furniture::Sofa, Furniture::Lamp],
-            self::MusicRoom => [Furniture::Piano, Furniture::Armchair, Furniture::Sofa, Furniture::Lamp],
-            self::Study => [Furniture::Books, Furniture::Armchair, Furniture::Lamp, Furniture::Plant],
-            self::DiningRoom => [Furniture::Armchair, Furniture::Plant, Furniture::Lamp, Furniture::Piano],
-            self::Hall => [Furniture::Plant, Furniture::Sofa, Furniture::Armchair, Furniture::Lamp],
-            self::Conservatory => [Furniture::Plant, Furniture::Armchair, Furniture::Sofa, Furniture::Books],
-            self::GuestRoom => [Furniture::Bed, Furniture::Armchair, Furniture::Tv, Furniture::Lamp],
-            self::Nursery => [Furniture::Bed, Furniture::Armchair, Furniture::Books, Furniture::Plant],
-            self::Attic => [Furniture::Books, Furniture::Bed, Furniture::Lamp, Furniture::Armchair],
-            self::Laundry => [Furniture::Washer, Furniture::Armchair, Furniture::Plant, Furniture::Lamp],
-        };
+        return self::FURNITURE[$this->value];
     }
 }

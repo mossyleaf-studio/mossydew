@@ -100,23 +100,42 @@ final class Search
     private function learn(Clue $clue): void
     {
         foreach (null === $clue->then || $clue->then->companion ? [$clue] : [$clue, $clue->then] as $fact) {
-            match ($fact->kind) {
-                ClueKind::SameRoom => $this->link($fact->person(), self::SAME, self::SAME, $fact->other()),
-                ClueKind::NorthOf => $this->link($fact->person(), self::NORTH, self::SOUTH, $fact->other()),
-                ClueKind::WestOf => $this->link($fact->person(), self::WEST, self::EAST, $fact->other()),
-                ClueKind::EmptyRoom => $this->limit($fact->room(), 0),
-                ClueKind::RoomHolds => $this->limit($fact->room(), $fact->number()),
-                ClueKind::AloneWithMurderer => null,
-                ClueKind::NorthBy => $this->link($fact->person(), self::NORTH_BY, self::SOUTH_BY, $fact->other(), $fact->number()),
-                ClueKind::WestBy => $this->link($fact->person(), self::WEST_BY, self::EAST_BY, $fact->other(), $fact->number()),
-                ClueKind::SameDiagonal => $this->link($fact->person(), self::DIAGONAL, self::DIAGONAL, $fact->other()),
-                ClueKind::Alone, ClueKind::AloneWith, ClueKind::SomeoneOn, ClueKind::SomeoneBeside, ClueKind::RoomAtLeast => $this->checks[] = $clue,
-                ClueKind::EveryRoomOccupied, ClueKind::Pairing => $this->checks[] = $clue,
-                ClueKind::RoomCap => $this->cap($clue, $fact->number()),
-                ClueKind::SeatCount, ClueKind::GenderSeated => $this->seatCount($clue, $fact),
-                ClueKind::OnlyOn => $this->seat($fact->person(), $fact->furniture()),
-                default => $this->narrow($fact->person(), $this->squares($fact)),
-            };
+            $this->know($clue, $fact);
+        }
+    }
+
+    private function know(Clue $clue, Clue $fact): void
+    {
+        match ($fact->kind) {
+            ClueKind::SameRoom, ClueKind::NorthOf, ClueKind::WestOf, ClueKind::NorthBy, ClueKind::WestBy, ClueKind::SameDiagonal => $this->relate($fact),
+            ClueKind::EmptyRoom => $this->limit($fact->room(), 0),
+            ClueKind::RoomHolds => $this->limit($fact->room(), $fact->number()),
+            ClueKind::AloneWithMurderer => null,
+            ClueKind::Alone, ClueKind::AloneWith, ClueKind::SomeoneOn, ClueKind::SomeoneBeside, ClueKind::RoomAtLeast, ClueKind::EveryRoomOccupied, ClueKind::Pairing => $this->checks[] = $clue,
+            ClueKind::RoomCap => $this->cap($clue, $fact->number()),
+            ClueKind::SeatCount, ClueKind::GenderSeated => $this->seatCount($clue, $fact),
+            default => $this->confine($fact),
+        };
+    }
+
+    private function relate(Clue $fact): void
+    {
+        match ($fact->kind) {
+            ClueKind::SameRoom => $this->link($fact->person(), self::SAME, self::SAME, $fact->other()),
+            ClueKind::NorthOf => $this->link($fact->person(), self::NORTH, self::SOUTH, $fact->other()),
+            ClueKind::WestOf => $this->link($fact->person(), self::WEST, self::EAST, $fact->other()),
+            ClueKind::NorthBy => $this->link($fact->person(), self::NORTH_BY, self::SOUTH_BY, $fact->other(), $fact->number()),
+            ClueKind::WestBy => $this->link($fact->person(), self::WEST_BY, self::EAST_BY, $fact->other(), $fact->number()),
+            default => $this->link($fact->person(), self::DIAGONAL, self::DIAGONAL, $fact->other()),
+        };
+    }
+
+    private function confine(Clue $fact): void
+    {
+        if (ClueKind::OnlyOn === $fact->kind) {
+            $this->seat($fact->person(), $fact->furniture());
+        } else {
+            $this->narrow($fact->person(), $this->squares($fact));
         }
     }
 
@@ -241,6 +260,16 @@ final class Search
             }
         }
 
+        return $this->agree($options);
+    }
+
+    /**
+     * @param array<int, non-empty-array<int, int>> $options
+     *
+     * @return array<int, non-empty-array<int, int>>|null
+     */
+    private function agree(array $options): ?array
+    {
         do {
             $changed = false;
             foreach (array_keys($options) as $person) {
@@ -285,34 +314,60 @@ final class Search
      */
     private function allowedBy(int $way, array $theirs, int $distance): array
     {
+        return match ($way) {
+            self::NORTH_BY, self::SOUTH_BY, self::WEST_BY, self::EAST_BY => $this->offsetFrom($way, $theirs, $distance),
+            self::DIAGONAL => $this->plan->diagonalsThrough($theirs),
+            self::SAME => $this->roomsReaching($theirs),
+            default => $this->beyond($way, $theirs),
+        };
+    }
+
+    /**
+     * @param non-empty-array<int, int> $theirs
+     *
+     * @return array<int, int>
+     */
+    private function offsetFrom(int $way, array $theirs, int $distance): array
+    {
         if (self::NORTH_BY === $way || self::SOUTH_BY === $way) {
             $shift = self::NORTH_BY === $way ? $distance : -$distance;
 
             return array_map(static fn (int $row): int => isset($theirs[$row + $shift]) ? -1 : 0, range(0, $this->size - 1));
         }
-        if (self::WEST_BY === $way || self::EAST_BY === $way) {
-            $columns = array_reduce($theirs, static fn (int $union, int $mask): int => $union | $mask, 0);
+        $columns = array_reduce($theirs, static fn (int $union, int $mask): int => $union | $mask, 0);
 
-            return array_fill(0, $this->size, self::WEST_BY === $way ? $columns >> $distance : $columns << $distance & (1 << $this->size) - 1);
-        }
-        if (self::DIAGONAL === $way) {
-            return $this->plan->diagonalsThrough($theirs);
-        }
-        if (self::SAME === $way) {
-            $allowed = array_fill(0, $this->size, 0);
-            foreach ($this->roomMask as $room) {
-                foreach ($theirs as $row => $columns) {
-                    if (0 !== ($columns & $room[$row])) {
-                        foreach ($room as $line => $cells) {
-                            $allowed[$line] |= $cells;
-                        }
-                        break;
+        return array_fill(0, $this->size, self::WEST_BY === $way ? $columns >> $distance : $columns << $distance & (1 << $this->size) - 1);
+    }
+
+    /**
+     * @param non-empty-array<int, int> $theirs
+     *
+     * @return array<int, int>
+     */
+    private function roomsReaching(array $theirs): array
+    {
+        $allowed = array_fill(0, $this->size, 0);
+        foreach ($this->roomMask as $room) {
+            foreach ($theirs as $row => $columns) {
+                if (0 !== ($columns & $room[$row])) {
+                    foreach ($room as $line => $cells) {
+                        $allowed[$line] |= $cells;
                     }
+                    break;
                 }
             }
-
-            return $allowed;
         }
+
+        return $allowed;
+    }
+
+    /**
+     * @param non-empty-array<int, int> $theirs
+     *
+     * @return array<int, int>
+     */
+    private function beyond(int $way, array $theirs): array
+    {
         if (self::NORTH === $way || self::SOUTH === $way) {
             $allowed = [];
             for ($row = 0; $row < $this->size; ++$row) {
@@ -363,23 +418,34 @@ final class Search
         }
 
         $single = $this->freeColumns & $once & ~$twice;
-        if ($best > 1 && 0 !== $single) {
-            $column = \strlen(decbin($single & -$single)) - 1;
-            foreach ($options as $person => $choices) {
-                foreach ($choices as $row => $columns) {
-                    if (0 !== ($columns >> $column & 1)) {
-                        return $this->descend($person, $row, $column);
-                    }
+        $going = $best > 1 && 0 !== $single ? $this->descendIntoTheOnlyColumn($options, \strlen(decbin($single & -$single)) - 1) : null;
+
+        return $going ?? $this->tryTheNarrowest($options, $rowCount, $best, $bestPerson);
+    }
+
+    /**
+     * @param array<int, non-empty-array<int, int>> $options
+     */
+    private function descendIntoTheOnlyColumn(array $options, int $column): ?bool
+    {
+        foreach ($options as $person => $choices) {
+            foreach ($choices as $row => $columns) {
+                if (0 !== ($columns >> $column & 1)) {
+                    return $this->descend($person, $row, $column);
                 }
             }
         }
-        $bestRow = -1;
-        foreach ($rowCount as $row => $count) {
-            if (0 !== $count && $count < $best) {
-                $best = $count;
-                $bestRow = $row;
-            }
-        }
+
+        return null;
+    }
+
+    /**
+     * @param array<int, non-empty-array<int, int>> $options
+     * @param array<int, int>                       $rowCount
+     */
+    private function tryTheNarrowest(array $options, array $rowCount, int $best, int $bestPerson): bool
+    {
+        $bestRow = self::narrowestRow($rowCount, $best);
         if ($bestRow >= 0) {
             foreach ($options as $person => $choices) {
                 if (!$this->tryEach($person, $bestRow, $choices[$bestRow] ?? 0)) {
@@ -396,6 +462,22 @@ final class Search
         }
 
         return true;
+    }
+
+    /**
+     * @param array<int, int> $rowCount
+     */
+    private static function narrowestRow(array $rowCount, int $best): int
+    {
+        $bestRow = -1;
+        foreach ($rowCount as $row => $count) {
+            if (0 !== $count && $count < $best) {
+                $best = $count;
+                $bestRow = $row;
+            }
+        }
+
+        return $bestRow;
     }
 
     /**

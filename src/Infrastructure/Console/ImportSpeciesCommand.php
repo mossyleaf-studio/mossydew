@@ -6,6 +6,7 @@ namespace App\Infrastructure\Console;
 
 use App\Domain\Gamification\Herbarium\Species;
 use App\Domain\Gamification\Herbarium\SpeciesCatalog;
+use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -19,7 +20,7 @@ final readonly class ImportSpeciesCommand
     private const string API = 'https://api.inaturalist.org/v1';
     private const array OPEN_LICENCES = ['cc0', 'cc-by'];
     private const array LOCALES = ['en', 'fr'];
-    private const int PAUSE_MICROSECONDS = 1_000_000;
+    private const int PAUSE_SECONDS = 1;
     private const int RETRIES = 5;
     private const string CATALOG = 'assets/vue/herbarium/species.json';
 
@@ -29,6 +30,7 @@ final readonly class ImportSpeciesCommand
         HttpClientInterface $httpClient,
         #[Autowire('%kernel.project_dir%')]
         private string $projectDir,
+        private ClockInterface $clock,
     ) {
         $this->httpClient = new RetryableHttpClient($httpClient, maxRetries: self::RETRIES);
     }
@@ -42,33 +44,16 @@ final readonly class ImportSpeciesCommand
         $missing = [];
 
         foreach ($io->progressIterate(SpeciesCatalog::all()) as $species) {
-            if ($this->isImported($species, $imported, $importedNames)) {
-                $catalog[$species->slug] = $imported[$species->slug];
-                foreach (self::LOCALES as $locale) {
-                    $names[$locale][$species->slug] = $importedNames[$locale][$species->slug];
-                }
-                continue;
-            }
-
-            $taxon = $this->taxon($species, 'en');
-            $photo = null === $taxon ? null : $this->openPhoto($taxon);
-            if (null === $taxon || null === $photo) {
+            $entry = $this->isImported($species, $imported, $importedNames)
+                ? [$imported[$species->slug], array_map(static fn (array $localeNames): mixed => $localeNames[$species->slug], $importedNames)]
+                : $this->import($species);
+            if (null === $entry) {
                 $missing[] = $species->scientificName;
                 continue;
             }
-
-            $file = $this->download($species, $photo);
-            $catalog[$species->slug] = [
-                'scientificName' => $species->scientificName,
-                'taxon' => 'https://www.inaturalist.org/taxa/'.self::int($taxon, 'id'),
-                'photo' => '/herbarium/'.$file,
-                'attribution' => self::string($photo, 'attribution'),
-                'license' => self::string($photo, 'license_code'),
-                'source' => 'https://www.inaturalist.org/photos/'.self::int($photo, 'id'),
-            ];
-            foreach (self::LOCALES as $locale) {
-                $localized = 'en' === $locale ? $taxon : $this->taxon($species, $locale);
-                $names[$locale][$species->slug] = mb_ucfirst(self::nullableString($localized ?? [], 'preferred_common_name') ?? $species->scientificName);
+            [$catalog[$species->slug], $localized] = $entry;
+            foreach ($localized as $locale => $name) {
+                $names[$locale][$species->slug] = $name;
             }
         }
 
@@ -85,6 +70,35 @@ final readonly class ImportSpeciesCommand
         $io->success(\sprintf('%d species imported.', \count($catalog)));
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * @return ?array{array<string, mixed>, array<string, string>}
+     */
+    private function import(Species $species): ?array
+    {
+        $taxon = $this->taxon($species, 'en');
+        $photo = null === $taxon ? null : $this->openPhoto($taxon);
+        if (null === $taxon || null === $photo) {
+            return null;
+        }
+
+        $file = $this->download($species, $photo);
+        $entry = [
+            'scientificName' => $species->scientificName,
+            'taxon' => 'https://www.inaturalist.org/taxa/'.self::int($taxon, 'id'),
+            'photo' => '/herbarium/'.$file,
+            'attribution' => self::string($photo, 'attribution'),
+            'license' => self::string($photo, 'license_code'),
+            'source' => 'https://www.inaturalist.org/photos/'.self::int($photo, 'id'),
+        ];
+        $names = [];
+        foreach (self::LOCALES as $locale) {
+            $localized = 'en' === $locale ? $taxon : $this->taxon($species, $locale);
+            $names[$locale] = mb_ucfirst(self::nullableString($localized ?? [], 'preferred_common_name') ?? $species->scientificName);
+        }
+
+        return [$entry, $names];
     }
 
     /**
@@ -111,6 +125,16 @@ final readonly class ImportSpeciesCommand
      */
     private function openPhoto(array $taxon): ?array
     {
+        return self::taxonPhoto($taxon) ?? $this->observedPhoto($taxon);
+    }
+
+    /**
+     * @param array<mixed> $taxon
+     *
+     * @return array<mixed>|null
+     */
+    private static function taxonPhoto(array $taxon): ?array
+    {
         $taxonPhotos = \is_array($taxon['taxon_photos'] ?? null) ? $taxon['taxon_photos'] : [];
         foreach ($taxonPhotos as $taxonPhoto) {
             $photo = \is_array($taxonPhoto) && \is_array($taxonPhoto['photo'] ?? null) ? $taxonPhoto['photo'] : [];
@@ -119,6 +143,16 @@ final readonly class ImportSpeciesCommand
             }
         }
 
+        return null;
+    }
+
+    /**
+     * @param array<mixed> $taxon
+     *
+     * @return array<mixed>|null
+     */
+    private function observedPhoto(array $taxon): ?array
+    {
         $observations = $this->get('/observations', [
             'taxon_id' => self::int($taxon, 'id'),
             'photo_license' => implode(',', self::OPEN_LICENCES),
@@ -163,7 +197,7 @@ final readonly class ImportSpeciesCommand
      */
     private function get(string $path, array $query): array
     {
-        usleep(self::PAUSE_MICROSECONDS);
+        $this->clock->sleep(self::PAUSE_SECONDS);
         $results = $this->httpClient->request('GET', self::API.$path, ['query' => $query])->toArray()['results'] ?? [];
 
         return \is_array($results) ? array_values($results) : [];

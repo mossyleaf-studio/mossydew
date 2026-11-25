@@ -142,25 +142,36 @@ final readonly class CaseGenerator
             $cellsByRoom[$room][] = $cell;
         }
         foreach ($cellsByRoom as $room => $cells) {
-            $affinity = $plan->kinds[$room]->furniture();
-            $free = \count(array_filter($cells, static fn (int $cell): bool => !$plan->blocks($cell)));
-            $pieces = (int) round(\count($cells) * $density) - \count(array_filter($cells, static fn (int $cell): bool => null !== $plan->furniture[$cell]));
-            for (; $pieces > 0; --$pieces) {
-                $choice = $plan->spareBlocks($blocking) > 0 ? $affinity : array_values(array_filter($affinity, static fn (Furniture $piece): bool => $piece->canHoldSomeone()));
-                if ([] === $choice) {
-                    break;
-                }
-                $piece = $choice[$this->randomizer->getInt(0, \count($choice) - 1)];
-                $spots = $piece->canHoldSomeone() || $free > 2 ? array_values(array_filter(
-                    $cells,
-                    static fn (int $cell): bool => null === $plan->furniture[$cell] && ($piece->canHoldSomeone() || !isset($occupied[$cell])),
-                )) : [];
-                if ([] === $spots) {
-                    continue;
-                }
-                $plan = $plan->with($spots[$this->randomizer->getInt(0, \count($spots) - 1)], $piece);
-                $free -= (int) !$piece->canHoldSomeone();
+            $plan = $this->furnishRoom($plan, $cells, $plan->kinds[$room]->furniture(), $occupied, $density, $blocking);
+        }
+
+        return $plan;
+    }
+
+    /**
+     * @param list<int>       $cells
+     * @param list<Furniture> $affinity
+     * @param array<int, int> $occupied
+     */
+    private function furnishRoom(Floorplan $plan, array $cells, array $affinity, array $occupied, float $density, float $blocking): Floorplan
+    {
+        $free = \count(array_filter($cells, static fn (int $cell): bool => !$plan->blocks($cell)));
+        $pieces = (int) round(\count($cells) * $density) - \count(array_filter($cells, static fn (int $cell): bool => null !== $plan->furniture[$cell]));
+        for (; $pieces > 0; --$pieces) {
+            $choice = $plan->spareBlocks($blocking) > 0 ? $affinity : array_values(array_filter($affinity, static fn (Furniture $piece): bool => $piece->canHoldSomeone()));
+            if ([] === $choice) {
+                break;
             }
+            $piece = $choice[$this->randomizer->getInt(0, \count($choice) - 1)];
+            $spots = $piece->canHoldSomeone() || $free > 2 ? array_values(array_filter(
+                $cells,
+                static fn (int $cell): bool => null === $plan->furniture[$cell] && ($piece->canHoldSomeone() || !isset($occupied[$cell])),
+            )) : [];
+            if ([] === $spots) {
+                continue;
+            }
+            $plan = $plan->with($spots[$this->randomizer->getInt(0, \count($spots) - 1)], $piece);
+            $free -= (int) !$piece->canHoldSomeone();
         }
 
         return $plan;

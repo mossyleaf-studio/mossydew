@@ -130,21 +130,42 @@ final class Deduction
     {
         match ($fact->kind) {
             ClueKind::AloneWithMurderer => null,
+            ClueKind::EmptyRoom, ClueKind::RoomHolds, ClueKind::RoomAtLeast, ClueKind::EveryRoomOccupied, ClueKind::RoomCap => $this->knowAboutRooms($fact),
+            ClueKind::SeatCount, ClueKind::GenderSeated, ClueKind::Pairing => $this->knowAboutEveryone($fact),
+            ClueKind::SameRoom, ClueKind::NorthOf, ClueKind::WestOf, ClueKind::NorthBy, ClueKind::WestBy, ClueKind::SameDiagonal => $this->links[] = [$fact, $fact->person(), $fact->other()],
+            ClueKind::SomeoneOn, ClueKind::SomeoneBeside, ClueKind::Alone, ClueKind::AloneWith => $this->knowTheCompany($fact),
+            ClueKind::OnlyOn => $this->seat($fact->person(), $this->seats($fact->furniture())),
+            default => $this->narrow($fact->person(), $this->where($fact)),
+        };
+    }
+
+    private function knowAboutRooms(Clue $fact): void
+    {
+        match ($fact->kind) {
             ClueKind::EmptyRoom => $this->limit($fact->room(), 0),
             ClueKind::RoomHolds => $this->limit($fact->room(), $fact->number()),
+            ClueKind::RoomAtLeast => $this->least[$fact->room()] = max($this->least[$fact->room()] ?? 0, $fact->number()),
+            ClueKind::EveryRoomOccupied => array_push($this->tallies, ...array_map(fn (array $mask): array => [$mask, array_keys($this->domain), 1, \PHP_INT_MAX], $this->roomMask)),
+            default => array_push($this->tallies, ...array_map(fn (array $mask): array => [$mask, array_keys($this->domain), 0, $fact->number()], $this->roomMask)),
+        };
+    }
+
+    private function knowAboutEveryone(Clue $fact): void
+    {
+        match ($fact->kind) {
             ClueKind::SeatCount => $this->tallies[] = [$this->seats($fact->furniture()), array_keys($this->domain), Bound::AtMost === $fact->bound ? 0 : $fact->number(), Bound::AtLeast === $fact->bound ? \PHP_INT_MAX : $fact->number()],
             ClueKind::GenderSeated => $this->tallies[] = [$this->seats($fact->furniture()), array_keys($this->genders, $fact->gender(), true), $fact->number(), $fact->number()],
-            ClueKind::EveryRoomOccupied => array_push($this->tallies, ...array_map(fn (array $mask): array => [$mask, array_keys($this->domain), 1, \PHP_INT_MAX], $this->roomMask)),
-            ClueKind::RoomCap => array_push($this->tallies, ...array_map(fn (array $mask): array => [$mask, array_keys($this->domain), 0, $fact->number()], $this->roomMask)),
-            ClueKind::Pairing => array_push($this->presences, ...array_map(fn (int $person): array => [$person, array_fill(0, $this->size, $this->full), Gender::Female === $this->genders[$person] ? Gender::Male : Gender::Female], array_keys($this->genders, $fact->gender(), true))),
-            ClueKind::RoomAtLeast => $this->least[$fact->room()] = max($this->least[$fact->room()] ?? 0, $fact->number()),
-            ClueKind::SameRoom, ClueKind::NorthOf, ClueKind::WestOf, ClueKind::NorthBy, ClueKind::WestBy, ClueKind::SameDiagonal => $this->links[] = [$fact, $fact->person(), $fact->other()],
+            default => array_push($this->presences, ...array_map(fn (int $person): array => [$person, array_fill(0, $this->size, $this->full), Gender::Female === $this->genders[$person] ? Gender::Male : Gender::Female], array_keys($this->genders, $fact->gender(), true))),
+        };
+    }
+
+    private function knowTheCompany(Clue $fact): void
+    {
+        match ($fact->kind) {
             ClueKind::SomeoneOn => $this->presences[] = [$fact->person(), $this->where(new Clue(ClueKind::OnFurniture, furniture: $fact->furniture())), $fact->gender()],
             ClueKind::SomeoneBeside => $this->presences[] = [$fact->person(), $this->where(new Clue(ClueKind::BesideFurniture, furniture: $fact->furniture())), null],
             ClueKind::Alone => $this->company[$fact->person()] = null,
-            ClueKind::AloneWith => $this->company[$fact->person()] = $fact->gender(),
-            ClueKind::OnlyOn => $this->seat($fact->person(), $this->seats($fact->furniture())),
-            default => $this->narrow($fact->person(), $this->where($fact)),
+            default => $this->company[$fact->person()] = $fact->gender(),
         };
     }
 
@@ -253,17 +274,39 @@ final class Deduction
         if ([] === $rows) {
             return array_fill(0, $this->size, 0);
         }
-        $sign = $forward ? 1 : -1;
 
         return match ($clue->kind) {
             ClueKind::SameRoom => $this->roomsTouching($theirs),
-            ClueKind::NorthOf => array_map(static fn (int $row): int => ($forward ? $row < max($rows) : $row > min($rows)) ? -1 : 0, range(0, $this->size - 1)),
-            ClueKind::WestOf => array_fill(0, $this->size, $forward ? (1 << \strlen(decbin($columns)) - 1) - 1 : -(($columns & -$columns) << 1)),
-            ClueKind::NorthBy => array_map(static fn (int $row): int => 0 !== ($theirs[$row + $sign * $clue->number()] ?? 0) ? -1 : 0, range(0, $this->size - 1)),
-            ClueKind::WestBy => array_fill(0, $this->size, $forward ? $columns >> $clue->number() : $columns << $clue->number()),
+            ClueKind::NorthOf, ClueKind::NorthBy => $this->rowsAllowed($clue, $theirs, $rows, $forward),
+            ClueKind::WestOf, ClueKind::WestBy => array_fill(0, $this->size, self::columnsAllowed($clue, $columns, $forward)),
             ClueKind::SameDiagonal => $this->plan->diagonalsThrough($theirs),
             default => array_fill(0, $this->size, -1),
         };
+    }
+
+    /**
+     * @param array<int, int>     $theirs
+     * @param non-empty-list<int> $rows
+     *
+     * @return array<int, int>
+     */
+    private function rowsAllowed(Clue $clue, array $theirs, array $rows, bool $forward): array
+    {
+        if (ClueKind::NorthOf === $clue->kind) {
+            return array_map(static fn (int $row): int => ($forward ? $row < max($rows) : $row > min($rows)) ? -1 : 0, range(0, $this->size - 1));
+        }
+        $shift = ($forward ? 1 : -1) * $clue->number();
+
+        return array_map(static fn (int $row): int => 0 !== ($theirs[$row + $shift] ?? 0) ? -1 : 0, range(0, $this->size - 1));
+    }
+
+    private static function columnsAllowed(Clue $clue, int $columns, bool $forward): int
+    {
+        if (ClueKind::WestOf === $clue->kind) {
+            return $forward ? (1 << \strlen(decbin($columns)) - 1) - 1 : -(($columns & -$columns) << 1);
+        }
+
+        return $forward ? $columns >> $clue->number() : $columns << $clue->number();
     }
 
     /**
@@ -310,8 +353,15 @@ final class Deduction
             $columnTwice |= $columnOnce & $columns;
             $columnOnce |= $columns;
         }
-        $rowSingles = $rowOnce & ~$rowTwice;
-        $columnSingles = $columnOnce & ~$columnTwice;
+        $this->pinTheSingles($rowsOf, $columnsOf, $rowOnce & ~$rowTwice, $columnOnce & ~$columnTwice);
+    }
+
+    /**
+     * @param array<int, int> $rowsOf
+     * @param array<int, int> $columnsOf
+     */
+    private function pinTheSingles(array $rowsOf, array $columnsOf, int $rowSingles, int $columnSingles): void
+    {
         foreach ($rowsOf as $person => $rows) {
             $row = $rows & $rowSingles;
             if (0 !== $row && $row !== $rows && 1 === self::$bits[$row]) {
@@ -465,25 +515,47 @@ final class Deduction
         if ($heads !== ($this->capacity[$room] ?? $heads)) {
             return false;
         }
-        $inside = 0;
-        foreach ($within as $other => $where) {
-            if ($other !== $person && $room === $where) {
-                if (null === $gender || $this->genders[$other] !== $gender) {
-                    return false;
-                }
-                ++$inside;
-            }
+        $inside = $this->guestsWithin($room, $person, $gender, $within);
+        if (null === $inside) {
+            return false;
         }
         if (null === $gender) {
             return true;
         }
+
+        return $this->canJoin($room, $person, $gender, $wheres) && $inside < 2;
+    }
+
+    /**
+     * @param array<int, ?int> $within
+     */
+    private function guestsWithin(int $room, int $person, ?Gender $gender, array $within): ?int
+    {
+        $inside = 0;
+        foreach ($within as $other => $where) {
+            if ($other !== $person && $room === $where) {
+                if (null === $gender || $this->genders[$other] !== $gender) {
+                    return null;
+                }
+                ++$inside;
+            }
+        }
+
+        return $inside;
+    }
+
+    /**
+     * @param list<array<int, int>> $wheres
+     */
+    private function canJoin(int $room, int $person, Gender $gender, array $wheres): bool
+    {
         $spot = $this->roomMask[$room];
         foreach ($wheres as $where) {
             $spot = array_map(static fn (int $inside, int $there): int => $inside & $there, $spot, $where);
         }
         foreach ($this->domain as $other => $domain) {
             if ($other !== $person && $this->genders[$other] === $gender && $this->meets($domain, $spot)) {
-                return $inside < 2;
+                return true;
             }
         }
 
@@ -506,6 +578,20 @@ final class Deduction
         if (null !== $victimRoom) {
             $capacity[$victimRoom] = 2;
         }
+        $this->fillToCapacity($capacity, $inside, $within, $victimRoom);
+        $this->fillToTheLeast($inside, $within, $victimRoom);
+        if (null === $victimRoom) {
+            $this->keepTheVictimFromImpossibleRooms($inside);
+        }
+    }
+
+    /**
+     * @param array<int, int>  $capacity
+     * @param array<int, int>  $inside
+     * @param array<int, ?int> $within
+     */
+    private function fillToCapacity(array $capacity, array $inside, array $within, ?int $victimRoom): void
+    {
         foreach ($capacity as $room => $heads) {
             $sure = $inside[$room] + (int) ($victimRoom === $room);
             $maybe = [];
@@ -522,6 +608,14 @@ final class Deduction
                 }
             }
         }
+    }
+
+    /**
+     * @param array<int, int>  $inside
+     * @param array<int, ?int> $within
+     */
+    private function fillToTheLeast(array $inside, array $within, ?int $victimRoom): void
+    {
         foreach ($this->least as $room => $heads) {
             $maybe = array_filter(array_keys($this->domain), fn (int $person): bool => $within[$person] !== $room && $this->touches($this->domain[$person], $room));
             if ($inside[$room] + (int) ($victimRoom === $room) + \count($maybe) === $heads) {
@@ -530,21 +624,36 @@ final class Deduction
                 }
             }
         }
-        if (null === $victimRoom) {
-            $union = array_fill(0, $this->size, 0);
-            foreach ($this->domain as $person => $domain) {
-                if ($person !== $this->victim) {
-                    foreach ($domain as $row => $mask) {
-                        $union[$row] |= $mask;
-                    }
-                }
+    }
+
+    /**
+     * @param array<int, int> $inside
+     */
+    private function keepTheVictimFromImpossibleRooms(array $inside): void
+    {
+        $union = $this->reachOfTheOthers();
+        foreach ($this->roomMask as $room => $mask) {
+            if ($this->touches($this->domain[$this->victim], $room) && ($inside[$room] >= 2 || 2 !== ($this->capacity[$room] ?? 2) || ($this->least[$room] ?? 0) > 2 || !$this->touches($union, $room))) {
+                $this->narrow($this->victim, self::inverse($mask));
             }
-            foreach ($this->roomMask as $room => $mask) {
-                if ($this->touches($this->domain[$this->victim], $room) && ($inside[$room] >= 2 || 2 !== ($this->capacity[$room] ?? 2) || ($this->least[$room] ?? 0) > 2 || !$this->touches($union, $room))) {
-                    $this->narrow($this->victim, self::inverse($mask));
+        }
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function reachOfTheOthers(): array
+    {
+        $union = array_fill(0, $this->size, 0);
+        foreach ($this->domain as $person => $domain) {
+            if ($person !== $this->victim) {
+                foreach ($domain as $row => $mask) {
+                    $union[$row] |= $mask;
                 }
             }
         }
+
+        return $union;
     }
 
     /**

@@ -13,6 +13,22 @@ use Symfony\Component\Routing\Attribute\Route;
 final class AppShellController extends AbstractController
 {
     private const array ALWAYS = ['/api/projects', '/api/player'];
+    private const array PAGES = [
+        '' => ['/api/tasks/today'],
+        'today' => ['/api/tasks/today'],
+        'upcoming' => ['/api/tasks/upcoming'],
+        'all' => ['/api/matrix'],
+        'inbox' => ['/api/tasks/inbox'],
+        'matrix' => ['/api/matrix'],
+        'done' => ['/api/tasks/done'],
+        'stats' => ['/api/stats'],
+        'herbarium' => ['/api/herbarium'],
+        'greenhouse' => ['/api/greenhouse'],
+        'achievements' => ['/api/achievements'],
+        'settings' => ['/api/integrations/injust'],
+        'friends' => ['/api/friends'],
+        'mysteries' => ['/api/mystery'],
+    ];
 
     public function __construct(private readonly ApiPreload $preload)
     {
@@ -34,21 +50,6 @@ final class AppShellController extends AbstractController
             return ['/api/projects/'.$matches[1].'/tasks'];
         }
 
-        return match ($path) {
-            '', 'today' => ['/api/tasks/today'],
-            'upcoming' => ['/api/tasks/upcoming'],
-            'all' => ['/api/matrix'],
-            'inbox' => ['/api/tasks/inbox'],
-            'matrix' => ['/api/matrix'],
-            'done' => ['/api/tasks/done'],
-            'stats' => ['/api/stats'],
-            'herbarium' => ['/api/herbarium'],
-            'greenhouse' => ['/api/greenhouse'],
-            'achievements' => ['/api/achievements'],
-            'settings' => ['/api/integrations/injust'],
-            'friends' => ['/api/friends'],
-            'mysteries' => ['/api/mystery'],
-            default => [],
-        };
+        return self::PAGES[$path] ?? [];
     }
 }

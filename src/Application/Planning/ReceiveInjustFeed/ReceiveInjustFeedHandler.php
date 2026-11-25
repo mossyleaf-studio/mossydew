@@ -20,6 +20,7 @@ use App\Domain\Planning\TaskRepository;
 use App\Domain\Shared\Day;
 use App\Domain\Shared\Exception\DomainException;
 use Psr\Clock\ClockInterface;
+use Symfony\Component\Uid\Ulid;
 
 final readonly class ReceiveInjustFeedHandler
 {
@@ -57,6 +58,27 @@ final readonly class ReceiveInjustFeedHandler
 
         $waiting = array_flip(array_map(static fn (InjustEvent $event): string => $event->item(), $this->links->pending($owner)));
         $linked = $this->tasks->linked(InjustLink::PREFIX);
+        $seen = $this->open($feed, $owner, $now, $linked, $waiting);
+        $toComplete = $this->closeTheRest($feed, $linked, $seen, $waiting);
+        $this->transaction->commit();
+
+        foreach ($toComplete as $id) {
+            try {
+                ($this->completeTask)($id);
+            } catch (DomainException) {
+                continue;
+            }
+        }
+    }
+
+    /**
+     * @param array<string, Task> $linked
+     * @param array<string, int>  $waiting
+     *
+     * @return array<string, true>
+     */
+    private function open(InjustFeed $feed, User $owner, \DateTimeImmutable $now, array $linked, array $waiting): array
+    {
         $adopted = $this->ungroup($linked);
         $limit = (string) Day::format($owner->today($now)->modify(\sprintf('+%d days', self::WINDOW_DAYS)));
         $project = null;
@@ -86,6 +108,18 @@ final readonly class ReceiveInjustFeedHandler
             }
         }
 
+        return $seen;
+    }
+
+    /**
+     * @param array<string, Task> $linked
+     * @param array<string, true> $seen
+     * @param array<string, int>  $waiting
+     *
+     * @return list<Ulid>
+     */
+    private function closeTheRest(InjustFeed $feed, array $linked, array $seen, array $waiting): array
+    {
         $toComplete = [];
         foreach ($linked as $task) {
             $item = (string) InjustLink::itemOf($task);
@@ -99,15 +133,8 @@ final readonly class ReceiveInjustFeedHandler
                 $this->tasks->remove($task);
             }
         }
-        $this->transaction->commit();
 
-        foreach ($toComplete as $id) {
-            try {
-                ($this->completeTask)($id);
-            } catch (DomainException) {
-                continue;
-            }
-        }
+        return $toComplete;
     }
 
     /**

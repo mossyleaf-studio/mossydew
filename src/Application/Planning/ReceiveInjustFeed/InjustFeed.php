@@ -35,20 +35,44 @@ final readonly class InjustFeed
      */
     public static function read(array $feed): self
     {
-        $journal = $feed['journal'] ?? null;
-        $epoch = is_array($journal) ? $journal['epoch'] ?? null : null;
+        [$epoch, $appliedThrough] = self::journal($feed['journal'] ?? null);
+        $instance = self::instance($feed['instance'] ?? null);
         if (self::FORMAT !== ($feed['format'] ?? null) || self::VERSION !== ($feed['version'] ?? null)
-            || !is_string($feed['instance'] ?? null) || '' === $feed['instance'] || strlen($feed['instance']) > 64
             || !is_int($feed['seq'] ?? null) || !in_array($feed['state'] ?? null, ['on', 'paused'], true)
-            || !is_array($journal) || !is_int($journal['appliedThrough'] ?? null)
-            || !(null === $epoch || is_string($epoch))
             || !is_array($feed['open'] ?? null) || !is_array($feed['closed'] ?? null)) {
             throw new UnreadableFeed();
         }
 
-        $open = array_map(self::item(...), array_values($feed['open']));
+        return new self($instance, $feed['seq'], 'paused' === $feed['state'], $epoch, $appliedThrough, array_map(self::item(...), array_values($feed['open'])), self::closed($feed['closed']));
+    }
+
+    /**
+     * @return array{?string, int}
+     */
+    private static function journal(mixed $journal): array
+    {
+        $epoch = is_array($journal) ? $journal['epoch'] ?? null : null;
+        if (!is_array($journal) || !is_int($journal['appliedThrough'] ?? null) || !(null === $epoch || is_string($epoch))) {
+            throw new UnreadableFeed();
+        }
+
+        return [$epoch, $journal['appliedThrough']];
+    }
+
+    private static function instance(mixed $instance): string
+    {
+        return is_string($instance) && '' !== $instance && strlen($instance) <= 64 ? $instance : throw new UnreadableFeed();
+    }
+
+    /**
+     * @param array<mixed> $entries
+     *
+     * @return array<string, InjustEventType>
+     */
+    private static function closed(array $entries): array
+    {
         $closed = [];
-        foreach ($feed['closed'] as $entry) {
+        foreach ($entries as $entry) {
             $id = is_array($entry) ? self::id($entry['id'] ?? null) : throw new UnreadableFeed();
             $closed[$id] = match ($entry['status'] ?? null) {
                 'done' => InjustEventType::Done,
@@ -57,7 +81,7 @@ final readonly class InjustFeed
             };
         }
 
-        return new self($feed['instance'], $feed['seq'], 'paused' === $feed['state'], $epoch, $journal['appliedThrough'], $open, $closed);
+        return $closed;
     }
 
     private static function item(mixed $item): InjustFeedItem
@@ -67,16 +91,25 @@ final readonly class InjustFeed
             || !is_array($item['tags'] ?? null)) {
             throw new UnreadableFeed();
         }
-        $tags = array_values(array_filter($item['tags'], is_string(...)));
-        if (count($tags) !== count($item['tags'])) {
-            throw new UnreadableFeed();
-        }
-        $due = $item['due'] ?? null;
-        if (null !== $due && (!is_string($due) || 1 !== preg_match('/^\d{4}-\d{2}-\d{2}$/', $due))) {
-            throw new UnreadableFeed();
-        }
 
-        return new InjustFeedItem(self::id($item['id'] ?? null), is_string($item['kind'] ?? null) ? $item['kind'] : '', $item['rev'], mb_substr($item['title'], 0, Task::MAX_TITLE_LENGTH), $due, $tags, $item['block']);
+        return new InjustFeedItem(self::id($item['id'] ?? null), is_string($item['kind'] ?? null) ? $item['kind'] : '', $item['rev'], mb_substr($item['title'], 0, Task::MAX_TITLE_LENGTH), self::due($item['due'] ?? null), self::tags($item['tags']), $item['block']);
+    }
+
+    /**
+     * @param array<mixed> $tags
+     *
+     * @return list<string>
+     */
+    private static function tags(array $tags): array
+    {
+        $strings = array_values(array_filter($tags, is_string(...)));
+
+        return count($strings) === count($tags) ? $strings : throw new UnreadableFeed();
+    }
+
+    private static function due(mixed $due): ?string
+    {
+        return null === $due || (is_string($due) && 1 === preg_match('/^\d{4}-\d{2}-\d{2}$/', $due)) ? $due : throw new UnreadableFeed();
     }
 
     private static function id(mixed $id): string
