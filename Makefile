@@ -6,8 +6,8 @@ DEPLOY_HOST ?= debian@duprat.cloud
 DEPLOY_DIR ?= /mnt/mossydew
 APK_ALIAS = mossydew
 APK_CN = MossyDew
-# The case generator's time budget runs without coverage (crap skips the timing group).
-CHECKS = cs phpstan deptrac audit crap test-js test-timing
+# The case generator's time budget runs without coverage (crap skips the timing group), after the other checks.
+CHECKS_AFTER = test-timing
 
 include common.mk
 include android.mk
