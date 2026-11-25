@@ -15,6 +15,7 @@ use App\Domain\Mystery\Gender;
 use App\Domain\Mystery\RoomKind;
 use App\Domain\Mystery\Solver;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Random\Engine\Mt19937;
 use Random\Randomizer;
@@ -422,6 +423,7 @@ final class CaseGeneratorTest extends TestCase
     }
 
     #[DataProvider('timedSeeds')]
+    #[Group('timing')]
     public function testDrawsACaseWithinFiveSeconds(int $seed): void
     {
         $start = hrtime(true);

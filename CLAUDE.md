@@ -81,6 +81,7 @@ Contexts: `Identity`, `Planning`, `Gamification`, `Social`, `Mystery`.
 
 ## Testing expectations
 
+- Every `src` method keeps a CRAP score ≤ 10, checked by `make crap` (PHPUnit with pcov coverage, then `bin/crap` on the Crap4J report; part of `make qa` and the CI checks job): a method above complexity 10 is split, a lower one gets tests. Wall-clock budgets carry `#[Group('timing')]` and run outside coverage (`make test-timing`).
 - PHPStan level 10 on `src`, `tests`, `fixtures`; ignores only in `phpstan.dist.neon`.
 - Unit test every business rule; functional test every handler (KernelTestCase, real DB) and endpoint (WebTestCase); Playwright for user journeys.
 

@@ -6,6 +6,8 @@ DEPLOY_HOST ?= debian@duprat.cloud
 DEPLOY_DIR ?= /mnt/mossydew
 APK_ALIAS = mossydew
 APK_CN = MossyDew
+# The case generator's time budget runs without coverage (crap skips the timing group).
+CHECKS = cs phpstan deptrac audit crap test-js test-timing
 
 include common.mk
 include android.mk
@@ -13,7 +15,10 @@ include android.mk
 IOS_SDK = $(shell xcrun --show-sdk-path)
 IOS_TYPECHECK = swiftc -typecheck -swift-version 6 -parse-as-library -target arm64-apple-ios17.0-macabi -sdk $(IOS_SDK) -F $(IOS_SDK)/System/iOSSupport/System/Library/Frameworks -I $(IOS_SDK)/System/iOSSupport/usr/lib/swift
 
-.PHONY: ios ios-typecheck
+.PHONY: ios ios-typecheck test-timing
+
+test-timing: ## Wall-clock budgets (#[Group('timing')]), without coverage
+	$(PHP) php bin/phpunit --group timing
 
 ios: ## Generate and open the iPad/iPhone Xcode project (needs Xcode and brew install xcodegen; signing team in ios/Team.xcconfig)
 	cd ios && xcodegen generate && open MossyDew.xcodeproj
