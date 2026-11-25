@@ -39,7 +39,6 @@ phpstan.neon
 /e2e/test-results/
 /e2e/shots/
 ###< e2e ###
-/ci-build.tgz
 
 /.claude/worktrees/
 

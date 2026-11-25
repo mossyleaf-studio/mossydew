@@ -31,7 +31,11 @@ make test            # PHPUnit; make test-unit / test-functional
 make test-js         # Vitest
 make deptrac / make cs / make cs-fix / make phpstan   # keep all at 0
 make e2e             # Playwright against php-e2e (APP_ENV=test)
+make audit           # composer audit + npm audit (high and above)
+make qa              # the gate: the checks and e2e at the same time
 ```
+
+Shared make targets (`common.mk`, `android.mk`), CI and the deptrac/PHPUnit configs are synced from `~/Sites/mossyleaf-studio/toolchain`: change them there and run its `./sync`, never edit the copies here.
 
 ## Backend architecture (Onion) — `src/`
 
